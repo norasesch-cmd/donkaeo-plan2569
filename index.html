@@ -1,0 +1,1168 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ระบบจัดทำแผนพัฒนาท้องถิ่น พ.ศ. 2571-2575 | เทศบาลเมืองดอนแก้ว</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+<style>
+:root{
+  --navy:#16324F; --navy-deep:#0D2136; --gold:#B8912F; --gold-light:#DCC479;
+  --paper:#F7F4EC; --paper-line:#E2D9C2; --ink:#20242B; --sub:#5B6472;
+  --teal:#2F6B5E; --red:#A63D3D; --white:#FFFFFF;
+  --card-shadow: 0 1px 2px rgba(13,33,54,.06), 0 6px 20px rgba(13,33,54,.06);
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{font-family:'Sarabun',sans-serif;background:var(--paper);color:var(--ink);line-height:1.65;-webkit-font-smoothing:antialiased;}
+::selection{background:var(--gold-light);}
+
+/* LAYOUT */
+.layout{display:flex;min-height:100vh;}
+#sidebar{width:266px;flex:0 0 266px;background:var(--navy-deep);color:#DCE3EC;padding:18px 0 40px;position:sticky;top:0;height:100vh;overflow-y:auto;}
+#sidebar .brand{padding:0 18px 16px;border-bottom:1px solid rgba(255,255,255,.09);margin-bottom:12px;}
+#sidebar .brand h2{font-size:15px;margin:0 0 2px;color:#fff;font-weight:600;}
+#sidebar .brand span{font-size:11.5px;color:var(--gold-light);}
+.navlabel{font-size:11px;letter-spacing:.06em;color:#7F8FA4;padding:14px 18px 5px;text-transform:uppercase;}
+.navitem{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 18px;font-size:13.5px;cursor:pointer;border-left:3px solid transparent;transition:.15s;}
+.navitem:hover{background:rgba(255,255,255,.05);}
+.navitem.active{background:rgba(184,145,47,.16);border-left-color:var(--gold);color:#fff;font-weight:500;}
+.navitem .pct{font-size:11px;color:#8FA2B8;background:rgba(255,255,255,.07);border-radius:10px;padding:1px 7px;}
+.navitem.done .pct{background:rgba(47,107,94,.35);color:#9FD9C6;}
+
+main{flex:1;min-width:0;padding:0 0 60px;}
+.topbar{display:flex;align-items:flex-start;gap:14px;background:var(--white);border-bottom:1px solid var(--paper-line);padding:16px 26px;position:sticky;top:0;z-index:40;flex-wrap:wrap;}
+.topbar h1{font-size:19px;margin:0;color:var(--navy);}
+.topbar p{margin:2px 0 0;font-size:12.5px;color:var(--sub);}
+.topright{margin-left:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.sync{font-size:11.5px;padding:4px 10px;border-radius:20px;background:#EEE7D5;color:var(--sub);white-space:nowrap;}
+.hamb{display:none;background:none;border:1px solid var(--paper-line);border-radius:8px;font-size:17px;padding:4px 10px;cursor:pointer;}
+.page{padding:22px 26px;max-width:1500px;}
+
+/* COMPONENTS */
+.btn{font-family:inherit;font-size:13.5px;border:1px solid var(--paper-line);background:var(--white);color:var(--ink);border-radius:8px;padding:7px 14px;cursor:pointer;transition:.15s;}
+.btn:hover{border-color:var(--gold);background:#FFFDF7;}
+.btn.sm{font-size:12px;padding:4px 10px;}
+.btn.primary{background:var(--navy);color:#fff;border-color:var(--navy);}
+.btn.primary:hover{background:var(--navy-deep);}
+.btn.danger{color:var(--red);border-color:#EAD2CE;}
+.btn.ai{background:#F3EFE2;border-color:var(--gold-light);color:#7A5F14;}
+.section-block{background:var(--white);border:1px solid var(--paper-line);border-radius:12px;padding:18px 20px;margin-bottom:18px;box-shadow:var(--card-shadow);}
+.section-block h3{margin:0 0 12px;font-size:15.5px;color:var(--navy);}
+.muted{color:var(--sub);font-size:13.5px;}
+label.fl{display:block;font-size:13.5px;font-weight:500;margin:14px 0 5px;color:var(--navy);}
+textarea,input[type=text],input[type=number],select{width:100%;font-family:inherit;font-size:13.5px;color:var(--ink);border:1px solid var(--paper-line);border-radius:8px;padding:8px 10px;background:#FEFDFA;}
+textarea{min-height:110px;resize:vertical;line-height:1.6;}
+textarea:focus,input:focus,select:focus{outline:none;border-color:var(--gold);background:#fff;}
+
+/* ACCORDION */
+.acc-item{border:1px solid var(--paper-line);border-radius:10px;background:var(--white);margin-bottom:8px;overflow:hidden;}
+.acc-head{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;}
+.acc-head:hover{background:#FFFDF7;}
+.acc-head .num{font-size:12px;font-weight:600;color:var(--gold);min-width:38px;}
+.acc-head .ttl{flex:1;font-size:13.5px;font-weight:500;}
+.acc-head .state{font-size:11px;padding:2px 9px;border-radius:20px;background:#F0ECE0;color:var(--sub);white-space:nowrap;}
+.acc-head .state.filled{background:#DCEEE6;color:var(--teal);}
+.acc-head .chev{color:var(--sub);transition:.2s;font-size:12px;}
+.acc-item.open .chev{transform:rotate(180deg);}
+.acc-body{display:none;padding:0 14px 14px;border-top:1px solid var(--paper-line);}
+.acc-item.open .acc-body{display:block;}
+.acc-body .hint{font-size:12px;color:var(--sub);margin:10px 0 8px;background:#FAF7EE;border-left:3px solid var(--gold-light);padding:6px 10px;border-radius:0 6px 6px 0;}
+
+/* TABLES */
+.tbl-wrap{overflow-x:auto;border:1px solid var(--paper-line);border-radius:10px;}
+.data-tbl{border-collapse:collapse;width:100%;font-size:12.5px;background:var(--white);}
+.data-tbl th{background:var(--navy);color:#fff;font-weight:500;padding:8px 6px;text-align:left;white-space:nowrap;}
+.data-tbl td{border-top:1px solid var(--paper-line);padding:4px 6px;vertical-align:top;}
+.data-tbl input{font-size:12.5px;padding:5px 7px;}
+.data-tbl tr.rowtot td{background:#F3EFE2;font-weight:600;}
+.row-actions{margin-top:10px;}
+
+/* DASHBOARD */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:14px;}
+.stat-card{background:var(--white);border:1px solid var(--paper-line);border-radius:12px;padding:18px;box-shadow:var(--card-shadow);}
+.stat-card .ring{width:52px;height:52px;border-radius:50%;border:4px solid var(--paper-line);display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:600;color:var(--navy);margin-bottom:10px;}
+.stat-card h4{margin:0;font-size:26px;color:var(--navy);}
+.stat-card p{margin:2px 0 0;font-size:12.5px;color:var(--sub);}
+
+/* MODAL / TOAST */
+.modal{display:none;position:fixed;inset:0;background:rgba(13,33,54,.55);z-index:100;align-items:center;justify-content:center;padding:20px;}
+.modal.show{display:flex;}
+.modal-box{background:var(--white);border-radius:14px;padding:24px;max-width:400px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.3);}
+.modal-box h3{margin:0 0 6px;color:var(--navy);font-size:17px;}
+#toast{position:fixed;bottom:24px;left:50%;transform:translate(-50%,20px);background:var(--navy-deep);color:#fff;padding:11px 20px;border-radius:24px;font-size:13.5px;opacity:0;pointer-events:none;transition:.25s;z-index:120;max-width:90vw;text-align:center;}
+#toast.show{opacity:1;transform:translate(-50%,0);}
+#aiResult{display:none;white-space:pre-wrap;background:var(--white);border:1px solid var(--paper-line);border-left:4px solid var(--gold);border-radius:10px;padding:16px;font-size:13.5px;margin-top:12px;}
+
+@media(max-width:900px){
+  #sidebar{position:fixed;left:-280px;z-index:90;transition:.25s;box-shadow:0 0 40px rgba(0,0,0,.3);}
+  #sidebar.open{left:0;}
+  .hamb{display:block;}
+  .page{padding:16px 14px;}
+  .topbar{padding:12px 14px;}
+}
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <aside id="sidebar">
+    <div class="brand">
+      <h2>แผนพัฒนาท้องถิ่น ฉบับที่ 3</h2>
+      <span>เทศบาลเมืองดอนแก้ว · พ.ศ. 2571-2575</span>
+    </div>
+    <div class="navitem active" data-nav="dashboard">📊 ภาพรวม</div>
+
+    <div class="navlabel">ส่วนที่ 1 · ข้อมูลพื้นฐาน</div>
+    <div class="navitem" data-nav="s1-group-0"><span>กายภาพและคมนาคม</span><span class="pct" id="pct-g0">0%</span></div>
+    <div class="navitem" data-nav="s1-group-1"><span>สังคมและคุณภาพชีวิต</span><span class="pct" id="pct-g1">0%</span></div>
+    <div class="navitem" data-nav="s1-group-2"><span>สาธารณูปโภคพื้นฐาน</span><span class="pct" id="pct-g2">0%</span></div>
+    <div class="navitem" data-nav="s1-group-3"><span>ทรัพยากร &amp; เศรษฐกิจ</span><span class="pct" id="pct-g3">0%</span></div>
+
+    <div class="navlabel">ส่วนที่ 2 · ประเด็นการพัฒนา</div>
+    <div class="navitem" data-nav="s2">วิสัยทัศน์ &amp; ความสัมพันธ์</div>
+    <div class="navitem" data-nav="s2b">ประเด็น/เป้าหมาย/วิเคราะห์</div>
+
+    <div class="navlabel">ส่วนที่ 3 · สู่การปฏิบัติ</div>
+    <div class="navitem" data-nav="s3a">แบบ ผ.01 บัญชีสรุป</div>
+    <div class="navitem" data-nav="s3b">แบบ ผ.02 รายละเอียด</div>
+
+    <div class="navlabel">เครื่องมือ</div>
+    <div class="navitem" data-nav="ai">✨ วิเคราะห์ด้วย AI</div>
+    <div class="navitem" data-nav="export">⬇ ส่งออกเอกสาร</div>
+  </aside>
+
+  <main>
+    <div class="topbar">
+      <button class="hamb" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+      <div>
+        <h1 id="page-title">ภาพรวมการจัดทำแผน</h1>
+        <p id="page-desc">—</p>
+      </div>
+      <div class="topright">
+        <span class="sync" id="syncStatus">● กำลังเชื่อมต่อ...</span>
+        <button class="btn sm" id="whoamiBtn" onclick="openNameModal()">👤 ผู้ใช้งาน</button>
+        <button class="btn sm primary" onclick="saveAll(true)">💾 บันทึกทั้งหมด</button>
+      </div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div class="page" id="page-dashboard">
+      <div class="cards" id="dashCards"></div>
+      <div class="section-block" style="margin-top:18px;">
+        <h3>คำแนะนำการใช้งาน</h3>
+        <p class="muted">1) กรอกข้อมูลส่วนที่ 1 ทีละด้าน (กดที่หัวข้อเพื่อเปิด) — 2) กำหนดวิสัยทัศน์และประเด็นการพัฒนาในส่วนที่ 2 — 3) เพิ่มโครงการในแบบ ผ.02 ระบบจะสรุป ผ.01 ให้อัตโนมัติ — 4) ส่งออกเป็น Word / Excel / PDF</p>
+        <p class="muted">ข้อมูลจะบันทึกอัตโนมัติและซิงค์ให้เพื่อนร่วมงานเห็นพร้อมกันทุก 6 วินาที</p>
+      </div>
+    </div>
+
+    <!-- SECTION 1 -->
+    <div class="page" id="page-s1-group-0" style="display:none"><div id="acc-group-0"></div></div>
+    <div class="page" id="page-s1-group-1" style="display:none"><div id="acc-group-1"></div></div>
+    <div class="page" id="page-s1-group-2" style="display:none"><div id="acc-group-2"></div></div>
+    <div class="page" id="page-s1-group-3" style="display:none"><div id="acc-group-3"></div></div>
+
+    <!-- SECTION 2A -->
+    <div class="page" id="page-s2" style="display:none">
+      <div class="section-block">
+        <h3>2.1 วิสัยทัศน์ (Vision)</h3>
+        <textarea id="f_2_1" placeholder="ระบุวิสัยทัศน์การพัฒนาเทศบาลเมืองดอนแก้ว..."></textarea>
+        <label class="fl">2.2 นโยบายผู้บริหารท้องถิ่น</label>
+        <textarea id="f_2_2" placeholder="ระบุนโยบายของผู้บริหารท้องถิ่น..."></textarea>
+      </div>
+      <div class="section-block">
+        <h3>2.3 ความสัมพันธ์ระหว่างประเด็นการพัฒนาท้องถิ่นกับแผนระดับต่าง ๆ</h3>
+        <label class="fl">2.3.1 ยุทธศาสตร์ชาติ 20 ปี (พ.ศ. 2561-2580)</label>
+        <textarea id="f_2_3_1"></textarea>
+        <label class="fl">2.3.2 แผนพัฒนาเศรษฐกิจและสังคมแห่งชาติ ฉบับที่ 13/14</label>
+        <textarea id="f_2_3_2"></textarea>
+        <label class="fl">2.3.3 เป้าหมายการพัฒนาที่ยั่งยืน (SDGs)</label>
+        <textarea id="f_2_3_3"></textarea>
+        <label class="fl">2.3.4 แผนพัฒนากลุ่มจังหวัด/ภาค</label>
+        <textarea id="f_2_3_4"></textarea>
+        <label class="fl">2.3.5 แผนพัฒนาจังหวัดเชียงใหม่</label>
+        <textarea id="f_2_3_5"></textarea>
+        <label class="fl">2.3.6 ประเด็นการพัฒนาของ อปท. ในเขตจังหวัด</label>
+        <textarea id="f_2_3_6"></textarea>
+      </div>
+    </div>
+
+    <!-- SECTION 2B -->
+    <div class="page" id="page-s2b" style="display:none">
+      <div class="section-block">
+        <h3>2.4 ประเด็นการพัฒนาท้องถิ่น</h3>
+        <div class="tbl-wrap"><table class="data-tbl" id="tbl_issues">
+          <thead><tr><th style="width:30px">#</th><th>ประเด็นการพัฒนาท้องถิ่น</th><th>แนวทาง/กลยุทธ์</th><th>ตัวชี้วัด (KPIs)</th><th style="width:44px"></th></tr></thead>
+          <tbody></tbody></table></div>
+        <div class="row-actions"><button class="btn sm" onclick="addRow('tbl_issues')">+ เพิ่มประเด็น</button></div>
+      </div>
+      <div class="section-block">
+        <h3>2.5 จุดมุ่งหมายการพัฒนาท้องถิ่น (Goals) รายปี</h3>
+        <div class="tbl-wrap"><table class="data-tbl" id="tbl_goals">
+          <thead><tr><th>ประเด็นการพัฒนา</th><th>จุดมุ่งหมาย (Goals)</th><th>2571</th><th>2572</th><th>2573</th><th>2574</th><th>2575</th><th style="width:44px"></th></tr></thead>
+          <tbody></tbody></table></div>
+        <div class="row-actions"><button class="btn sm" onclick="addRow('tbl_goals')">+ เพิ่มแถว</button></div>
+      </div>
+      <div class="section-block">
+        <h3>2.6 การวิเคราะห์ปัจจัยและสถานการณ์การเปลี่ยนแปลง</h3>
+        <div class="tbl-wrap"><table class="data-tbl" id="tbl_factors">
+          <thead><tr><th style="width:30px">#</th><th>ประเด็น</th><th>หลักการวิเคราะห์</th><th>ผลการวิเคราะห์</th><th>ผลกระทบต่อการพัฒนา</th><th style="width:44px"></th></tr></thead>
+          <tbody></tbody></table></div>
+        <div class="row-actions"><button class="btn sm" onclick="addRow('tbl_factors')">+ เพิ่มแถว</button></div>
+      </div>
+      <div class="section-block">
+        <h3>2.7 สรุปภาพรวมประเด็นการพัฒนาท้องถิ่น</h3>
+        <div class="tbl-wrap"><table class="data-tbl" id="tbl_summary">
+          <thead><tr><th style="width:30px">#</th><th>ประเด็น</th><th>จุดมุ่งหมาย (Goals)</th><th>ผลที่คาดว่าจะได้รับ</th><th>หน่วยงานรับผิดชอบ</th><th style="width:44px"></th></tr></thead>
+          <tbody></tbody></table></div>
+        <div class="row-actions"><button class="btn sm" onclick="addRow('tbl_summary')">+ เพิ่มแถว</button></div>
+      </div>
+    </div>
+
+    <!-- SECTION 3A -->
+    <div class="page" id="page-s3a" style="display:none">
+      <div class="section-block">
+        <h3>แบบ ผ.01 บัญชีสรุปโครงการพัฒนาท้องถิ่น</h3>
+        <p class="muted">คำนวณอัตโนมัติจากข้อมูลที่กรอกในแบบ ผ.02</p>
+        <div class="tbl-wrap"><table class="data-tbl" id="tbl_p01">
+          <thead><tr><th>ประเด็นการพัฒนา</th><th style="width:130px">จำนวนโครงการ</th><th style="width:180px">งบประมาณรวม (บาท)</th></tr></thead>
+          <tbody></tbody><tfoot></tfoot></table></div>
+      </div>
+    </div>
+
+    <!-- SECTION 3B -->
+    <div class="page" id="page-s3b" style="display:none"><div id="p02-groups"></div></div>
+
+    <!-- AI -->
+    <div class="page" id="page-ai" style="display:none">
+      <div class="section-block">
+        <h3>เชื่อมต่อ Google Gemini</h3>
+        <p class="muted">คีย์จะถูกเก็บไว้ในเบราว์เซอร์ของคุณเท่านั้น ไม่ถูกส่งขึ้นระบบส่วนกลาง — ขอคีย์ฟรีได้ที่ Google AI Studio</p>
+        <label class="fl">Google API Key (Gemini)</label>
+        <input type="password" id="geminiKey" placeholder="วาง API Key ที่นี่">
+        <div class="row-actions"><button class="btn sm" onclick="saveKey()">บันทึกคีย์ในเครื่องนี้</button></div>
+      </div>
+      <div class="section-block">
+        <h3>เลือกรูปแบบการวิเคราะห์</h3>
+        <select id="aiTask">
+          <option value="completeness">ตรวจสอบความครบถ้วนของข้อมูลส่วนที่ 1</option>
+          <option value="alignment">ตรวจสอบความสอดคล้องกับแผนระดับชาติ/SDGs</option>
+          <option value="budget">ตรวจสอบความสมเหตุสมผลของโครงการและงบประมาณ (ผ.02)</option>
+          <option value="full">วิเคราะห์ภาพรวมทั้งฉบับ</option>
+        </select>
+        <div class="row-actions"><button class="btn primary" onclick="runGemini()">✨ เริ่มวิเคราะห์</button></div>
+        <p class="muted" id="aiStatus" style="margin-top:10px"></p>
+        <div id="aiResult"></div>
+      </div>
+    </div>
+
+    <!-- EXPORT -->
+    <div class="page" id="page-export" style="display:none">
+      <div class="section-block">
+        <h3>ส่งออกร่างเอกสาร</h3>
+        <div class="row-actions" style="display:flex;gap:10px;flex-wrap:wrap;">
+          <button class="btn primary" onclick="exportWord()">📄 Word (.doc)</button>
+          <button class="btn" onclick="exportExcel()">📊 Excel (.xlsx)</button>
+          <button class="btn" onclick="exportPdf()">🖨 PDF (ผ่านหน้าต่างพิมพ์)</button>
+        </div>
+      </div>
+      <div class="section-block">
+        <h3>สำรอง / กู้คืนข้อมูล</h3>
+        <p class="muted">ไฟล์ JSON ใช้สำรองข้อมูลทั้งหมด — การนำเข้าจะเขียนทับข้อมูลส่วนกลาง</p>
+        <div class="row-actions" style="display:flex;gap:10px;flex-wrap:wrap;">
+          <button class="btn" onclick="exportJson()">⬇ ส่งออกไฟล์สำรอง</button>
+          <button class="btn danger" onclick="importJson()">⬆ นำเข้าไฟล์สำรอง</button>
+        </div>
+        <input type="file" id="fileInput" accept="application/json" style="display:none">
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="modal" id="nameModal">
+  <div class="modal-box">
+    <h3>ยินดีต้อนรับ</h3>
+    <p class="muted">กรุณาระบุชื่อผู้กรอกข้อมูล เพื่อให้เพื่อนร่วมงานทราบว่าใครแก้ไขล่าสุด</p>
+    <input type="text" id="userNameInput" placeholder="เช่น นางสาวสมหญิง (กองยุทธศาสตร์ฯ)">
+    <div class="row-actions"><button class="btn primary" onclick="confirmName()">เริ่มใช้งาน</button></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* ============================================================
+   CONSTANTS & STATE
+============================================================ */
+const USERNAME_KEY       = "donkaeo_username";
+const LOCAL_CACHE_KEY    = "donkaeo_plan_cache";
+const GEMINI_KEY_STORAGE = "donkaeo_gemini_key";
+const YEARS = ["2571","2572","2573","2574","2575"];
+
+let DATA = {
+  s1:{}, issues:[], goals:[], factors:[], summary:[], p02:{},
+  "2_1":"","2_2":"","2_3_1":"","2_3_2":"","2_3_3":"","2_3_4":"","2_3_5":"","2_3_6":""
+};
+
+const S1_FIELDS = [
+  [ /* กลุ่ม 0 : กายภาพและคมนาคม 1.1–1.10 */
+    {id:"1_1", t:"1.1 ที่ตั้งของหมู่บ้าน/ชุมชน/ตำบล", h:"ที่ตั้งสำนักงาน อาณาเขตติดต่อ ระยะทางจากอำเภอ/จังหวัด เนื้อที่ทั้งหมด"},
+    {id:"1_2", t:"1.2 ลักษณะภูมิประเทศ", h:"สภาพพื้นที่ ที่ราบ/ที่ลาดเชิงเขา ความสูงจากระดับน้ำทะเล"},
+    {id:"1_3", t:"1.3 ลักษณะภูมิอากาศ", h:"ฤดูกาล อุณหภูมิเฉลี่ย ปริมาณน้ำฝนเฉลี่ยต่อปี"},
+    {id:"1_4", t:"1.4 ลักษณะของดิน", h:"ชนิดของดิน ความเหมาะสมต่อการเกษตร ปัญหาดิน"},
+    {id:"1_5", t:"1.5 ลักษณะของแหล่งน้ำ", h:"แหล่งน้ำธรรมชาติ/แหล่งน้ำที่สร้างขึ้น ลำเหมือง คลอง อ่างเก็บน้ำ"},
+    {id:"1_6", t:"1.6 ลักษณะของไม้และป่าไม้", h:"พื้นที่ป่า ชนิดพันธุ์ไม้เด่น การใช้ประโยชน์"},
+    {id:"1_7", t:"1.7 เขตการปกครอง", h:"จำนวนหมู่บ้าน/ชุมชน ชื่อหมู่บ้าน จำนวนครัวเรือนแต่ละหมู่"},
+    {id:"1_8", t:"1.8 ประชากร", h:"จำนวนประชากรแยกชาย/หญิง ช่วงอายุ ความหนาแน่น แนวโน้ม 5 ปี"},
+    {id:"1_9", t:"1.9 การคมนาคมขนส่ง", h:"ถนนสายหลัก/สายรอง ระยะทาง สภาพผิวจราจร ระบบขนส่งสาธารณะ"},
+    {id:"1_10",t:"1.10 การจราจรและความปลอดภัยทางถนน", h:"จุดเสี่ยง สถิติอุบัติเหตุ ไฟส่องสว่าง สัญญาณจราจร"}
+  ],
+  [ /* กลุ่ม 1 : สังคมและคุณภาพชีวิต 1.11–1.20 */
+    {id:"1_11",t:"1.11 การศึกษา", h:"ศพด. โรงเรียนในพื้นที่ จำนวนนักเรียน/ครู แหล่งเรียนรู้ชุมชน"},
+    {id:"1_12",t:"1.12 สาธารณสุข", h:"รพ.สต. คลินิก อสม. สถิติโรคสำคัญ การส่งเสริมสุขภาพ"},
+    {id:"1_13",t:"1.13 อาชญากรรมและความปลอดภัยในชีวิตและทรัพย์สิน", h:"สถิติคดี กล้อง CCTV อปพร. ชุดรักษาความปลอดภัยหมู่บ้าน"},
+    {id:"1_14",t:"1.14 ยาเสพติด", h:"สถานการณ์ กลุ่มเสี่ยง มาตรการป้องกัน/บำบัดในพื้นที่"},
+    {id:"1_15",t:"1.15 การสังคมสงเคราะห์", h:"เบี้ยยังชีพ ผู้ยากไร้ ผู้ด้อยโอกาส การช่วยเหลือผู้ประสบภัย"},
+    {id:"1_16",t:"1.16 ผู้สูงอายุ", h:"จำนวน สัดส่วนสังคมสูงวัย ชมรมผู้สูงอายุ ระบบดูแลระยะยาว (LTC)"},
+    {id:"1_17",t:"1.17 เด็กและเยาวชน", h:"จำนวน สภาเด็กและเยาวชน กิจกรรมส่งเสริมพัฒนาการ"},
+    {id:"1_18",t:"1.18 คนพิการ", h:"จำนวนผู้พิการแยกประเภท การเข้าถึงสิทธิ กายอุปกรณ์ อารยสถาปัตย์"},
+    {id:"1_19",t:"1.19 สตรีและครอบครัว", h:"กลุ่มสตรี การส่งเสริมอาชีพ ความรุนแรงในครอบครัว"},
+    {id:"1_20",t:"1.20 การกีฬาและนันทนาการ", h:"สนามกีฬา ลานออกกำลังกาย ชมรมกีฬา กิจกรรมประจำปี"}
+  ],
+  [ /* กลุ่ม 2 : สาธารณูปโภคพื้นฐาน 1.21–1.25 */
+    {id:"1_21",t:"1.21 การไฟฟ้า", h:"ครัวเรือนที่มีไฟฟ้าใช้ ไฟฟ้าสาธารณะ จุดที่ยังไม่ครอบคลุม"},
+    {id:"1_22",t:"1.22 การประปา", h:"ประปาหมู่บ้าน/ภูมิภาค จำนวนครัวเรือนที่ใช้ คุณภาพน้ำ ปัญหาขาดแคลน"},
+    {id:"1_23",t:"1.23 โทรศัพท์และการสื่อสาร", h:"สัญญาณโทรศัพท์ อินเทอร์เน็ตความเร็วสูง หอกระจายข่าว"},
+    {id:"1_24",t:"1.24 ไปรษณีย์ การขนส่ง และวัสดุครุภัณฑ์", h:"ที่ทำการไปรษณีย์ ขนส่งเอกชน ครุภัณฑ์สำคัญของเทศบาล"},
+    {id:"1_25",t:"1.25 ระบบระบายน้ำและการป้องกันน้ำท่วม", h:"ท่อ/รางระบายน้ำ จุดน้ำท่วมซ้ำซาก แนวป้องกันตลิ่ง"}
+  ],
+  [ /* กลุ่ม 3 : ทรัพยากรธรรมชาติและเศรษฐกิจ 1.26–1.37 */
+    {id:"1_26",t:"1.26 ทรัพยากรน้ำ", h:"ปริมาณน้ำต้นทุน การจัดสรร ปัญหาภัยแล้ง"},
+    {id:"1_27",t:"1.27 ป่าไม้", h:"พื้นที่ป่าอนุรักษ์ ป่าชุมชน การบุกรุก การฟื้นฟู"},
+    {id:"1_28",t:"1.28 ภูเขาและสภาพธรณี", h:"ภูเขา ความลาดชัน ความเสี่ยงดินถล่ม"},
+    {id:"1_29",t:"1.29 คุณภาพของทรัพยากรธรรมชาติ", h:"คุณภาพน้ำผิวดิน ดิน ความหลากหลายทางชีวภาพ"},
+    {id:"1_30",t:"1.30 การจัดการขยะมูลฝอยและสิ่งปฏิกูล", h:"ปริมาณขยะต่อวัน วิธีกำจัด ธนาคารขยะ อัตราการคัดแยก"},
+    {id:"1_31",t:"1.31 คุณภาพอากาศและฝุ่นละออง PM2.5", h:"สถิติค่าฝุ่นรายปี แหล่งกำเนิด มาตรการรับมือหมอกควันไฟป่า"},
+    {id:"1_32",t:"1.32 การเกษตร", h:"พื้นที่เพาะปลูก พืชเศรษฐกิจหลัก จำนวนเกษตรกร ผลผลิตเฉลี่ย"},
+    {id:"1_33",t:"1.33 การประมงและปศุสัตว์", h:"การเลี้ยงสัตว์น้ำ ปศุสัตว์ จำนวนฟาร์ม"},
+    {id:"1_34",t:"1.34 การพาณิชย์และกลุ่มอาชีพ", h:"ร้านค้า ตลาด สถานประกอบการ กลุ่มวิสาหกิจชุมชน OTOP"},
+    {id:"1_35",t:"1.35 การท่องเที่ยว", h:"แหล่งท่องเที่ยว จำนวนนักท่องเที่ยว ที่พัก รายได้จากการท่องเที่ยว"},
+    {id:"1_36",t:"1.36 อุตสาหกรรมและแรงงาน", h:"โรงงาน ประเภทกิจการ จำนวนแรงงาน แรงงานต่างด้าว การว่างงาน"},
+    {id:"1_37",t:"1.37 ศาสนา ประเพณี วัฒนธรรม และภูมิปัญญาท้องถิ่น", h:"วัด/ศาสนสถาน ประเพณีประจำปี ปราชญ์ชาวบ้าน ภูมิปัญญาเด่น"}
+  ]
+];
+
+/* ============================================================
+   SHARED CLOUD STORAGE (Firebase Realtime Database)
+   ⚠️ นำ Firebase Config ของคุณมาวางแทนค่าด้านล่าง
+============================================================ */
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "donkaeo-plan.firebaseapp.com",
+  databaseURL: "https://donkaeo-plan-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "donkaeo-plan",
+  storageBucket: "donkaeo-plan.firebasestorage.app",
+  messagingSenderId: "939638592444",
+  appId: "1:939638592444:web:ff1259f256a5f907d611b9"
+};
+
+let db = null;
+try{
+  if (typeof firebase !== "undefined" && firebaseConfig.apiKey && !firebaseConfig.apiKey.startsWith("YOUR_")) {
+    firebase.initializeApp(firebaseConfig);
+    db = firebase.database();
+  }
+}catch(e){ console.warn("Firebase init failed:", e); }
+
+const GROUPS = ["s1","s2","tables","p02"];
+const GROUP_KEY = {s1:"plan_s1", s2:"plan_s2", tables:"plan_tables", p02:"plan_p02"};
+const S2_KEYS = ["2_1","2_2","2_3_1","2_3_2","2_3_3","2_3_4","2_3_5","2_3_6"];
+
+let remoteMeta = {};
+let editingGroup = {};
+let saveTimers = {};
+let cloudAvailable = true;
+let currentUser = localStorage.getItem(USERNAME_KEY) || "";
+
+function groupSnapshot(group){
+  if(group==="s1") return DATA.s1;
+  if(group==="s2"){ const o={}; S2_KEYS.forEach(k=>o[k]=DATA[k]||""); return o; }
+  if(group==="tables") return {issues:DATA.issues, goals:DATA.goals, factors:DATA.factors, summary:DATA.summary};
+  if(group==="p02") return DATA.p02;
+}
+function applyGroupData(group, data){
+  if(!data) return;
+  if(group==="s1") DATA.s1 = data;
+  else if(group==="s2") Object.assign(DATA, data);
+  else if(group==="tables"){ DATA.issues=data.issues||[]; DATA.goals=data.goals||[]; DATA.factors=data.factors||[]; DATA.summary=data.summary||[]; }
+  else if(group==="p02") DATA.p02 = data||{};
+}
+
+async function pullGroup(group){
+  if(!db) return null;
+  try{
+    const snapshot = await db.ref('donkaeo_plan/' + GROUP_KEY[group]).once('value');
+    const val = snapshot.val();
+    if(val){ remoteMeta[group] = val.updatedAt || 0; return val; }
+  }catch(e){ console.error("Pull error:", e); cloudAvailable=false; }
+  return null;
+}
+
+async function pushGroup(group){
+  const payload = { data: groupSnapshot(group), updatedAt: Date.now(), updatedBy: currentUser || "ไม่ระบุชื่อ" };
+  try{
+    if(!db) throw new Error("Firebase ไม่ได้ถูกตั้งค่า");
+    await db.ref('donkaeo_plan/' + GROUP_KEY[group]).set(payload);
+    remoteMeta[group] = payload.updatedAt;
+    cloudAvailable = true;
+    setSyncStatus("synced");
+  }catch(e){
+    cloudAvailable = false;
+    setSyncStatus("offline");
+  }
+  try{ localStorage.setItem(LOCAL_CACHE_KEY, JSON.stringify(DATA)); }catch(e){}
+}
+
+function queueSave(group){
+  editingGroup[group]=true;
+  setSyncStatus("editing");
+  clearTimeout(saveTimers[group]);
+  saveTimers[group]=setTimeout(async ()=>{
+    collectAllInputs();
+    await pushGroup(group);
+    editingGroup[group]=false;
+    renderDashboard();
+  }, 900);
+}
+
+async function initialLoad(){
+  setSyncStatus("connecting");
+  let anyRemote = false;
+  if(db){
+    for(const g of GROUPS){
+      const payload = await pullGroup(g);
+      if(payload){ applyGroupData(g, payload.data); anyRemote=true; }
+    }
+  }
+  if(!anyRemote){
+    try{
+      const raw=localStorage.getItem(LOCAL_CACHE_KEY);
+      if(raw) DATA=Object.assign(DATA, JSON.parse(raw));
+    }catch(e){}
+  }
+  setSyncStatus(cloudAvailable && db ? "synced" : "offline");
+}
+
+function isTyping(){
+  const a=document.activeElement;
+  return !!a && (a.tagName==="INPUT" || a.tagName==="TEXTAREA" || a.tagName==="SELECT");
+}
+
+function pollLoop(){
+  if(!db) return;
+  setInterval(async ()=>{
+    if(isTyping()) return;
+    for(const g of GROUPS){
+      if(editingGroup[g]) continue;
+      const payload = await pullGroup(g);
+      if(payload) applyGroupData(g, payload.data);
+    }
+    renderEverything(true);
+  }, 6000);
+}
+
+function setSyncStatus(state){
+  const el=document.getElementById("syncStatus");
+  if(!el) return;
+  const map={
+    connecting:["● กำลังเชื่อมต่อ...","#EEE7D5","#5B6472"],
+    synced:["● ข้อมูลซิงค์แล้ว (ใช้งานร่วมกันได้)","#DCEEE6","#2F6B5E"],
+    editing:["● กำลังบันทึกการแก้ไข...","#FBF0DC","#B8912F"],
+    offline:["⚠ ออฟไลน์ — บันทึกเฉพาะเครื่องนี้","#FBEBE7","#A63D3D"]
+  };
+  const [txt,bg,fg]=map[state]||map.connecting;
+  el.textContent=txt; el.style.background=bg; el.style.color=fg;
+}
+
+/* ============================================================
+   USER / TOAST / COLLECT
+============================================================ */
+function openNameModal(){
+  document.getElementById("nameModal").classList.add("show");
+  document.getElementById("userNameInput").value=currentUser;
+}
+function confirmName(){
+  currentUser=document.getElementById("userNameInput").value.trim()||"ไม่ระบุชื่อ";
+  localStorage.setItem(USERNAME_KEY,currentUser);
+  document.getElementById("nameModal").classList.remove("show");
+  document.getElementById("whoamiBtn").textContent="👤 "+currentUser;
+  showToastMsg("สวัสดีคุณ "+currentUser);
+}
+function showToastMsg(msg){
+  const t=document.getElementById("toast");
+  t.textContent=msg; t.classList.add("show");
+  setTimeout(()=>t.classList.remove("show"),2400);
+}
+function collectAllInputs(){
+  S1_FIELDS.flat().forEach(f=>{
+    const el=document.getElementById("ta_"+f.id);
+    if(el) DATA.s1[f.id]=el.value;
+  });
+  S2_KEYS.forEach(k=>{
+    const el=document.getElementById("f_"+k);
+    if(el) DATA[k]=el.value;
+  });
+}
+function saveAll(showToast){
+  collectAllInputs();
+  GROUPS.forEach(g=>{ editingGroup[g]=true; clearTimeout(saveTimers[g]); });
+  Promise.all(GROUPS.map(pushGroup)).then(()=>{
+    GROUPS.forEach(g=>editingGroup[g]=false);
+    if(showToast) showToastMsg(db ? "บันทึกและซิงค์กับเพื่อนร่วมงานแล้ว" : "บันทึกลงเครื่องนี้แล้ว (ยังไม่ได้ตั้งค่า Firebase)");
+    renderDashboard();
+  });
+}
+
+/* ============================================================
+   RENDER: Section 1 accordions
+============================================================ */
+function renderS1(){
+  S1_FIELDS.forEach((group,gi)=>{
+    const wrap=document.getElementById("acc-group-"+gi);
+    if(!wrap) return;
+    const openIdx=new Set();
+    wrap.querySelectorAll(".acc-item").forEach((el,idx)=>{ if(el.classList.contains("open")) openIdx.add(idx); });
+    wrap.innerHTML="";
+    group.forEach((f,fi)=>{
+      const val = DATA.s1[f.id]||"";
+      const filled = val.trim().length>0;
+      const item=document.createElement("div");
+      item.className="acc-item";
+      item.innerHTML=
+        '<div class="acc-head" onclick="this.parentElement.classList.toggle(\'open\')">'+
+          '<div class="num">'+f.id.replace('1_','1.')+'</div>'+
+          '<div class="ttl">'+escHtml(f.t)+'</div>'+
+          '<div class="state '+(filled?'filled':'')+'">'+(filled?'กรอกแล้ว':'ยังไม่กรอก')+'</div>'+
+          '<div class="chev">▾</div>'+
+        '</div>'+
+        '<div class="acc-body">'+
+          '<div class="hint">'+escHtml(f.h)+'</div>'+
+          '<div style="margin-bottom:8px;display:flex;align-items:center;">'+
+            '<button class="btn sm ai" onclick="generateFieldAI(\''+f.id+'\')">✨ ให้ AI ช่วยร่างข้อมูล</button>'+
+            '<span id="ai_status_'+f.id+'" style="font-size:12px;color:var(--teal);margin-left:8px;"></span>'+
+          '</div>'+
+          '<textarea id="ta_'+f.id+'" placeholder="พิมพ์ข้อมูล/สถิติ '+escAttr(f.t)+'..."></textarea>'+
+        '</div>';
+      if(openIdx.has(fi)) item.classList.add("open");
+      wrap.appendChild(item);
+      const ta=item.querySelector("textarea");
+      ta.value=val;
+      ta.addEventListener("input",(e)=>{
+        DATA.s1[f.id]=e.target.value;
+        const filled2=e.target.value.trim().length>0;
+        const stateEl=item.querySelector(".state");
+        stateEl.textContent = filled2?"กรอกแล้ว":"ยังไม่กรอก";
+        stateEl.classList.toggle("filled",filled2);
+        queueSave("s1");
+      });
+    });
+  });
+}
+
+function findField(id){
+  return S1_FIELDS.flat().find(f=>f.id===id);
+}
+
+async function generateFieldAI(id){
+  const f = findField(id);
+  if(!f) return;
+  const statusEl = document.getElementById("ai_status_"+id);
+  const textarea = document.getElementById("ta_"+id);
+  const apiKey = (document.getElementById("geminiKey").value||"").trim();
+  if(!apiKey){
+    statusEl.textContent = "⚠ กรุณาใส่ API Key ที่หน้า 'วิเคราะห์ด้วย AI' ก่อน";
+    return;
+  }
+  statusEl.textContent = "กำลังประมวลผล...";
+  const prompt = "คุณเป็นเจ้าหน้าที่จัดทำแผนพัฒนาท้องถิ่นเทศบาลเมืองดอนแก้ว ช่วยร่างข้อมูล 'สภาพทั่วไปและข้อมูลพื้นฐาน' ในหัวข้อ: \""+f.t+"\" (ครอบคลุมเนื้อหา: "+f.h+")\n"+
+    "เขียนเป็นภาษาทางการเชิงวิชาการ ความยาว 3-5 บรรทัด (หากเป็นข้อมูลตัวเลขสถิติที่ต้องเจาะจง ให้เว้นช่องว่าง [........] ไว้ให้เติมเอง) ไม่ต้องมีคำขึ้นต้นหรือลงท้าย";
+  try{
+    const resp=await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key="+encodeURIComponent(apiKey),{
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({contents:[{parts:[{text:prompt}]}]})
+    });
+    if(!resp.ok) throw new Error("HTTP "+resp.status);
+    const json = await resp.json();
+    const text = json?.candidates?.[0]?.content?.parts?.map(p=>p.text).join("\n");
+    if(text){
+      textarea.value = (textarea.value.trim() ? textarea.value+"\n\n" : "") + text.trim();
+      DATA.s1[id]=textarea.value;
+      queueSave("s1");
+      statusEl.textContent = "✅ ร่างข้อมูลสำเร็จ (โปรดตรวจสอบและแก้ไขเพิ่มเติม)";
+      setTimeout(()=>statusEl.textContent="", 5000);
+      const stateEl = textarea.closest('.acc-item').querySelector(".state");
+      stateEl.textContent = "กรอกแล้ว"; stateEl.classList.add("filled");
+      renderDashboard();
+    }else{
+      statusEl.textContent = "⚠ ไม่ได้รับผลลัพธ์จาก Gemini";
+    }
+  }catch(e){
+    statusEl.textContent = "❌ เกิดข้อผิดพลาด: "+e.message;
+  }
+}
+
+/* ============================================================
+   RENDER: Dynamic tables (section 2)
+============================================================ */
+const TABLE_DEFS = {
+  tbl_issues:{cols:["issue","approach","kpi"], data:"issues", withNum:true},
+  tbl_goals:{cols:["issue","goal","y71","y72","y73","y74","y75"], data:"goals", withNum:false},
+  tbl_factors:{cols:["issue","principle","result","impact"], data:"factors", withNum:true},
+  tbl_summary:{cols:["issue","goal","expect","dept"], data:"summary", withNum:true}
+};
+
+function addRow(tblId, prefill){
+  const def=TABLE_DEFS[tblId];
+  const row={}; def.cols.forEach(c=>row[c]="");
+  if(prefill) Object.assign(row,prefill);
+  DATA[def.data].push(row);
+  renderTable(tblId);
+  queueSave("tables");
+  if(tblId==="tbl_issues") renderP01();
+}
+function removeRow(tblId, idx){
+  const def=TABLE_DEFS[tblId];
+  DATA[def.data].splice(idx,1);
+  renderTable(tblId);
+  queueSave("tables");
+  if(tblId==="tbl_issues") renderP01();
+}
+function renderTable(tblId){
+  const def=TABLE_DEFS[tblId];
+  const tbody=document.querySelector("#"+tblId+" tbody");
+  if(!tbody) return;
+  tbody.innerHTML="";
+  DATA[def.data].forEach((row,idx)=>{
+    const tr=document.createElement("tr");
+    let cells="";
+    if(def.withNum) cells+="<td>"+(idx+1)+"</td>";
+    def.cols.forEach(c=>{
+      const isYear=c.charAt(0)==="y";
+      cells+='<td><input type="text" value="'+escAttr(row[c])+'" style="min-width:'+(isYear?'60px':'130px')+'"'+
+             ' oninput="updateCell(\''+tblId+'\','+idx+',\''+c+'\',this.value)"></td>';
+    });
+    cells+='<td><button class="btn sm danger" onclick="removeRow(\''+tblId+'\','+idx+')">ลบ</button></td>';
+    tr.innerHTML=cells;
+    tbody.appendChild(tr);
+  });
+}
+function updateCell(tblId, idx, col, val){
+  DATA[TABLE_DEFS[tblId].data][idx][col]=val;
+  queueSave("tables");
+}
+function escAttr(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;"); }
+function escHtml(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+/* ============================================================
+   RENDER: ผ.02 + ผ.01
+============================================================ */
+function issueKey(text,idx){ return "issue_"+idx; }
+
+function renderP02(){
+  const container=document.getElementById("p02-groups");
+  if(!container) return;
+  container.innerHTML="";
+  if(DATA.issues.length===0){
+    container.innerHTML='<div class="section-block"><p class="muted">ยังไม่มีประเด็นการพัฒนา กรุณาไปเพิ่มที่ "ส่วนที่ 2 · ประเด็นพัฒนา/เป้าหมาย/วิเคราะห์" ข้อ 2.4 ก่อน</p></div>';
+    renderP01(); return;
+  }
+  DATA.issues.forEach((issue,idx)=>{
+    const key=issueKey(issue.issue,idx);
+    if(!DATA.p02[key]) DATA.p02[key]=[];
+    const block=document.createElement("div");
+    block.className="section-block";
+    const issueName = issue.issue || "(ยังไม่ได้ตั้งชื่อประเด็นที่ "+(idx+1)+")";
+    block.innerHTML=
+      '<h3>'+(idx+1)+'. ประเด็นการพัฒนาท้องถิ่น: '+escHtml(issueName)+'</h3>'+
+      '<div class="tbl-wrap"><table class="data-tbl" id="p02_'+idx+'">'+
+        '<thead><tr>'+
+          '<th style="width:26px">#</th><th>โครงการ</th><th>วัตถุประสงค์</th><th>เป้าหมาย (ผลผลิต)</th>'+
+          YEARS.map(y=>'<th style="width:78px">'+y+'</th>').join("")+
+          '<th>ตัวชี้วัด (KPI)</th><th>ผลที่คาดว่าจะได้รับ</th><th>ที่มาของโครงการ</th><th>หน่วยงานรับผิดชอบ</th><th style="width:44px"></th>'+
+        '</tr></thead><tbody></tbody><tfoot></tfoot></table></div>'+
+      '<div class="row-actions"><button class="btn sm" onclick="addProject('+idx+')">+ เพิ่มโครงการ</button></div>';
+    container.appendChild(block);
+    renderProjectsTable(idx);
+  });
+  renderP01();
+}
+
+function addProject(issueIdx){
+  const key=issueKey(null,issueIdx);
+  if(!DATA.p02[key]) DATA.p02[key]=[];
+  const proj={project:"",obj:"",target:"",budget:{},kpi:"",result:"",source:"",dept:""};
+  YEARS.forEach(y=>proj.budget[y]="");
+  DATA.p02[key].push(proj);
+  renderProjectsTable(issueIdx);
+  renderP01();
+  queueSave("p02");
+}
+function removeProject(issueIdx,pIdx){
+  DATA.p02[issueKey(null,issueIdx)].splice(pIdx,1);
+  renderProjectsTable(issueIdx);
+  renderP01();
+  queueSave("p02");
+}
+/* อัปเดตค่าโดยไม่ re-render ทั้งตาราง → cursor ไม่เด้ง */
+function updateProject(issueIdx,pIdx,field,val,year){
+  const proj=DATA.p02[issueKey(null,issueIdx)][pIdx];
+  if(!proj) return;
+  if(year){ proj.budget[year]=val; updateP02Totals(issueIdx); renderP01(); }
+  else proj[field]=val;
+  queueSave("p02");
+}
+function updateP02Totals(issueIdx){
+  const projs=DATA.p02[issueKey(null,issueIdx)]||[];
+  const tfoot=document.querySelector("#p02_"+issueIdx+" tfoot");
+  if(!tfoot) return;
+  const totals={}; YEARS.forEach(y=>totals[y]=0);
+  projs.forEach(p=>YEARS.forEach(y=>totals[y]+=parseFloat(p.budget[y])||0));
+  tfoot.innerHTML='<tr class="rowtot"><td colspan="4">รวม</td>'+
+    YEARS.map(y=>'<td>'+totals[y].toLocaleString()+'</td>').join("")+'<td colspan="5"></td></tr>';
+}
+function renderProjectsTable(issueIdx){
+  const projs=DATA.p02[issueKey(null,issueIdx)]||[];
+  const tbody=document.querySelector("#p02_"+issueIdx+" tbody");
+  if(!tbody) return;
+  tbody.innerHTML="";
+  projs.forEach((p,pIdx)=>{
+    const tr=document.createElement("tr");
+    let budgetCells="";
+    YEARS.forEach(y=>{
+      budgetCells+='<td><input type="number" value="'+escAttr(p.budget[y])+'" oninput="updateProject('+issueIdx+','+pIdx+',null,this.value,\''+y+'\')"></td>';
+    });
+    tr.innerHTML=
+      '<td>'+(pIdx+1)+'</td>'+
+      '<td><input type="text" value="'+escAttr(p.project)+'" oninput="updateProject('+issueIdx+','+pIdx+',\'project\',this.value)"></td>'+
+      '<td><input type="text" value="'+escAttr(p.obj)+'" oninput="updateProject('+issueIdx+','+pIdx+',\'obj\',this.value)"></td>'+
+      '<td><input type="text" value="'+escAttr(p.target)+'" oninput="updateProject('+issueIdx+','+pIdx+',\'target\',this.value)"></td>'+
+      budgetCells+
+      '<td><input type="text" value="'+escAttr(p.kpi)+'" oninput="updateProject('+issueIdx+','+pIdx+',\'kpi\',this.value)"></td>'+
+      '<td><input type="text" value="'+escAttr(p.result)+'" oninput="updateProject('+issueIdx+','+pIdx+',\'result\',this.value)"></td>'+
+      '<td><input type="text" value="'+escAttr(p.source)+'" oninput="updateProject('+issueIdx+','+pIdx+',\'source\',this.value)"></td>'+
+      '<td><input type="text" value="'+escAttr(p.dept)+'" oninput="updateProject('+issueIdx+','+pIdx+',\'dept\',this.value)"></td>'+
+      '<td><button class="btn sm danger" onclick="removeProject('+issueIdx+','+pIdx+')">ลบ</button></td>';
+    tbody.appendChild(tr);
+  });
+  updateP02Totals(issueIdx);
+}
+
+function renderP01(){
+  const tbody=document.querySelector("#tbl_p01 tbody");
+  const tfoot=document.querySelector("#tbl_p01 tfoot");
+  if(!tbody) return;
+  tbody.innerHTML="";
+  let grandCount=0, grandBudget=0;
+  DATA.issues.forEach((issue,idx)=>{
+    const projs=DATA.p02[issueKey(null,idx)]||[];
+    let sum=0;
+    projs.forEach(p=>YEARS.forEach(y=>sum+=parseFloat(p.budget[y])||0));
+    grandCount+=projs.length; grandBudget+=sum;
+    const tr=document.createElement("tr");
+    tr.innerHTML='<td>'+(idx+1)+'. '+escHtml(issue.issue||'(ไม่มีชื่อ)')+'</td><td>'+projs.length+'</td><td>'+sum.toLocaleString()+'</td>';
+    tbody.appendChild(tr);
+  });
+  tfoot.innerHTML='<tr class="rowtot"><td>รวมทั้งสิ้น</td><td>'+grandCount+'</td><td>'+grandBudget.toLocaleString()+'</td></tr>';
+}
+
+/* ============================================================
+   RENDER: Dashboard
+============================================================ */
+function pctOf(list){
+  if(list.length===0) return 0;
+  const filled=list.filter(f=>(DATA.s1[f.id]||"").trim().length>0).length;
+  return Math.round(filled/list.length*100);
+}
+function renderDashboard(){
+  const pcts=S1_FIELDS.map(pctOf);
+  pcts.forEach((p,i)=>{
+    const el=document.getElementById("pct-g"+i);
+    if(el) el.textContent=p+"%";
+    const nav=document.querySelector('[data-nav="s1-group-'+i+'"]');
+    if(nav) nav.classList.toggle("done", pcts[i]===100);
+  });
+  const totalFields=S1_FIELDS.flat().length;
+  const totalFilled=S1_FIELDS.flat().filter(f=>(DATA.s1[f.id]||"").trim().length>0).length;
+  const s2filled=["2_1","2_2"].filter(k=>(DATA[k]||"").trim().length>0).length;
+  const projCount=Object.values(DATA.p02).reduce((a,arr)=>a+(arr?arr.length:0),0);
+
+  const cards=[
+    {label:"ส่วนที่ 1: ข้อมูลพื้นฐาน", val:totalFilled+"/"+totalFields, sub:"ด้านที่กรอกแล้ว", pct:Math.round(totalFilled/totalFields*100)},
+    {label:"ส่วนที่ 2: ประเด็นการพัฒนา", val:DATA.issues.length, sub:"ประเด็นที่กำหนดไว้", pct:Math.min(100,DATA.issues.length*20)},
+    {label:"ส่วนที่ 3: โครงการพัฒนา", val:projCount, sub:"โครงการทั้งหมด (ผ.02)", pct:Math.min(100,projCount*10)},
+    {label:"วิสัยทัศน์ & นโยบาย", val:s2filled+"/2", sub:"กรอกแล้ว", pct:s2filled*50}
+  ];
+  const wrap=document.getElementById("dashCards");
+  if(wrap) wrap.innerHTML=cards.map(c=>
+    '<div class="stat-card">'+
+      '<div class="ring" style="border-color:'+(c.pct>=100?'#2F6B5E':'#E2D9C2')+';color:'+(c.pct>=100?'#2F6B5E':'#16324F')+'">'+c.pct+'%</div>'+
+      '<h4>'+c.val+'</h4><p>'+c.label+' — '+c.sub+'</p></div>').join("");
+}
+
+/* ============================================================
+   NAVIGATION
+============================================================ */
+const PAGE_TITLES = {
+  dashboard:["ภาพรวมการจัดทำแผน","ติดตามความคืบหน้าการกรอกข้อมูลแผนพัฒนาท้องถิ่น ฉบับที่ 3 (พ.ศ. 2571-2575)"],
+  "s1-group-0":["ส่วนที่ 1 · กายภาพและคมนาคม","ด้านที่ 1.1 – 1.10 ตามเค้าโครงแผนพัฒนาท้องถิ่น"],
+  "s1-group-1":["ส่วนที่ 1 · สังคมและคุณภาพชีวิต","ด้านที่ 1.11 – 1.20 ตามเค้าโครงแผนพัฒนาท้องถิ่น"],
+  "s1-group-2":["ส่วนที่ 1 · สาธารณูปโภคพื้นฐาน","ด้านที่ 1.21 – 1.25 ตามเค้าโครงแผนพัฒนาท้องถิ่น"],
+  "s1-group-3":["ส่วนที่ 1 · ทรัพยากรธรรมชาติและเศรษฐกิจ","ด้านที่ 1.26 – 1.37 ตามเค้าโครงแผนพัฒนาท้องถิ่น"],
+  s2:["ส่วนที่ 2 · วิสัยทัศน์และความสัมพันธ์","วิสัยทัศน์ นโยบายผู้บริหาร และความสัมพันธ์กับแผนระดับต่าง ๆ"],
+  s2b:["ส่วนที่ 2 · ประเด็น เป้าหมาย และการวิเคราะห์","ประเด็นการพัฒนาท้องถิ่น จุดมุ่งหมาย การวิเคราะห์ปัจจัย และสรุปภาพรวม"],
+  s3a:["ส่วนที่ 3 · แบบ ผ.01","บัญชีสรุปโครงการพัฒนาท้องถิ่น (คำนวณอัตโนมัติจาก ผ.02)"],
+  s3b:["ส่วนที่ 3 · แบบ ผ.02","บัญชีรายละเอียดโครงการพัฒนาท้องถิ่น แยกตามประเด็นการพัฒนา"],
+  ai:["วิเคราะห์ข้อมูลด้วย AI","ใช้ Google Gemini ช่วยตรวจสอบและให้ข้อเสนอแนะบนข้อมูลที่กรอกไว้"],
+  export:["ส่งออกเอกสาร","ส่งออกร่างแผนพัฒนาท้องถิ่นเป็น Word, Excel และ PDF"]
+};
+
+function goTo(pageKey){
+  const target=document.getElementById("page-"+pageKey);
+  if(!target) return;
+  document.querySelectorAll(".page").forEach(p=>p.style.display="none");
+  target.style.display="block";
+  document.querySelectorAll(".navitem").forEach(n=>n.classList.toggle("active", n.dataset.nav===pageKey));
+  document.getElementById("page-title").textContent=PAGE_TITLES[pageKey][0];
+  document.getElementById("page-desc").textContent=PAGE_TITLES[pageKey][1];
+  document.getElementById("sidebar").classList.remove("open");
+  window.scrollTo(0,0);
+  if(pageKey==="s3b") renderP02();
+  if(pageKey==="s3a") renderP01();
+}
+document.querySelectorAll(".navitem").forEach(n=>n.addEventListener("click",()=>goTo(n.dataset.nav)));
+
+/* ============================================================
+   IMPORT / EXPORT JSON
+============================================================ */
+function exportJson(){
+  collectAllInputs();
+  const blob=new Blob([JSON.stringify(DATA,null,2)],{type:"application/json"});
+  downloadBlob(blob, "donkaeo-plan-backup.json");
+  showToastMsg("ส่งออกไฟล์สำรองแล้ว");
+}
+function importJson(){ document.getElementById("fileInput").click(); }
+document.getElementById("fileInput").addEventListener("change",(e)=>{
+  const file=e.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=async ()=>{
+    if(!confirm("การนำเข้าไฟล์นี้จะเขียนทับข้อมูลที่เพื่อนร่วมงานกรอกไว้บนระบบส่วนกลางทั้งหมด ยืนยันหรือไม่?")){
+      e.target.value=""; return;
+    }
+    try{
+      const parsed=JSON.parse(reader.result);
+      DATA=Object.assign({s1:{},issues:[],goals:[],factors:[],summary:[],p02:{}}, parsed);
+      renderEverything();
+      await Promise.all(GROUPS.map(pushGroup));
+      showToastMsg("นำเข้าข้อมูลและซิงค์ไปยังเพื่อนร่วมงานแล้ว");
+    }catch(err){ showToastMsg("ไฟล์ไม่ถูกต้อง: "+err.message); }
+    e.target.value="";
+  };
+  reader.readAsText(file);
+});
+function downloadBlob(blob, filename){
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url; a.download=filename; document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
+}
+
+/* ============================================================
+   EXPORT: Excel
+============================================================ */
+function exportExcel(){
+  collectAllInputs();
+  const wb=XLSX.utils.book_new();
+
+  const s1rows=[["ด้านที่","หัวข้อ","ข้อมูล"]];
+  S1_FIELDS.flat().forEach(f=>s1rows.push([f.id.replace('1_','1.'), f.t, DATA.s1[f.id]||""]));
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(s1rows), "ส่วนที่1 ข้อมูลพื้นฐาน");
+
+  const s2rows=[
+    ["หัวข้อ","เนื้อหา"],
+    ["2.1 วิสัยทัศน์", DATA["2_1"]||""],
+    ["2.2 นโยบายผู้บริหาร", DATA["2_2"]||""],
+    ["2.3.1 ยุทธศาสตร์ชาติ 20 ปี", DATA["2_3_1"]||""],
+    ["2.3.2 แผนพัฒนาเศรษฐกิจฯ ฉบับ13/14", DATA["2_3_2"]||""],
+    ["2.3.3 SDGs", DATA["2_3_3"]||""],
+    ["2.3.4 กลุ่มจังหวัด/ภาค", DATA["2_3_4"]||""],
+    ["2.3.5 แผนพัฒนาจังหวัด", DATA["2_3_5"]||""],
+    ["2.3.6 ประเด็นพัฒนา อปท.ระดับจังหวัด", DATA["2_3_6"]||""]
+  ];
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(s2rows), "ส่วนที่2 วิสัยทัศน์");
+
+  const issueRows=[["#","ประเด็นการพัฒนา","แนวทาง/กลยุทธ์","ตัวชี้วัด KPIs"]];
+  DATA.issues.forEach((r,i)=>issueRows.push([i+1,r.issue,r.approach,r.kpi]));
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(issueRows), "2.4 ประเด็นพัฒนา");
+
+  const goalRows=[["ประเด็นการพัฒนา","Goals","ปี71","ปี72","ปี73","ปี74","ปี75"]];
+  DATA.goals.forEach(r=>goalRows.push([r.issue,r.goal,r.y71,r.y72,r.y73,r.y74,r.y75]));
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(goalRows), "2.5 เป้าหมาย");
+
+  const factorRows=[["#","ประเด็น","หลักการวิเคราะห์","ผลการวิเคราะห์","ผลกระทบ"]];
+  DATA.factors.forEach((r,i)=>factorRows.push([i+1,r.issue,r.principle,r.result,r.impact]));
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(factorRows), "2.6 วิเคราะห์ปัจจัย");
+
+  const sumRows=[["#","ประเด็น","Goals","ผลที่คาดว่าจะได้รับ","หน่วยงาน"]];
+  DATA.summary.forEach((r,i)=>sumRows.push([i+1,r.issue,r.goal,r.expect,r.dept]));
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sumRows), "2.7 สรุปภาพรวม");
+
+  const p01rows=[["ประเด็นการพัฒนา","จำนวนโครงการ","งบประมาณรวม (บาท)"]];
+  let gCount=0,gBudget=0;
+  DATA.issues.forEach((issue,idx)=>{
+    const projs=DATA.p02[issueKey(null,idx)]||[];
+    let sum=0; projs.forEach(p=>YEARS.forEach(y=>sum+=parseFloat(p.budget[y])||0));
+    gCount+=projs.length; gBudget+=sum;
+    p01rows.push([issue.issue, projs.length, sum]);
+  });
+  p01rows.push(["รวมทั้งสิ้น", gCount, gBudget]);
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(p01rows), "ผ.01");
+
+  const p02rows=[["ประเด็นการพัฒนา","โครงการ","วัตถุประสงค์","เป้าหมาย"].concat(YEARS,["ตัวชี้วัด (KPI)","ผลที่คาดว่าจะได้รับ","ที่มาของโครงการ","หน่วยงานรับผิดชอบ"])];
+  DATA.issues.forEach((issue,idx)=>{
+    (DATA.p02[issueKey(null,idx)]||[]).forEach(p=>{
+      p02rows.push([issue.issue,p.project,p.obj,p.target].concat(YEARS.map(y=>p.budget[y]||0),[p.kpi,p.result,p.source,p.dept]));
+    });
+  });
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(p02rows), "ผ.02");
+
+  XLSX.writeFile(wb, "แผนพัฒนาท้องถิ่น_ดอนแก้ว_2571-2575.xlsx");
+  showToastMsg("ส่งออกไฟล์ Excel แล้ว");
+}
+
+/* ============================================================
+   Build full report HTML (shared by Word & PDF)
+============================================================ */
+function tableHtml(headers, rows){
+  let h='<table border="1" cellspacing="0" cellpadding="6" style="border-collapse:collapse;width:100%;font-size:12px;margin-bottom:14px;">'+
+    '<tr style="background:#16324F;color:#fff;">'+headers.map(x=>'<th>'+x+'</th>').join("")+'</tr>';
+  if(rows.length===0){ h+='<tr><td colspan="'+headers.length+'" style="text-align:center;color:#888;">- ไม่มีข้อมูล -</td></tr>'; }
+  rows.forEach(r=>{ h+='<tr>'+r.map(c=>'<td>'+(c===undefined||c===null||c===""?"-":c)+'</td>').join("")+'</tr>'; });
+  return h+"</table>";
+}
+
+function buildReportHtml(){
+  collectAllInputs();
+  const esc=escHtml;
+  let s1html="";
+  S1_FIELDS.flat().forEach(f=>{
+    s1html+='<h4>'+esc(f.t)+'</h4><p>'+esc(DATA.s1[f.id]||'-').replace(/\n/g,'<br>')+'</p>';
+  });
+
+  const issuesTbl = tableHtml(["#","ประเด็นการพัฒนาท้องถิ่น","แนวทาง/กลยุทธ์","ตัวชี้วัด (KPIs)"],
+    DATA.issues.map((r,i)=>[i+1,esc(r.issue),esc(r.approach),esc(r.kpi)]));
+  const goalsTbl = tableHtml(["ประเด็นการพัฒนา","Goals","2571","2572","2573","2574","2575"],
+    DATA.goals.map(r=>[esc(r.issue),esc(r.goal),esc(r.y71),esc(r.y72),esc(r.y73),esc(r.y74),esc(r.y75)]));
+  const factorsTbl = tableHtml(["#","ประเด็น","หลักการวิเคราะห์","ผลการวิเคราะห์","ผลกระทบ"],
+    DATA.factors.map((r,i)=>[i+1,esc(r.issue),esc(r.principle),esc(r.result),esc(r.impact)]));
+  const summaryTbl = tableHtml(["#","ประเด็น","Goals","ผลที่คาดว่าจะได้รับ","หน่วยงาน"],
+    DATA.summary.map((r,i)=>[i+1,esc(r.issue),esc(r.goal),esc(r.expect),esc(r.dept)]));
+
+  let gCount=0,gBudget=0;
+  const p01body=DATA.issues.map((issue,idx)=>{
+    const projs=DATA.p02[issueKey(null,idx)]||[];
+    let sum=0; projs.forEach(p=>YEARS.forEach(y=>sum+=parseFloat(p.budget[y])||0));
+    gCount+=projs.length; gBudget+=sum;
+    return [esc(issue.issue), projs.length, sum.toLocaleString()];
+  });
+  p01body.push(["<strong>รวมทั้งสิ้น</strong>",gCount,gBudget.toLocaleString()]);
+  const p01Tbl = tableHtml(["ประเด็นการพัฒนา","จำนวนโครงการ","งบประมาณรวม (บาท)"], p01body);
+
+  let p02html="";
+  DATA.issues.forEach((issue,idx)=>{
+    const projs=DATA.p02[issueKey(null,idx)]||[];
+    p02html+='<h4>'+(idx+1)+'. ประเด็นการพัฒนาท้องถิ่น: '+esc(issue.issue||'-')+'</h4>';
+    p02html+=tableHtml(["#","โครงการ","วัตถุประสงค์","เป้าหมาย"].concat(YEARS,["ตัวชี้วัด (KPI)","ผลที่คาดว่าจะได้รับ","ที่มาของโครงการ","หน่วยงาน"]),
+      projs.map((p,i)=>[i+1,esc(p.project),esc(p.obj),esc(p.target)].concat(YEARS.map(y=>p.budget[y]||"-"),[esc(p.kpi),esc(p.result),esc(p.source),esc(p.dept)])));
+  });
+
+  return '<div style="font-family:\'Sarabun\',sans-serif;">'+
+    '<div style="text-align:center;margin-bottom:30px;">'+
+      '<h1 style="margin-bottom:4px;">แผนพัฒนาท้องถิ่น ฉบับที่ 3 (พ.ศ. 2571-2575)</h1>'+
+      '<h2 style="font-weight:400;margin-top:0;">เทศบาลเมืองดอนแก้ว</h2>'+
+      '<p>จัดทำตามระเบียบกระทรวงมหาดไทยว่าด้วยการจัดทำแผนพัฒนาขององค์กรปกครองส่วนท้องถิ่น พ.ศ. 2548 และที่แก้ไขเพิ่มเติม</p>'+
+    '</div>'+
+    '<h2>คำนำ</h2>'+
+    '<p>แผนพัฒนาท้องถิ่นฉบับนี้จัดทำขึ้นเพื่อเป็นกรอบแนวทางการพัฒนาเทศบาลเมืองดอนแก้ว ระยะ 5 ปี (พ.ศ. 2571-2575) ให้สอดคล้องกับยุทธศาสตร์ชาติ 20 ปี แผนพัฒนาเศรษฐกิจและสังคมแห่งชาติ เป้าหมายการพัฒนาที่ยั่งยืน (SDGs) และแผนพัฒนาจังหวัด/กลุ่มจังหวัด</p>'+
+    '<h2>ส่วนที่ 1 สภาพทั่วไปและข้อมูลพื้นฐาน</h2>'+s1html+
+    '<h2>ส่วนที่ 2 ประเด็นการพัฒนาท้องถิ่น</h2>'+
+    '<h3>2.1 วิสัยทัศน์</h3><p>'+esc(DATA["2_1"]||"-")+'</p>'+
+    '<h3>2.2 นโยบายผู้บริหารท้องถิ่น</h3><p>'+esc(DATA["2_2"]||"-")+'</p>'+
+    '<h3>2.3 ความสัมพันธ์ประเด็นการพัฒนาท้องถิ่น</h3>'+
+    '<p><strong>2.3.1 ยุทธศาสตร์ชาติ 20 ปี:</strong> '+esc(DATA["2_3_1"]||"-")+'</p>'+
+    '<p><strong>2.3.2 แผนพัฒนาเศรษฐกิจฯ ฉบับ 13/14:</strong> '+esc(DATA["2_3_2"]||"-")+'</p>'+
+    '<p><strong>2.3.3 SDGs:</strong> '+esc(DATA["2_3_3"]||"-")+'</p>'+
+    '<p><strong>2.3.4 กลุ่มจังหวัด/ภาค:</strong> '+esc(DATA["2_3_4"]||"-")+'</p>'+
+    '<p><strong>2.3.5 แผนพัฒนาจังหวัด:</strong> '+esc(DATA["2_3_5"]||"-")+'</p>'+
+    '<p><strong>2.3.6 ประเด็นพัฒนา อปท. ระดับจังหวัด:</strong> '+esc(DATA["2_3_6"]||"-")+'</p>'+
+    '<h3>2.4 ประเด็นการพัฒนาท้องถิ่น</h3>'+issuesTbl+
+    '<h3>2.5 จุดมุ่งหมายการพัฒนาท้องถิ่น</h3>'+goalsTbl+
+    '<h3>2.6 การวิเคราะห์ปัจจัยและสถานการณ์การเปลี่ยนแปลง</h3>'+factorsTbl+
+    '<h3>2.7 สรุปภาพรวมประเด็นการพัฒนาท้องถิ่น</h3>'+summaryTbl+
+    '<h2>ส่วนที่ 3 การนำแผนพัฒนาท้องถิ่นสู่การปฏิบัติ</h2>'+
+    '<h3>3.1 แบบ ผ.01 บัญชีสรุปโครงการพัฒนาท้องถิ่น</h3>'+p01Tbl+
+    '<h3>3.2 แบบ ผ.02 บัญชีรายละเอียดโครงการพัฒนาท้องถิ่น</h3>'+p02html+
+  '</div>';
+}
+
+/* ============================================================
+   EXPORT: Word / PDF   (หมายเหตุ: escape <\/style> เพื่อไม่ให้ปิด tag ผิด)
+============================================================ */
+function exportWord(){
+  const content=buildReportHtml();
+  const html='<!DOCTYPE html><html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">'+
+    '<head><meta charset="utf-8"><title>แผนพัฒนาท้องถิ่น</title>'+
+    '<style>body{font-family:\'Sarabun\',sans-serif;font-size:14px;} h1,h2,h3,h4{color:#16324F;}<\/style>'+
+    '<\/head><body>'+content+'<\/body><\/html>';
+  const blob=new Blob(['\ufeff', html], {type:'application/msword'});
+  downloadBlob(blob, "แผนพัฒนาท้องถิ่น_ดอนแก้ว_2571-2575.doc");
+  showToastMsg("ส่งออกไฟล์ Word แล้ว");
+}
+
+function exportPdf(){
+  const content=buildReportHtml();
+  const w=window.open("", "_blank");
+  if(!w){ showToastMsg("เบราว์เซอร์บล็อกป๊อปอัป กรุณาอนุญาตแล้วลองใหม่"); return; }
+  w.document.write('<!DOCTYPE html><html><head><meta charset="utf-8"><title>แผนพัฒนาท้องถิ่น ดอนแก้ว</title>'+
+    '<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">'+
+    '<style>'+
+      'body{font-family:\'Sarabun\',sans-serif;padding:30px;color:#20242B;}'+
+      'h1{font-size:22px;} h2{font-size:18px;color:#16324F;border-bottom:2px solid #B8912F;padding-bottom:4px;margin-top:26px;}'+
+      'h3{font-size:15px;color:#16324F;} h4{font-size:13.5px;margin-bottom:2px;}'+
+      'table{page-break-inside:auto;} tr{page-break-inside:avoid;}'+
+    '<\/style><\/head><body>'+content+'<\/body><\/html>');
+  w.document.close();
+  setTimeout(()=>{ w.focus(); w.print(); }, 800);
+  showToastMsg("เปิดหน้าต่างพิมพ์แล้ว — เลือก 'บันทึกเป็น PDF' เพื่อดาวน์โหลด");
+}
+
+/* ============================================================
+   GEMINI AI INTEGRATION
+============================================================ */
+function saveKey(){
+  const k=document.getElementById("geminiKey").value.trim();
+  if(!k){ showToastMsg("กรุณาวางคีย์ก่อนบันทึก"); return; }
+  localStorage.setItem(GEMINI_KEY_STORAGE, k);
+  showToastMsg("บันทึกคีย์ในเครื่องนี้แล้ว");
+}
+function loadKey(){
+  const k=localStorage.getItem(GEMINI_KEY_STORAGE);
+  if(k) document.getElementById("geminiKey").value=k;
+}
+
+async function runGemini(){
+  const key=document.getElementById("geminiKey").value.trim();
+  const statusEl=document.getElementById("aiStatus");
+  const resultEl=document.getElementById("aiResult");
+  if(!key){ statusEl.textContent="กรุณาใส่ Google API Key (Gemini) ก่อนใช้งาน"; return; }
+  collectAllInputs();
+
+  const task=document.getElementById("aiTask").value;
+  const dataSummary=buildAiContext(task);
+
+  const prompts={
+    completeness:"ตรวจสอบว่าข้อมูล 'สภาพทั่วไปและข้อมูลพื้นฐาน' ด้านใดยังกรอกไม่ครบหรือเนื้อหาสั้นเกินไป พร้อมข้อเสนอแนะสิ่งที่ควรเพิ่มเติมในแต่ละด้าน (ตอบเป็นรายการ)",
+    alignment:"ตรวจสอบความสอดคล้องระหว่างประเด็นการพัฒนาท้องถิ่นกับยุทธศาสตร์ชาติ 20 ปี, แผนพัฒนาเศรษฐกิจและสังคมแห่งชาติ, และเป้าหมาย SDGs ที่ระบุไว้ ชี้จุดที่ยังเชื่อมโยงไม่ชัดเจน และเสนอแนะแนวทางเชื่อมโยงเพิ่มเติม",
+    budget:"ตรวจสอบความสมเหตุสมผลของโครงการและงบประมาณในแบบ ผ.02 เช่น โครงการที่ไม่มีงบประมาณ งบประมาณที่อาจสูง/ต่ำผิดปกติ หรือวัตถุประสงค์ที่ไม่ชัดเจน พร้อมข้อเสนอแนะการปรับปรุง",
+    full:"วิเคราะห์ภาพรวมร่างแผนพัฒนาท้องถิ่นทั้งฉบับ ทั้งความครบถ้วน ความสอดคล้องเชิงยุทธศาสตร์ และความเหมาะสมของโครงการ/งบประมาณ พร้อมให้ข้อเสนอแนะเชิงนโยบาย 5-8 ข้อ"
+  };
+
+  const prompt = "คุณเป็นผู้เชี่ยวชาญด้านการวางแผนพัฒนาท้องถิ่นขององค์กรปกครองส่วนท้องถิ่นไทย ตามระเบียบกระทรวงมหาดไทยว่าด้วยการจัดทำแผนพัฒนาขององค์กรปกครองส่วนท้องถิ่น พ.ศ. 2548\n"+
+    "กรุณา"+prompts[task]+"\n"+
+    "โดยอ้างอิงจากข้อมูลร่างแผนพัฒนาท้องถิ่นเทศบาลเมืองดอนแก้วต่อไปนี้ (รูปแบบ JSON แบบย่อ):\n\n"+
+    dataSummary+"\n\nตอบเป็นภาษาไทย จัดรูปแบบเป็นหัวข้อและรายการที่อ่านง่าย";
+
+  statusEl.textContent="กำลังส่งข้อมูลไปวิเคราะห์กับ Gemini ...";
+  resultEl.style.display="none";
+
+  try{
+    const resp=await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key="+encodeURIComponent(key),{
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({contents:[{parts:[{text:prompt}]}]})
+    });
+    if(!resp.ok){
+      const errText=await resp.text();
+      throw new Error("HTTP "+resp.status+": "+errText.slice(0,300));
+    }
+    const json=await resp.json();
+    const text=json?.candidates?.[0]?.content?.parts?.map(p=>p.text).join("\n") || "ไม่ได้รับผลลัพธ์จาก Gemini";
+    resultEl.textContent=text;
+    resultEl.style.display="block";
+    statusEl.textContent="วิเคราะห์เสร็จสิ้น";
+  }catch(e){
+    statusEl.textContent="เกิดข้อผิดพลาด: "+e.message+" (ตรวจสอบว่าคีย์ถูกต้องและเปิดใช้งาน Generative Language API แล้ว)";
+  }
+}
+
+function buildAiContext(task){
+  const obj={};
+  if(task==="completeness"||task==="full"){
+    obj.section1 = S1_FIELDS.flat().map(f=>({id:f.id, title:f.t, filled: !!(DATA.s1[f.id]||"").trim(), length:(DATA.s1[f.id]||"").length}));
+  }
+  if(task==="alignment"||task==="full"){
+    obj.vision=DATA["2_1"]; obj.policy=DATA["2_2"];
+    obj.nationalStrategy=DATA["2_3_1"]; obj.ndp=DATA["2_3_2"]; obj.sdgs=DATA["2_3_3"];
+    obj.provinceGroup=DATA["2_3_4"]; obj.province=DATA["2_3_5"]; obj.provinceLevelIssues=DATA["2_3_6"];
+    obj.issues=DATA.issues;
+  }
+  if(task==="budget"||task==="full"){
+    obj.projects=[];
+    DATA.issues.forEach((issue,idx)=>{
+      (DATA.p02[issueKey(null,idx)]||[]).forEach(p=>obj.projects.push({issue:issue.issue, project:p.project, obj:p.obj, target:p.target, budget:p.budget, dept:p.dept}));
+    });
+  }
+  return JSON.stringify(obj).slice(0,12000);
+}
+
+/* ============================================================
+   BOOTSTRAP
+============================================================ */
+function attachS2Listeners(){
+  S2_KEYS.forEach(k=>{
+    const el=document.getElementById("f_"+k);
+    if(el) el.addEventListener("input",()=>{ DATA[k]=el.value; queueSave("s2"); });
+  });
+}
+function populateS2Values(){
+  S2_KEYS.forEach(k=>{
+    const el=document.getElementById("f_"+k);
+    if(el && !editingGroup.s2) el.value=DATA[k]||"";
+  });
+}
+function renderEverything(fromSync){
+  if(!editingGroup.s1) renderS1();
+  Object.keys(TABLE_DEFS).forEach(id=>{ if(!editingGroup.tables) renderTable(id); });
+  populateS2Values();
+  const s3b=document.getElementById("page-s3b");
+  if(!editingGroup.p02 && s3b && s3b.style.display!=="none") renderP02();
+  renderDashboard();
+  renderP01();
+}
+
+async function boot(){
+  attachS2Listeners();
+  await initialLoad();
+  renderEverything();
+  loadKey();
+  goTo("dashboard");
+  if(currentUser) document.getElementById("whoamiBtn").textContent="👤 "+currentUser;
+  else openNameModal();
+  pollLoop();
+}
+boot();
+</script>
+</body>
+</html>
