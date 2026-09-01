@@ -55,7 +55,7 @@ main{flex:1;min-width:0;padding:0 0 60px;}
 .section-block h3{margin:0 0 12px;font-size:15.5px;color:var(--navy);}
 .muted{color:var(--sub);font-size:13.5px;}
 label.fl{display:block;font-size:13.5px;font-weight:500;margin:14px 0 5px;color:var(--navy);}
-textarea,input[type=text],input[type=number],select{width:100%;font-family:inherit;font-size:13.5px;color:var(--ink);border:1px solid var(--paper-line);border-radius:8px;padding:8px 10px;background:#FEFDFA;}
+textarea,input[type=text],input[type=number],input[type=password],select{width:100%;font-family:inherit;font-size:13.5px;color:var(--ink);border:1px solid var(--paper-line);border-radius:8px;padding:8px 10px;background:#FEFDFA;}
 textarea{min-height:110px;resize:vertical;line-height:1.6;}
 textarea:focus,input:focus,select:focus{outline:none;border-color:var(--gold);background:#fff;}
 
@@ -72,6 +72,11 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:var(--gold);ba
 .acc-body{display:none;padding:0 14px 14px;border-top:1px solid var(--paper-line);}
 .acc-item.open .acc-body{display:block;}
 .acc-body .hint{font-size:12px;color:var(--sub);margin:10px 0 8px;background:#FAF7EE;border-left:3px solid var(--gold-light);padding:6px 10px;border-radius:0 6px 6px 0;}
+
+/* AI BAR */
+.ai-bar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:8px;}
+.ai-status{font-size:12px;color:var(--teal);}
+.group-bar{background:#FFFDF7;border:1px dashed var(--gold-light);border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:13px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
 
 /* TABLES */
 .tbl-wrap{overflow-x:auto;border:1px solid var(--paper-line);border-radius:10px;}
@@ -118,10 +123,10 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:var(--gold);ba
     <div class="navitem active" data-nav="dashboard">📊 ภาพรวม</div>
 
     <div class="navlabel">ส่วนที่ 1 · ข้อมูลพื้นฐาน</div>
-    <div class="navitem" data-nav="s1-group-0"><span>กายภาพและคมนาคม</span><span class="pct" id="pct-g0">0%</span></div>
-    <div class="navitem" data-nav="s1-group-1"><span>สังคมและคุณภาพชีวิต</span><span class="pct" id="pct-g1">0%</span></div>
-    <div class="navitem" data-nav="s1-group-2"><span>สาธารณูปโภคพื้นฐาน</span><span class="pct" id="pct-g2">0%</span></div>
-    <div class="navitem" data-nav="s1-group-3"><span>ทรัพยากร &amp; เศรษฐกิจ</span><span class="pct" id="pct-g3">0%</span></div>
+    <div class="navitem" data-nav="s1-group-0"><span>กายภาพ ประชากร คมนาคม</span><span class="pct" id="pct-g0">0%</span></div>
+    <div class="navitem" data-nav="s1-group-1"><span>สังคม การศึกษา วัฒนธรรม</span><span class="pct" id="pct-g1">0%</span></div>
+    <div class="navitem" data-nav="s1-group-2"><span>สาธารณูปโภค &amp; บริการสาธารณะ</span><span class="pct" id="pct-g2">0%</span></div>
+    <div class="navitem" data-nav="s1-group-3"><span>ทรัพยากรธรรมชาติ &amp; เศรษฐกิจ</span><span class="pct" id="pct-g3">0%</span></div>
 
     <div class="navlabel">ส่วนที่ 2 · ประเด็นการพัฒนา</div>
     <div class="navitem" data-nav="s2">วิสัยทัศน์ &amp; ความสัมพันธ์</div>
@@ -155,16 +160,28 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:var(--gold);ba
       <div class="cards" id="dashCards"></div>
       <div class="section-block" style="margin-top:18px;">
         <h3>คำแนะนำการใช้งาน</h3>
-        <p class="muted">1) กรอกข้อมูลส่วนที่ 1 ทีละด้าน (กดที่หัวข้อเพื่อเปิด) — 2) กำหนดวิสัยทัศน์และประเด็นการพัฒนาในส่วนที่ 2 — 3) เพิ่มโครงการในแบบ ผ.02 ระบบจะสรุป ผ.01 ให้อัตโนมัติ — 4) ส่งออกเป็น Word / Excel / PDF</p>
-        <p class="muted">ข้อมูลจะบันทึกอัตโนมัติและซิงค์ให้เพื่อนร่วมงานเห็นพร้อมกันทุก 6 วินาที</p>
+        <p class="muted">1) กรอกข้อมูลส่วนที่ 1 ทั้ง 37 ด้าน (กดที่หัวข้อเพื่อเปิด) — 2) กำหนดวิสัยทัศน์และประเด็นการพัฒนาในส่วนที่ 2 — 3) เพิ่มโครงการในแบบ ผ.02 ระบบจะสรุป ผ.01 ให้อัตโนมัติ — 4) ส่งออกเป็น Word / Excel / PDF</p>
+        <p class="muted">ข้อมูลบันทึกอัตโนมัติและซิงค์ให้เพื่อนร่วมงานเห็นพร้อมกันทุก 6 วินาที</p>
       </div>
     </div>
 
     <!-- SECTION 1 -->
-    <div class="page" id="page-s1-group-0" style="display:none"><div id="acc-group-0"></div></div>
-    <div class="page" id="page-s1-group-1" style="display:none"><div id="acc-group-1"></div></div>
-    <div class="page" id="page-s1-group-2" style="display:none"><div id="acc-group-2"></div></div>
-    <div class="page" id="page-s1-group-3" style="display:none"><div id="acc-group-3"></div></div>
+    <div class="page" id="page-s1-group-0" style="display:none">
+      <div class="group-bar"><span>วิเคราะห์ทุกหัวข้อที่กรอกแล้วในกลุ่มนี้ด้วย AI พร้อมกัน</span><button class="btn sm ai" onclick="analyzeGroupAI(0)">🔍 วิเคราะห์ทั้งกลุ่ม</button></div>
+      <div id="acc-group-0"></div>
+    </div>
+    <div class="page" id="page-s1-group-1" style="display:none">
+      <div class="group-bar"><span>วิเคราะห์ทุกหัวข้อที่กรอกแล้วในกลุ่มนี้ด้วย AI พร้อมกัน</span><button class="btn sm ai" onclick="analyzeGroupAI(1)">🔍 วิเคราะห์ทั้งกลุ่ม</button></div>
+      <div id="acc-group-1"></div>
+    </div>
+    <div class="page" id="page-s1-group-2" style="display:none">
+      <div class="group-bar"><span>วิเคราะห์ทุกหัวข้อที่กรอกแล้วในกลุ่มนี้ด้วย AI พร้อมกัน</span><button class="btn sm ai" onclick="analyzeGroupAI(2)">🔍 วิเคราะห์ทั้งกลุ่ม</button></div>
+      <div id="acc-group-2"></div>
+    </div>
+    <div class="page" id="page-s1-group-3" style="display:none">
+      <div class="group-bar"><span>วิเคราะห์ทุกหัวข้อที่กรอกแล้วในกลุ่มนี้ด้วย AI พร้อมกัน</span><button class="btn sm ai" onclick="analyzeGroupAI(3)">🔍 วิเคราะห์ทั้งกลุ่ม</button></div>
+      <div id="acc-group-3"></div>
+    </div>
 
     <!-- SECTION 2A -->
     <div class="page" id="page-s2" style="display:none">
@@ -249,7 +266,7 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:var(--gold);ba
       <div class="section-block">
         <h3>เลือกรูปแบบการวิเคราะห์</h3>
         <select id="aiTask">
-          <option value="completeness">ตรวจสอบความครบถ้วนของข้อมูลส่วนที่ 1</option>
+          <option value="completeness">ตรวจสอบความครบถ้วนของข้อมูลส่วนที่ 1 (37 ด้าน)</option>
           <option value="alignment">ตรวจสอบความสอดคล้องกับแผนระดับชาติ/SDGs</option>
           <option value="budget">ตรวจสอบความสมเหตุสมผลของโครงการและงบประมาณ (ผ.02)</option>
           <option value="full">วิเคราะห์ภาพรวมทั้งฉบับ</option>
@@ -309,52 +326,55 @@ let DATA = {
 };
 
 const S1_FIELDS = [
-  [ /* กลุ่ม 0 : กายภาพและคมนาคม 1.1–1.10 */
-    {id:"1_1", t:"1.1 ที่ตั้งของหมู่บ้าน/ชุมชน/ตำบล", h:"ที่ตั้งสำนักงาน อาณาเขตติดต่อ ระยะทางจากอำเภอ/จังหวัด เนื้อที่ทั้งหมด"},
-    {id:"1_2", t:"1.2 ลักษณะภูมิประเทศ", h:"สภาพพื้นที่ ที่ราบ/ที่ลาดเชิงเขา ความสูงจากระดับน้ำทะเล"},
-    {id:"1_3", t:"1.3 ลักษณะภูมิอากาศ", h:"ฤดูกาล อุณหภูมิเฉลี่ย ปริมาณน้ำฝนเฉลี่ยต่อปี"},
-    {id:"1_4", t:"1.4 ลักษณะของดิน", h:"ชนิดของดิน ความเหมาะสมต่อการเกษตร ปัญหาดิน"},
-    {id:"1_5", t:"1.5 ลักษณะของแหล่งน้ำ", h:"แหล่งน้ำธรรมชาติ/แหล่งน้ำที่สร้างขึ้น ลำเหมือง คลอง อ่างเก็บน้ำ"},
-    {id:"1_6", t:"1.6 ลักษณะของไม้และป่าไม้", h:"พื้นที่ป่า ชนิดพันธุ์ไม้เด่น การใช้ประโยชน์"},
-    {id:"1_7", t:"1.7 เขตการปกครอง", h:"จำนวนหมู่บ้าน/ชุมชน ชื่อหมู่บ้าน จำนวนครัวเรือนแต่ละหมู่"},
-    {id:"1_8", t:"1.8 ประชากร", h:"จำนวนประชากรแยกชาย/หญิง ช่วงอายุ ความหนาแน่น แนวโน้ม 5 ปี"},
-    {id:"1_9", t:"1.9 การคมนาคมขนส่ง", h:"ถนนสายหลัก/สายรอง ระยะทาง สภาพผิวจราจร ระบบขนส่งสาธารณะ"},
-    {id:"1_10",t:"1.10 การจราจรและความปลอดภัยทางถนน", h:"จุดเสี่ยง สถิติอุบัติเหตุ ไฟส่องสว่าง สัญญาณจราจร"}
+  [ /* กลุ่ม 0 : กายภาพ ประชากร และคมนาคม (1.1–1.10) */
+    {id:"1_1", t:"ด้านกายภาพ", h:"ที่ตั้ง อาณาเขตติดต่อ เนื้อที่ ลักษณะภูมิประเทศ ภูมิอากาศ ลักษณะของดิน แหล่งน้ำธรรมชาติ และลักษณะของไม้/ป่าไม้"},
+    {id:"1_2", t:"ด้านขอบเขตความรับผิดชอบ", h:"เขตการปกครอง จำนวนหมู่บ้าน/ชุมชน พื้นที่รับผิดชอบ อำนาจหน้าที่ตามกฎหมาย และโครงสร้างส่วนราชการของเทศบาล"},
+    {id:"1_3", t:"ด้านประชากร", h:"จำนวนประชากรแยกชาย/หญิง ช่วงวัย จำนวนครัวเรือน ความหนาแน่น ประชากรแฝง/ผู้ย้ายถิ่น และแนวโน้มการเปลี่ยนแปลง 5 ปี"},
+    {id:"1_4", t:"ด้านการคมนาคมทางบก", h:"ถนนสายหลัก/สายรอง ระยะทาง สภาพผิวจราจร สะพาน จุดเสี่ยงอุบัติเหตุ และสถิติการจราจร"},
+    {id:"1_5", t:"ด้านการพัฒนาระบบคมนาคมและโลจิสติกส์", h:"โครงข่ายเชื่อมโยงกับเส้นทางหลัก ศูนย์กระจายสินค้า คลังสินค้า และแผนพัฒนาเส้นทางในอนาคต"},
+    {id:"1_6", t:"ด้านการคมนาคมทางน้ำ", h:"ลำน้ำสายหลัก ท่าเรือ/ท่าน้ำ การใช้ประโยชน์เพื่อการสัญจรหรือท่องเที่ยว (หากไม่มีให้ระบุว่าไม่มี)"},
+    {id:"1_7", t:"ด้านการคมนาคมทางอากาศ", h:"ท่าอากาศยานใกล้เคียง ระยะทางจากพื้นที่ ผลกระทบด้านเสียง/ข้อจำกัดการใช้ประโยชน์ที่ดิน"},
+    {id:"1_8", t:"ด้านการขนส่งสาธารณะ", h:"รถโดยสารประจำทาง รถสองแถว รถรับส่งนักเรียน เส้นทางให้บริการ ความครอบคลุม และปัญหาการเข้าถึง"},
+    {id:"1_9", t:"ด้านการพัฒนาเมืองอัจฉริยะ (Smart City)", h:"ความคืบหน้า Smart City 7 ด้าน ระบบ CCTV เซนเซอร์ IoT ข้อมูลเปิด (Open Data) และแพลตฟอร์มบริการประชาชน"},
+    {id:"1_10",t:"ด้านการสื่อสาร เทคโนโลยีและดิจิทัล", h:"สัญญาณโทรศัพท์/อินเทอร์เน็ตความเร็วสูง หอกระจายข่าว เสียงตามสาย ระบบ e-Service และทักษะดิจิทัลของประชาชน"}
   ],
-  [ /* กลุ่ม 1 : สังคมและคุณภาพชีวิต 1.11–1.20 */
-    {id:"1_11",t:"1.11 การศึกษา", h:"ศพด. โรงเรียนในพื้นที่ จำนวนนักเรียน/ครู แหล่งเรียนรู้ชุมชน"},
-    {id:"1_12",t:"1.12 สาธารณสุข", h:"รพ.สต. คลินิก อสม. สถิติโรคสำคัญ การส่งเสริมสุขภาพ"},
-    {id:"1_13",t:"1.13 อาชญากรรมและความปลอดภัยในชีวิตและทรัพย์สิน", h:"สถิติคดี กล้อง CCTV อปพร. ชุดรักษาความปลอดภัยหมู่บ้าน"},
-    {id:"1_14",t:"1.14 ยาเสพติด", h:"สถานการณ์ กลุ่มเสี่ยง มาตรการป้องกัน/บำบัดในพื้นที่"},
-    {id:"1_15",t:"1.15 การสังคมสงเคราะห์", h:"เบี้ยยังชีพ ผู้ยากไร้ ผู้ด้อยโอกาส การช่วยเหลือผู้ประสบภัย"},
-    {id:"1_16",t:"1.16 ผู้สูงอายุ", h:"จำนวน สัดส่วนสังคมสูงวัย ชมรมผู้สูงอายุ ระบบดูแลระยะยาว (LTC)"},
-    {id:"1_17",t:"1.17 เด็กและเยาวชน", h:"จำนวน สภาเด็กและเยาวชน กิจกรรมส่งเสริมพัฒนาการ"},
-    {id:"1_18",t:"1.18 คนพิการ", h:"จำนวนผู้พิการแยกประเภท การเข้าถึงสิทธิ กายอุปกรณ์ อารยสถาปัตย์"},
-    {id:"1_19",t:"1.19 สตรีและครอบครัว", h:"กลุ่มสตรี การส่งเสริมอาชีพ ความรุนแรงในครอบครัว"},
-    {id:"1_20",t:"1.20 การกีฬาและนันทนาการ", h:"สนามกีฬา ลานออกกำลังกาย ชมรมกีฬา กิจกรรมประจำปี"}
+  [ /* กลุ่ม 1 : สังคม การศึกษา และวัฒนธรรม (1.11–1.20) */
+    {id:"1_11",t:"ด้านการศึกษาและการพัฒนาคน", h:"ศพด. โรงเรียนในพื้นที่ จำนวนนักเรียน/ครู อัตราการเรียนต่อ แหล่งเรียนรู้ชุมชน และการเรียนรู้ตลอดชีวิต"},
+    {id:"1_12",t:"ด้านอัตลักษณ์ท้องถิ่น", h:"เอกลักษณ์เด่นของดอนแก้ว สัญลักษณ์ชุมชน ทุนทางสังคม และสิ่งที่สร้างความภาคภูมิใจร่วมของคนในพื้นที่"},
+    {id:"1_13",t:"ด้านความเชื่อ ศาสนา จารีต ประเพณี วัฒนธรรม", h:"วัด/ศาสนสถาน จำนวนผู้นับถือแต่ละศาสนา ประเพณีประจำปี พิธีกรรมสำคัญ และการสืบทอด"},
+    {id:"1_14",t:"ด้านภูมิปัญญาท้องถิ่น ภาษาถิ่น", h:"ปราชญ์ชาวบ้าน องค์ความรู้ดั้งเดิม หัตถกรรม สมุนไพร ภาษาล้านนา และการอนุรักษ์/ถ่ายทอด"},
+    {id:"1_15",t:"ด้านสาธารณสุข", h:"รพ.สต. คลินิก จำนวน อสม. สถิติโรคสำคัญ การส่งเสริมสุขภาพ และการดูแลผู้สูงอายุระยะยาว (LTC)"},
+    {id:"1_16",t:"ด้านสังคมสงเคราะห์", h:"เบี้ยยังชีพผู้สูงอายุ/ผู้พิการ/ผู้ป่วยเอดส์ ผู้ยากไร้ ผู้ด้อยโอกาส เด็กและเยาวชน สตรี และการช่วยเหลือผู้ประสบปัญหาทางสังคม"},
+    {id:"1_17",t:"ด้านความปลอดภัยในชีวิตและทรัพย์สิน", h:"สถิติคดีอาชญากรรม กล้อง CCTV จุดตรวจ ชุดรักษาความปลอดภัยหมู่บ้าน และไฟส่องสว่างจุดเสี่ยง"},
+    {id:"1_18",t:"ด้านยาเสพติด", h:"สถานการณ์การแพร่ระบาด กลุ่มเสี่ยง จำนวนผู้เข้ารับการบำบัด มาตรการป้องกัน และการติดตามช่วยเหลือหลังบำบัด"},
+    {id:"1_19",t:"ด้านการป้องกันและบรรเทาสาธารณภัย", h:"ประเภทภัยที่เกิดบ่อย (อุทกภัย ภัยแล้ง อัคคีภัย หมอกควัน แผ่นดินไหว) อปพร. เครื่องมือ/รถดับเพลิง และแผนเผชิญเหตุ"},
+    {id:"1_20",t:"ด้านองค์กรภาคประชาสังคมและองค์กรจัดตั้งเพื่อการพัฒนาชุมชน", h:"กลุ่ม/ชมรม/สภาองค์กรชุมชน กองทุนหมู่บ้าน กลุ่มสตรี ผู้สูงอายุ เยาวชน และบทบาทการมีส่วนร่วมในการพัฒนา"}
   ],
-  [ /* กลุ่ม 2 : สาธารณูปโภคพื้นฐาน 1.21–1.25 */
-    {id:"1_21",t:"1.21 การไฟฟ้า", h:"ครัวเรือนที่มีไฟฟ้าใช้ ไฟฟ้าสาธารณะ จุดที่ยังไม่ครอบคลุม"},
-    {id:"1_22",t:"1.22 การประปา", h:"ประปาหมู่บ้าน/ภูมิภาค จำนวนครัวเรือนที่ใช้ คุณภาพน้ำ ปัญหาขาดแคลน"},
-    {id:"1_23",t:"1.23 โทรศัพท์และการสื่อสาร", h:"สัญญาณโทรศัพท์ อินเทอร์เน็ตความเร็วสูง หอกระจายข่าว"},
-    {id:"1_24",t:"1.24 ไปรษณีย์ การขนส่ง และวัสดุครุภัณฑ์", h:"ที่ทำการไปรษณีย์ ขนส่งเอกชน ครุภัณฑ์สำคัญของเทศบาล"},
-    {id:"1_25",t:"1.25 ระบบระบายน้ำและการป้องกันน้ำท่วม", h:"ท่อ/รางระบายน้ำ จุดน้ำท่วมซ้ำซาก แนวป้องกันตลิ่ง"}
+  [ /* กลุ่ม 2 : สาธารณูปโภคและบริการสาธารณะ (1.21–1.25) */
+    {id:"1_21",t:"ด้านการไฟฟ้าและแสงสว่าง", h:"ครัวเรือนที่มีไฟฟ้าใช้ จำนวนโคมไฟสาธารณะ จุดที่ยังไม่ครอบคลุม และการใช้พลังงานทดแทน/โซลาร์เซลล์"},
+    {id:"1_22",t:"ด้านการบริหารจัดการบ่อบำบัดน้ำเสีย", h:"ระบบบำบัดน้ำเสียรวม/ชุมชน กำลังการบำบัด คุณภาพน้ำทิ้ง ค่าใช้จ่ายในการดูแล และปัญหาที่พบ"},
+    {id:"1_23",t:"ด้านการบริหารจัดการขยะ", h:"ปริมาณขยะต่อวัน อัตราการคัดแยก วิธีกำจัด ธนาคารขยะ ขยะอันตราย และค่าใช้จ่ายในการจัดการ"},
+    {id:"1_24",t:"ด้านการบริหารจัดการตลาด", h:"จำนวนตลาดในความรับผิดชอบ จำนวนแผงค้า รายได้ค่าธรรมเนียม สุขาภิบาลตลาด และปัญหาการจัดระเบียบ"},
+    {id:"1_25",t:"ด้านแหล่งน้ำ การประปา และการบริหารจัดการน้ำ", h:"ประปาหมู่บ้าน/ภูมิภาค ครัวเรือนที่เข้าถึง คุณภาพน้ำ อ่างเก็บน้ำ ลำเหมือง ระบบระบายน้ำ และการรับมือภัยแล้ง/น้ำท่วม"}
   ],
-  [ /* กลุ่ม 3 : ทรัพยากรธรรมชาติและเศรษฐกิจ 1.26–1.37 */
-    {id:"1_26",t:"1.26 ทรัพยากรน้ำ", h:"ปริมาณน้ำต้นทุน การจัดสรร ปัญหาภัยแล้ง"},
-    {id:"1_27",t:"1.27 ป่าไม้", h:"พื้นที่ป่าอนุรักษ์ ป่าชุมชน การบุกรุก การฟื้นฟู"},
-    {id:"1_28",t:"1.28 ภูเขาและสภาพธรณี", h:"ภูเขา ความลาดชัน ความเสี่ยงดินถล่ม"},
-    {id:"1_29",t:"1.29 คุณภาพของทรัพยากรธรรมชาติ", h:"คุณภาพน้ำผิวดิน ดิน ความหลากหลายทางชีวภาพ"},
-    {id:"1_30",t:"1.30 การจัดการขยะมูลฝอยและสิ่งปฏิกูล", h:"ปริมาณขยะต่อวัน วิธีกำจัด ธนาคารขยะ อัตราการคัดแยก"},
-    {id:"1_31",t:"1.31 คุณภาพอากาศและฝุ่นละออง PM2.5", h:"สถิติค่าฝุ่นรายปี แหล่งกำเนิด มาตรการรับมือหมอกควันไฟป่า"},
-    {id:"1_32",t:"1.32 การเกษตร", h:"พื้นที่เพาะปลูก พืชเศรษฐกิจหลัก จำนวนเกษตรกร ผลผลิตเฉลี่ย"},
-    {id:"1_33",t:"1.33 การประมงและปศุสัตว์", h:"การเลี้ยงสัตว์น้ำ ปศุสัตว์ จำนวนฟาร์ม"},
-    {id:"1_34",t:"1.34 การพาณิชย์และกลุ่มอาชีพ", h:"ร้านค้า ตลาด สถานประกอบการ กลุ่มวิสาหกิจชุมชน OTOP"},
-    {id:"1_35",t:"1.35 การท่องเที่ยว", h:"แหล่งท่องเที่ยว จำนวนนักท่องเที่ยว ที่พัก รายได้จากการท่องเที่ยว"},
-    {id:"1_36",t:"1.36 อุตสาหกรรมและแรงงาน", h:"โรงงาน ประเภทกิจการ จำนวนแรงงาน แรงงานต่างด้าว การว่างงาน"},
-    {id:"1_37",t:"1.37 ศาสนา ประเพณี วัฒนธรรม และภูมิปัญญาท้องถิ่น", h:"วัด/ศาสนสถาน ประเพณีประจำปี ปราชญ์ชาวบ้าน ภูมิปัญญาเด่น"}
+  [ /* กลุ่ม 3 : ทรัพยากรธรรมชาติและเศรษฐกิจ (1.26–1.37) */
+    {id:"1_26",t:"ด้านทรัพยากรธรรมชาติและสิ่งแวดล้อม", h:"คุณภาพอากาศและฝุ่น PM2.5 คุณภาพน้ำผิวดิน พื้นที่สีเขียว ความหลากหลายทางชีวภาพ และปัญหาสิ่งแวดล้อมเด่น"},
+    {id:"1_27",t:"ด้านป่าชุมชน", h:"พื้นที่ป่าชุมชน การขึ้นทะเบียน คณะกรรมการดูแล การใช้ประโยชน์ การป้องกันไฟป่า และการฟื้นฟู"},
+    {id:"1_28",t:"ด้านการส่งเสริมอาชีพและแก้ไขปัญหาความยากจน", h:"กลุ่มอาชีพ การฝึกอบรม ข้อมูล TPMAP ครัวเรือนยากจน รายได้เฉลี่ย และผลการช่วยเหลือ"},
+    {id:"1_29",t:"ด้านการเกษตร", h:"พื้นที่เพาะปลูก พืชเศรษฐกิจหลัก จำนวนเกษตรกร ผลผลิตเฉลี่ย เกษตรอินทรีย์ และปัญหาด้านต้นทุน/ราคา"},
+    {id:"1_30",t:"ด้านการประมงและปศุสัตว์", h:"การเลี้ยงสัตว์น้ำ ปศุสัตว์ จำนวนฟาร์ม/เกษตรกร ผลผลิต และปัญหาโรคระบาด/กลิ่นรบกวน"},
+    {id:"1_31",t:"ด้านการบริการและท่องเที่ยว", h:"แหล่งท่องเที่ยว จำนวนนักท่องเที่ยว ที่พัก ร้านอาหาร รายได้จากการท่องเที่ยว และการท่องเที่ยวชุมชน"},
+    {id:"1_32",t:"ด้านอุตสาหกรรม", h:"จำนวนโรงงาน ประเภทกิจการ ขนาดการลงทุน ผลกระทบต่อชุมชน และมาตรการกำกับดูแล"},
+    {id:"1_33",t:"ด้านการพาณิชย์และกลุ่มอาชีพ", h:"ร้านค้า สถานประกอบการ ตลาดสด วิสาหกิจชุมชน OTOP และช่องทางการตลาดออนไลน์"},
+    {id:"1_34",t:"ด้านแรงงาน", h:"กำลังแรงงานในพื้นที่ อัตราการว่างงาน แรงงานนอกระบบ แรงงานต่างด้าว และการพัฒนาฝีมือแรงงาน"},
+    {id:"1_35",t:"ด้านกีฬาและนันทนาการ", h:"สนามกีฬา ลานออกกำลังกาย สวนสาธารณะ ชมรมกีฬา และกิจกรรมนันทนาการประจำปี"},
+    {id:"1_36",t:"ด้านรายได้", h:"รายได้เฉลี่ยครัวเรือน/บุคคล โครงสร้างรายได้ตามอาชีพ ภาวะหนี้สิน และรายได้ของเทศบาล (ภาษี ค่าธรรมเนียม เงินอุดหนุน)"},
+    {id:"1_37",t:"ด้านอื่น ๆ", h:"ข้อมูลอื่นที่มีความสำคัญต่อการวางแผนพัฒนาแต่ไม่อยู่ในหัวข้อข้างต้น (โปรดระบุให้ชัดเจน)"}
   ]
 ];
+
+/* บัฟเฟอร์สำหรับปุ่ม "ย้อนกลับ" หลังให้ AI แทนที่ข้อความ */
+let aiUndoBuffer = {};
 
 /* ============================================================
    SHARED CLOUD STORAGE (Firebase Realtime Database)
@@ -505,7 +525,8 @@ function confirmName(){
 function showToastMsg(msg){
   const t=document.getElementById("toast");
   t.textContent=msg; t.classList.add("show");
-  setTimeout(()=>t.classList.remove("show"),2400);
+  clearTimeout(t._timer);
+  t._timer=setTimeout(()=>t.classList.remove("show"),2400);
 }
 function collectAllInputs(){
   S1_FIELDS.flat().forEach(f=>{
@@ -526,6 +547,8 @@ function saveAll(showToast){
     renderDashboard();
   });
 }
+function escAttr(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;"); }
+function escHtml(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
 
 /* ============================================================
    RENDER: Section 1 accordions
@@ -540,20 +563,23 @@ function renderS1(){
     group.forEach((f,fi)=>{
       const val = DATA.s1[f.id]||"";
       const filled = val.trim().length>0;
+      const no = f.id.replace('1_','1.');
       const item=document.createElement("div");
       item.className="acc-item";
       item.innerHTML=
         '<div class="acc-head" onclick="this.parentElement.classList.toggle(\'open\')">'+
-          '<div class="num">'+f.id.replace('1_','1.')+'</div>'+
+          '<div class="num">'+no+'</div>'+
           '<div class="ttl">'+escHtml(f.t)+'</div>'+
           '<div class="state '+(filled?'filled':'')+'">'+(filled?'กรอกแล้ว':'ยังไม่กรอก')+'</div>'+
           '<div class="chev">▾</div>'+
         '</div>'+
         '<div class="acc-body">'+
           '<div class="hint">'+escHtml(f.h)+'</div>'+
-          '<div style="margin-bottom:8px;display:flex;align-items:center;">'+
-            '<button class="btn sm ai" onclick="generateFieldAI(\''+f.id+'\')">✨ ให้ AI ช่วยร่างข้อมูล</button>'+
-            '<span id="ai_status_'+f.id+'" style="font-size:12px;color:var(--teal);margin-left:8px;"></span>'+
+          '<div class="ai-bar">'+
+            '<button class="btn sm ai" onclick="generateFieldAI(\''+f.id+'\')">✨ ร่างข้อมูลใหม่</button>'+
+            '<button class="btn sm ai" onclick="analyzeFieldAI(\''+f.id+'\')">🔍 วิเคราะห์ &amp; เรียบเรียงแทนที่</button>'+
+            '<button class="btn sm" id="undo_'+f.id+'" style="display:none" onclick="undoAI(\''+f.id+'\')">↩ ย้อนกลับ</button>'+
+            '<span id="ai_status_'+f.id+'" class="ai-status"></span>'+
           '</div>'+
           '<textarea id="ta_'+f.id+'" placeholder="พิมพ์ข้อมูล/สถิติ '+escAttr(f.t)+'..."></textarea>'+
         '</div>';
@@ -561,6 +587,10 @@ function renderS1(){
       wrap.appendChild(item);
       const ta=item.querySelector("textarea");
       ta.value=val;
+      if(aiUndoBuffer[f.id]!==undefined){
+        const ub=item.querySelector("#undo_"+f.id);
+        if(ub) ub.style.display="inline-block";
+      }
       ta.addEventListener("input",(e)=>{
         DATA.s1[f.id]=e.target.value;
         const filled2=e.target.value.trim().length>0;
@@ -573,46 +603,144 @@ function renderS1(){
   });
 }
 
-function findField(id){
-  return S1_FIELDS.flat().find(f=>f.id===id);
+function findField(id){ return S1_FIELDS.flat().find(f=>f.id===id); }
+
+/* ============================================================
+   GEMINI HELPERS
+============================================================ */
+async function callGemini(prompt){
+  const apiKey=(document.getElementById("geminiKey").value||"").trim();
+  if(!apiKey) throw new Error("ยังไม่ได้ใส่ API Key (ไปที่หน้า 'วิเคราะห์ด้วย AI')");
+  const resp=await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key="+encodeURIComponent(apiKey),{
+    method:"POST", headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({contents:[{parts:[{text:prompt}]}]})
+  });
+  if(!resp.ok){
+    const t=await resp.text();
+    throw new Error("HTTP "+resp.status+" "+t.slice(0,180));
+  }
+  const json=await resp.json();
+  const text=json?.candidates?.[0]?.content?.parts?.map(p=>p.text).join("\n");
+  if(!text) throw new Error("ไม่ได้รับผลลัพธ์จาก Gemini");
+  return text.trim();
 }
 
-async function generateFieldAI(id){
-  const f = findField(id);
-  if(!f) return;
-  const statusEl = document.getElementById("ai_status_"+id);
-  const textarea = document.getElementById("ta_"+id);
-  const apiKey = (document.getElementById("geminiKey").value||"").trim();
-  if(!apiKey){
-    statusEl.textContent = "⚠ กรุณาใส่ API Key ที่หน้า 'วิเคราะห์ด้วย AI' ก่อน";
-    return;
-  }
-  statusEl.textContent = "กำลังประมวลผล...";
-  const prompt = "คุณเป็นเจ้าหน้าที่จัดทำแผนพัฒนาท้องถิ่นเทศบาลเมืองดอนแก้ว ช่วยร่างข้อมูล 'สภาพทั่วไปและข้อมูลพื้นฐาน' ในหัวข้อ: \""+f.t+"\" (ครอบคลุมเนื้อหา: "+f.h+")\n"+
-    "เขียนเป็นภาษาทางการเชิงวิชาการ ความยาว 3-5 บรรทัด (หากเป็นข้อมูลตัวเลขสถิติที่ต้องเจาะจง ให้เว้นช่องว่าง [........] ไว้ให้เติมเอง) ไม่ต้องมีคำขึ้นต้นหรือลงท้าย";
-  try{
-    const resp=await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key="+encodeURIComponent(apiKey),{
-      method:"POST", headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({contents:[{parts:[{text:prompt}]}]})
-    });
-    if(!resp.ok) throw new Error("HTTP "+resp.status);
-    const json = await resp.json();
-    const text = json?.candidates?.[0]?.content?.parts?.map(p=>p.text).join("\n");
-    if(text){
-      textarea.value = (textarea.value.trim() ? textarea.value+"\n\n" : "") + text.trim();
-      DATA.s1[id]=textarea.value;
-      queueSave("s1");
-      statusEl.textContent = "✅ ร่างข้อมูลสำเร็จ (โปรดตรวจสอบและแก้ไขเพิ่มเติม)";
-      setTimeout(()=>statusEl.textContent="", 5000);
-      const stateEl = textarea.closest('.acc-item').querySelector(".state");
-      stateEl.textContent = "กรอกแล้ว"; stateEl.classList.add("filled");
-      renderDashboard();
-    }else{
-      statusEl.textContent = "⚠ ไม่ได้รับผลลัพธ์จาก Gemini";
+function setFieldValue(id, text){
+  const ta=document.getElementById("ta_"+id);
+  DATA.s1[id]=text;
+  queueSave("s1");
+  if(ta){
+    ta.value=text;
+    const item=ta.closest('.acc-item');
+    if(item){
+      const st=item.querySelector(".state");
+      st.textContent="กรอกแล้ว"; st.classList.add("filled");
     }
-  }catch(e){
-    statusEl.textContent = "❌ เกิดข้อผิดพลาด: "+e.message;
   }
+  const ub=document.getElementById("undo_"+id);
+  if(ub) ub.style.display="inline-block";
+  renderDashboard();
+}
+
+/* ปุ่ม 1: ร่างข้อมูลใหม่ (ต่อท้ายของเดิม) */
+async function generateFieldAI(id){
+  const f=findField(id); if(!f) return;
+  const statusEl=document.getElementById("ai_status_"+id);
+  const ta=document.getElementById("ta_"+id);
+  statusEl.textContent="⏳ กำลังร่างข้อมูล...";
+  const prompt=
+    "คุณเป็นเจ้าหน้าที่วิเคราะห์นโยบายและแผน เทศบาลเมืองดอนแก้ว อำเภอแม่ริม จังหวัดเชียงใหม่\n"+
+    "ช่วยร่างเนื้อหาส่วนที่ 1 'สภาพทั่วไปและข้อมูลพื้นฐาน' หัวข้อ "+f.id.replace('1_','1.')+" "+f.t+"\n"+
+    "ขอบเขตเนื้อหาที่ต้องครอบคลุม: "+f.h+"\n\n"+
+    "ข้อกำหนด:\n"+
+    "- เขียนภาษาราชการเชิงวิชาการ กระชับ 4-6 บรรทัด\n"+
+    "- ตัวเลข/สถิติที่ต้องยืนยันจากเอกสารจริง ให้เว้นเป็น [........] เพื่อให้เจ้าหน้าที่เติมเอง ห้ามแต่งตัวเลขขึ้นเอง\n"+
+    "- ไม่ต้องมีคำขึ้นต้น คำลงท้าย หรือหัวข้อซ้ำ ส่งเฉพาะเนื้อหา";
+  try{
+    const text=await callGemini(prompt);
+    aiUndoBuffer[id]=ta.value;
+    setFieldValue(id, (ta.value.trim()? ta.value.trim()+"\n\n":"")+text);
+    statusEl.textContent="✅ ร่างเสร็จ — โปรดตรวจสอบและเติมตัวเลขจริง";
+    setTimeout(()=>{ if(statusEl) statusEl.textContent=""; },6000);
+  }catch(e){ statusEl.textContent="❌ "+e.message; }
+}
+
+/* ปุ่ม 2: วิเคราะห์ข้อมูลที่กรอก แล้วแทนที่ด้วยผลลัพธ์ */
+async function analyzeFieldAI(id){
+  const f=findField(id); if(!f) return;
+  const statusEl=document.getElementById("ai_status_"+id);
+  const ta=document.getElementById("ta_"+id);
+  const raw=(ta.value||"").trim();
+  if(!raw){ statusEl.textContent="⚠ ยังไม่มีข้อมูลให้วิเคราะห์ — กรอกก่อนหรือกด 'ร่างข้อมูลใหม่'"; return; }
+  if(!confirm("AI จะวิเคราะห์และเรียบเรียงข้อความในหัวข้อ \""+f.t+"\" ใหม่ทั้งหมด แล้วแทนที่ข้อความเดิม\n(กด 'ย้อนกลับ' เพื่อกู้คืนได้)\n\nดำเนินการต่อหรือไม่?")) return;
+
+  statusEl.textContent="⏳ กำลังวิเคราะห์และเรียบเรียง...";
+  try{
+    const text=await callGemini(buildFieldAnalyzePrompt(f, raw));
+    aiUndoBuffer[id]=raw;
+    setFieldValue(id, text);
+    statusEl.textContent="✅ วิเคราะห์และแทนที่แล้ว — ตรวจทานก่อนใช้จริง";
+    setTimeout(()=>{ if(statusEl) statusEl.textContent=""; },7000);
+  }catch(e){ statusEl.textContent="❌ "+e.message; }
+}
+
+function buildFieldAnalyzePrompt(f, raw){
+  return "คุณเป็นผู้เชี่ยวชาญการจัดทำแผนพัฒนาท้องถิ่นตามระเบียบกระทรวงมหาดไทยว่าด้วยการจัดทำแผนพัฒนาขององค์กรปกครองส่วนท้องถิ่น พ.ศ. 2548 และที่แก้ไขเพิ่มเติม\n\n"+
+    "หัวข้อ: "+f.id.replace('1_','1.')+" "+f.t+"\n"+
+    "ขอบเขตที่ควรครอบคลุม: "+f.h+"\n\n"+
+    "ข้อมูลดิบที่เจ้าหน้าที่กรอกไว้:\n\"\"\"\n"+raw+"\n\"\"\"\n\n"+
+    "ภารกิจ: วิเคราะห์ข้อมูลดิบข้างต้น แล้วเขียนขึ้นใหม่ให้พร้อมบรรจุลงเล่มแผนพัฒนาท้องถิ่น โดยส่งผลลัพธ์ตามโครงสร้างนี้เท่านั้น:\n\n"+
+    "[เนื้อหาเรียบเรียงใหม่ 5-8 บรรทัด ภาษาราชการ ลำดับความคิดต่อเนื่อง]\n\n"+
+    "ผลการวิเคราะห์:\n"+
+    "- จุดแข็ง/โอกาส: ...\n"+
+    "- ปัญหา/ข้อจำกัดที่พบ: ...\n"+
+    "- ข้อมูลที่ยังขาดและควรจัดเก็บเพิ่ม: ...\n"+
+    "- ข้อเสนอแนะเชื่อมโยงสู่ประเด็นการพัฒนา: ...\n\n"+
+    "ข้อห้ามเด็ดขาด: ห้ามสร้างตัวเลขสถิติที่ไม่ปรากฏในข้อมูลดิบ หากจำเป็นต้องมีตัวเลขให้ใส่ [........] แทน";
+}
+
+function undoAI(id){
+  if(aiUndoBuffer[id]===undefined) return;
+  const prev=aiUndoBuffer[id];
+  delete aiUndoBuffer[id];
+  const ta=document.getElementById("ta_"+id);
+  DATA.s1[id]=prev; queueSave("s1");
+  if(ta){
+    ta.value=prev;
+    const st=ta.closest('.acc-item').querySelector(".state");
+    const ok=prev.trim().length>0;
+    st.textContent=ok?"กรอกแล้ว":"ยังไม่กรอก"; st.classList.toggle("filled",ok);
+  }
+  const btn=document.getElementById("undo_"+id); if(btn) btn.style.display="none";
+  const stt=document.getElementById("ai_status_"+id); if(stt) stt.textContent="↩ กู้คืนข้อความเดิมแล้ว";
+  renderDashboard();
+}
+
+/* วิเคราะห์รวดเดียวทั้งกลุ่ม */
+async function analyzeGroupAI(gi){
+  const fields=S1_FIELDS[gi].filter(f=>(DATA.s1[f.id]||"").trim().length>0);
+  if(fields.length===0){ showToastMsg("กลุ่มนี้ยังไม่มีข้อมูลให้วิเคราะห์"); return; }
+  if(!confirm("จะวิเคราะห์และแทนที่ข้อความ "+fields.length+" หัวข้อในกลุ่มนี้\nใช้เวลาสักครู่ (กด 'ย้อนกลับ' ในแต่ละหัวข้อเพื่อกู้คืนได้)\n\nดำเนินการต่อหรือไม่?")) return;
+  let ok=0, fail=0;
+  for(const f of fields){
+    showToastMsg("กำลังวิเคราะห์: "+f.t);
+    const done=await analyzeFieldAIQuiet(f.id);
+    done ? ok++ : fail++;
+  }
+  renderS1();
+  showToastMsg("เสร็จสิ้น — สำเร็จ "+ok+" หัวข้อ"+(fail? " / ผิดพลาด "+fail+" หัวข้อ":""));
+}
+async function analyzeFieldAIQuiet(id){
+  const f=findField(id);
+  const raw=(DATA.s1[id]||"").trim(); if(!raw) return false;
+  try{
+    const text=await callGemini(buildFieldAnalyzePrompt(f, raw));
+    aiUndoBuffer[id]=raw;
+    DATA.s1[id]=text;
+    const ta=document.getElementById("ta_"+id); if(ta) ta.value=text;
+    queueSave("s1");
+    return true;
+  }catch(e){ console.warn(id, e.message); return false; }
 }
 
 /* ============================================================
@@ -664,8 +792,6 @@ function updateCell(tblId, idx, col, val){
   DATA[TABLE_DEFS[tblId].data][idx][col]=val;
   queueSave("tables");
 }
-function escAttr(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;"); }
-function escHtml(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
 
 /* ============================================================
    RENDER: ผ.02 + ผ.01
@@ -677,7 +803,7 @@ function renderP02(){
   if(!container) return;
   container.innerHTML="";
   if(DATA.issues.length===0){
-    container.innerHTML='<div class="section-block"><p class="muted">ยังไม่มีประเด็นการพัฒนา กรุณาไปเพิ่มที่ "ส่วนที่ 2 · ประเด็นพัฒนา/เป้าหมาย/วิเคราะห์" ข้อ 2.4 ก่อน</p></div>';
+    container.innerHTML='<div class="section-block"><p class="muted">ยังไม่มีประเด็นการพัฒนา กรุณาไปเพิ่มที่ "ส่วนที่ 2 · ประเด็น/เป้าหมาย/วิเคราะห์" ข้อ 2.4 ก่อน</p></div>';
     renderP01(); return;
   }
   DATA.issues.forEach((issue,idx)=>{
@@ -818,10 +944,10 @@ function renderDashboard(){
 ============================================================ */
 const PAGE_TITLES = {
   dashboard:["ภาพรวมการจัดทำแผน","ติดตามความคืบหน้าการกรอกข้อมูลแผนพัฒนาท้องถิ่น ฉบับที่ 3 (พ.ศ. 2571-2575)"],
-  "s1-group-0":["ส่วนที่ 1 · กายภาพและคมนาคม","ด้านที่ 1.1 – 1.10 ตามเค้าโครงแผนพัฒนาท้องถิ่น"],
-  "s1-group-1":["ส่วนที่ 1 · สังคมและคุณภาพชีวิต","ด้านที่ 1.11 – 1.20 ตามเค้าโครงแผนพัฒนาท้องถิ่น"],
-  "s1-group-2":["ส่วนที่ 1 · สาธารณูปโภคพื้นฐาน","ด้านที่ 1.21 – 1.25 ตามเค้าโครงแผนพัฒนาท้องถิ่น"],
-  "s1-group-3":["ส่วนที่ 1 · ทรัพยากรธรรมชาติและเศรษฐกิจ","ด้านที่ 1.26 – 1.37 ตามเค้าโครงแผนพัฒนาท้องถิ่น"],
+  "s1-group-0":["ส่วนที่ 1 · กายภาพ ประชากร และคมนาคม","ด้านที่ 1.1 – 1.10"],
+  "s1-group-1":["ส่วนที่ 1 · สังคม การศึกษา และวัฒนธรรม","ด้านที่ 1.11 – 1.20"],
+  "s1-group-2":["ส่วนที่ 1 · สาธารณูปโภคและบริการสาธารณะ","ด้านที่ 1.21 – 1.25"],
+  "s1-group-3":["ส่วนที่ 1 · ทรัพยากรธรรมชาติและเศรษฐกิจ","ด้านที่ 1.26 – 1.37"],
   s2:["ส่วนที่ 2 · วิสัยทัศน์และความสัมพันธ์","วิสัยทัศน์ นโยบายผู้บริหาร และความสัมพันธ์กับแผนระดับต่าง ๆ"],
   s2b:["ส่วนที่ 2 · ประเด็น เป้าหมาย และการวิเคราะห์","ประเด็นการพัฒนาท้องถิ่น จุดมุ่งหมาย การวิเคราะห์ปัจจัย และสรุปภาพรวม"],
   s3a:["ส่วนที่ 3 · แบบ ผ.01","บัญชีสรุปโครงการพัฒนาท้องถิ่น (คำนวณอัตโนมัติจาก ผ.02)"],
@@ -959,7 +1085,7 @@ function buildReportHtml(){
   const esc=escHtml;
   let s1html="";
   S1_FIELDS.flat().forEach(f=>{
-    s1html+='<h4>'+esc(f.t)+'</h4><p>'+esc(DATA.s1[f.id]||'-').replace(/\n/g,'<br>')+'</p>';
+    s1html+='<h4>'+f.id.replace('1_','1.')+' '+esc(f.t)+'</h4><p>'+esc(DATA.s1[f.id]||'-').replace(/\n/g,'<br>')+'</p>';
   });
 
   const issuesTbl = tableHtml(["#","ประเด็นการพัฒนาท้องถิ่น","แนวทาง/กลยุทธ์","ตัวชี้วัด (KPIs)"],
@@ -1019,7 +1145,7 @@ function buildReportHtml(){
 }
 
 /* ============================================================
-   EXPORT: Word / PDF   (หมายเหตุ: escape <\/style> เพื่อไม่ให้ปิด tag ผิด)
+   EXPORT: Word / PDF  (escape <\/style> เพื่อไม่ให้ปิด tag ผิด)
 ============================================================ */
 function exportWord(){
   const content=buildReportHtml();
@@ -1050,7 +1176,7 @@ function exportPdf(){
 }
 
 /* ============================================================
-   GEMINI AI INTEGRATION
+   GEMINI: วิเคราะห์ภาพรวม
 ============================================================ */
 function saveKey(){
   const k=document.getElementById("geminiKey").value.trim();
@@ -1064,9 +1190,9 @@ function loadKey(){
 }
 
 async function runGemini(){
-  const key=document.getElementById("geminiKey").value.trim();
   const statusEl=document.getElementById("aiStatus");
   const resultEl=document.getElementById("aiResult");
+  const key=document.getElementById("geminiKey").value.trim();
   if(!key){ statusEl.textContent="กรุณาใส่ Google API Key (Gemini) ก่อนใช้งาน"; return; }
   collectAllInputs();
 
@@ -1074,7 +1200,7 @@ async function runGemini(){
   const dataSummary=buildAiContext(task);
 
   const prompts={
-    completeness:"ตรวจสอบว่าข้อมูล 'สภาพทั่วไปและข้อมูลพื้นฐาน' ด้านใดยังกรอกไม่ครบหรือเนื้อหาสั้นเกินไป พร้อมข้อเสนอแนะสิ่งที่ควรเพิ่มเติมในแต่ละด้าน (ตอบเป็นรายการ)",
+    completeness:"ตรวจสอบว่าข้อมูล 'สภาพทั่วไปและข้อมูลพื้นฐาน' ทั้ง 37 ด้าน ด้านใดยังกรอกไม่ครบหรือเนื้อหาสั้นเกินไป พร้อมข้อเสนอแนะสิ่งที่ควรเพิ่มเติมในแต่ละด้าน (ตอบเป็นรายการ)",
     alignment:"ตรวจสอบความสอดคล้องระหว่างประเด็นการพัฒนาท้องถิ่นกับยุทธศาสตร์ชาติ 20 ปี, แผนพัฒนาเศรษฐกิจและสังคมแห่งชาติ, และเป้าหมาย SDGs ที่ระบุไว้ ชี้จุดที่ยังเชื่อมโยงไม่ชัดเจน และเสนอแนะแนวทางเชื่อมโยงเพิ่มเติม",
     budget:"ตรวจสอบความสมเหตุสมผลของโครงการและงบประมาณในแบบ ผ.02 เช่น โครงการที่ไม่มีงบประมาณ งบประมาณที่อาจสูง/ต่ำผิดปกติ หรือวัตถุประสงค์ที่ไม่ชัดเจน พร้อมข้อเสนอแนะการปรับปรุง",
     full:"วิเคราะห์ภาพรวมร่างแผนพัฒนาท้องถิ่นทั้งฉบับ ทั้งความครบถ้วน ความสอดคล้องเชิงยุทธศาสตร์ และความเหมาะสมของโครงการ/งบประมาณ พร้อมให้ข้อเสนอแนะเชิงนโยบาย 5-8 ข้อ"
@@ -1087,18 +1213,8 @@ async function runGemini(){
 
   statusEl.textContent="กำลังส่งข้อมูลไปวิเคราะห์กับ Gemini ...";
   resultEl.style.display="none";
-
   try{
-    const resp=await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key="+encodeURIComponent(key),{
-      method:"POST", headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({contents:[{parts:[{text:prompt}]}]})
-    });
-    if(!resp.ok){
-      const errText=await resp.text();
-      throw new Error("HTTP "+resp.status+": "+errText.slice(0,300));
-    }
-    const json=await resp.json();
-    const text=json?.candidates?.[0]?.content?.parts?.map(p=>p.text).join("\n") || "ไม่ได้รับผลลัพธ์จาก Gemini";
+    const text=await callGemini(prompt);
     resultEl.textContent=text;
     resultEl.style.display="block";
     statusEl.textContent="วิเคราะห์เสร็จสิ้น";
@@ -1110,7 +1226,7 @@ async function runGemini(){
 function buildAiContext(task){
   const obj={};
   if(task==="completeness"||task==="full"){
-    obj.section1 = S1_FIELDS.flat().map(f=>({id:f.id, title:f.t, filled: !!(DATA.s1[f.id]||"").trim(), length:(DATA.s1[f.id]||"").length}));
+    obj.section1 = S1_FIELDS.flat().map(f=>({no:f.id.replace('1_','1.'), title:f.t, filled: !!(DATA.s1[f.id]||"").trim(), length:(DATA.s1[f.id]||"").length}));
   }
   if(task==="alignment"||task==="full"){
     obj.vision=DATA["2_1"]; obj.policy=DATA["2_2"];
