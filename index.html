@@ -3,296 +3,716 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ระบบจัดทำแผนพัฒนาท้องถิ่น พ.ศ. 2571-2575 | เทศบาลเมืองดอนแก้ว</title>
+<title>ระบบจัดทำแผนพัฒนาท้องถิ่น 2571-2575 | เทศบาลเมืองดอนแก้ว</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Nunito:wght@600;700;800&family=Lexend+Deca:wght@400;500&family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 <style>
+/* ============================================================
+   SKYLEARN TOKENS
+============================================================ */
 :root{
-  --navy:#16324F; --navy-deep:#0D2136; --gold:#B8912F; --gold-light:#DCC479;
-  --paper:#F7F4EC; --paper-line:#E2D9C2; --ink:#20242B; --sub:#5B6472;
-  --teal:#2F6B5E; --red:#A63D3D; --white:#FFFFFF;
-  --card-shadow: 0 1px 2px rgba(13,33,54,.06), 0 6px 20px rgba(13,33,54,.06);
+  --sky:#3B82F6; --sky-bright:#60A5FA; --sky-deep:#1D4ED8; --sky-soft:#DBEAFE;
+  --sun:#FBBF24; --sun-bright:#FCD34D; --sun-deep:#D97706; --sun-soft:#FEF3C7;
+  --leaf:#22C55E; --leaf-soft:#DCFCE7; --leaf-deep:#16A34A;
+  --coral:#F87171; --coral-soft:#FEE2E2;
+  --berry:#A855F7; --berry-soft:#F3E8FF;
+  --bg:#FFFFFF; --surface:#F8FAFC; --elev:#FFFFFF; --sunken:#F1F5F9;
+  --ink:#0F172A; --ink-muted:#475569; --ink-subtle:#94A3B8; --ink-faint:#CBD5E1;
+  --outline:#E2E8F0; --outline-strong:#94A3B8;
+
+  --f-display:'Nunito','Noto Sans Thai',sans-serif;
+  --f-body:'Atkinson Hyperlegible','Noto Sans Thai',sans-serif;
+  --f-read:'Lexend Deca','Noto Sans Thai',sans-serif;
+  --f-mono:'JetBrains Mono','Noto Sans Thai',monospace;
+
+  --r-chip:8px; --r-input:12px; --r-btn:16px; --r-card:20px; --r-panel:28px; --r-pill:999px;
+  --sh-card:0 8px 24px rgba(15,23,42,.06);
+  --sh-sky:0 12px 32px rgba(59,130,246,.15);
+  --sh-modal:0 24px 48px rgba(15,23,42,.12);
+  --sh-sun:0 0 24px rgba(252,211,77,.4);
+  --spring:cubic-bezier(.34,1.56,.64,1);
+  --t:240ms var(--spring);
 }
+body.hc{
+  --surface:#FFFFFF; --sunken:#FFFFFF; --ink:#000000; --ink-muted:#000000;
+  --outline:#000000; --outline-strong:#000000; --sky-soft:#FFFFFF; --leaf-soft:#FFFFFF; --coral-soft:#FFFFFF;
+}
+body.hc .deco{display:none !important;}
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:.12s !important;transition-duration:.12s !important;}
+}
+
 *{box-sizing:border-box;}
 html,body{margin:0;padding:0;}
-body{font-family:'Sarabun',sans-serif;background:var(--paper);color:var(--ink);line-height:1.65;-webkit-font-smoothing:antialiased;}
-::selection{background:var(--gold-light);}
+body{
+  font-family:var(--f-body);background:var(--bg);color:var(--ink);
+  font-size:18px;line-height:1.6;letter-spacing:.01em;-webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,h4{font-family:var(--f-display);font-weight:700;margin:0;line-height:1.25;}
+::selection{background:var(--sky-soft);color:var(--ink);}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums;}
 
-/* LAYOUT */
+/* ============================================================
+   LOGIN GATE
+============================================================ */
+#gate{
+  position:fixed;inset:0;z-index:200;background:var(--surface);
+  display:flex;align-items:center;justify-content:center;padding:24px;overflow-y:auto;
+}
+#gate.hidden{display:none;}
+.gate-card{
+  background:var(--elev);border:1px solid var(--outline);border-radius:var(--r-panel);
+  box-shadow:var(--sh-modal);max-width:520px;width:100%;padding:48px;
+}
+.gate-logo{
+  width:64px;height:64px;border-radius:var(--r-pill);background:var(--sky);
+  display:flex;align-items:center;justify-content:center;margin-bottom:24px;
+  font-family:var(--f-display);font-size:24px;font-weight:800;color:#fff;
+}
+.gate-card h1{font-size:32px;margin-bottom:8px;}
+.gate-card .lead{font-size:18px;color:var(--ink-muted);margin:0 0 32px;}
+.tabs{display:flex;gap:8px;background:var(--sunken);padding:6px;border-radius:var(--r-btn);margin-bottom:24px;}
+.tabs button{
+  flex:1;height:48px;border:none;border-radius:12px;background:transparent;
+  font-family:var(--f-body);font-size:17px;font-weight:700;color:var(--ink-muted);cursor:pointer;
+  transition:background var(--t),color var(--t);
+}
+.tabs button.on{background:var(--elev);color:var(--sky-deep);box-shadow:0 2px 8px rgba(15,23,42,.08);}
+.gate-msg{
+  display:none;margin-top:20px;padding:16px 20px;border-radius:var(--r-input);
+  font-size:17px;align-items:flex-start;gap:10px;
+}
+.gate-msg.show{display:flex;}
+.gate-msg.err{background:var(--coral-soft);color:#B91C1C;border:2px solid var(--coral);}
+.gate-msg.ok{background:var(--leaf-soft);color:var(--leaf-deep);border:2px solid var(--leaf);}
+
+/* ============================================================
+   LAYOUT
+============================================================ */
 .layout{display:flex;min-height:100vh;}
-#sidebar{width:266px;flex:0 0 266px;background:var(--navy-deep);color:#DCE3EC;padding:18px 0 40px;position:sticky;top:0;height:100vh;overflow-y:auto;}
-#sidebar .brand{padding:0 18px 16px;border-bottom:1px solid rgba(255,255,255,.09);margin-bottom:12px;}
-#sidebar .brand h2{font-size:15px;margin:0 0 2px;color:#fff;font-weight:600;}
-#sidebar .brand span{font-size:11.5px;color:var(--gold-light);}
-.navlabel{font-size:11px;letter-spacing:.06em;color:#7F8FA4;padding:14px 18px 5px;text-transform:uppercase;}
-.navitem{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 18px;font-size:13.5px;cursor:pointer;border-left:3px solid transparent;transition:.15s;}
-.navitem:hover{background:rgba(255,255,255,.05);}
-.navitem.active{background:rgba(184,145,47,.16);border-left-color:var(--gold);color:#fff;font-weight:500;}
-.navitem .pct{font-size:11px;color:#8FA2B8;background:rgba(255,255,255,.07);border-radius:10px;padding:1px 7px;}
-.navitem.done .pct{background:rgba(47,107,94,.35);color:#9FD9C6;}
+#sidebar{
+  width:300px;flex:0 0 300px;background:var(--elev);border-right:1px solid var(--outline);
+  padding:24px 0 32px;position:sticky;top:0;height:100vh;overflow-y:auto;
+  display:flex;flex-direction:column;
+}
+.brand{padding:0 20px 24px;}
+.brand-row{display:flex;align-items:center;gap:14px;}
+.brand-mark{
+  width:56px;height:56px;flex:0 0 56px;border-radius:var(--r-pill);background:var(--sky);
+  display:flex;align-items:center;justify-content:center;color:#fff;
+  font-family:var(--f-display);font-size:20px;font-weight:800;
+}
+.brand h2{font-size:19px;line-height:1.3;}
+.brand span{font-size:15px;color:var(--ink-muted);}
 
-main{flex:1;min-width:0;padding:0 0 60px;}
-.topbar{display:flex;align-items:flex-start;gap:14px;background:var(--white);border-bottom:1px solid var(--paper-line);padding:16px 26px;position:sticky;top:0;z-index:40;flex-wrap:wrap;}
-.topbar h1{font-size:19px;margin:0;color:var(--navy);}
-.topbar p{margin:2px 0 0;font-size:12.5px;color:var(--sub);}
-.topright{margin-left:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
-.sync{font-size:11.5px;padding:4px 10px;border-radius:20px;background:#EEE7D5;color:var(--sub);white-space:nowrap;}
-.hamb{display:none;background:none;border:1px solid var(--paper-line);border-radius:8px;font-size:17px;padding:4px 10px;cursor:pointer;}
-.page{padding:22px 26px;max-width:1500px;}
+.navlabel{font-size:14px;font-weight:700;color:var(--ink-subtle);padding:24px 20px 8px;font-family:var(--f-display);}
+.navitem{
+  display:flex;align-items:center;gap:12px;
+  margin:0 12px 6px;padding:0 16px;min-height:56px;
+  font-size:17px;font-weight:400;color:var(--ink-muted);
+  border-radius:var(--r-btn);cursor:pointer;border:2px solid transparent;
+  transition:background var(--t),color var(--t),border-color var(--t);
+}
+.navitem:hover{background:var(--sky-soft);color:var(--sky-deep);}
+.navitem.active{background:var(--sky-soft);border-color:var(--sky);color:var(--sky-deep);font-weight:700;}
+.navitem .ico{width:24px;flex:0 0 24px;display:flex;}
+.navitem .lbl{flex:1;}
+.navitem .pct{
+  font-family:var(--f-mono);font-size:14px;font-weight:500;
+  color:var(--ink-muted);background:var(--sunken);border-radius:var(--r-pill);padding:4px 10px;
+}
+.navitem.active .pct{background:#fff;color:var(--sky-deep);}
+.navitem.done .pct{background:var(--leaf-soft);color:var(--leaf-deep);}
 
-/* COMPONENTS */
-.btn{font-family:inherit;font-size:13.5px;border:1px solid var(--paper-line);background:var(--white);color:var(--ink);border-radius:8px;padding:7px 14px;cursor:pointer;transition:.15s;}
-.btn:hover{border-color:var(--gold);background:#FFFDF7;}
-.btn.sm{font-size:12px;padding:4px 10px;}
-.btn.primary{background:var(--navy);color:#fff;border-color:var(--navy);}
-.btn.primary:hover{background:var(--navy-deep);}
-.btn.danger{color:var(--red);border-color:#EAD2CE;}
-.btn.ai{background:#F3EFE2;border-color:var(--gold-light);color:#7A5F14;}
-.section-block{background:var(--white);border:1px solid var(--paper-line);border-radius:12px;padding:18px 20px;margin-bottom:18px;box-shadow:var(--card-shadow);}
-.section-block h3{margin:0 0 12px;font-size:15.5px;color:var(--navy);}
-.muted{color:var(--sub);font-size:13.5px;}
-label.fl{display:block;font-size:13.5px;font-weight:500;margin:14px 0 5px;color:var(--navy);}
-textarea,input[type=text],input[type=number],input[type=password],select{width:100%;font-family:inherit;font-size:13.5px;color:var(--ink);border:1px solid var(--paper-line);border-radius:8px;padding:8px 10px;background:#FEFDFA;}
-textarea{min-height:110px;resize:vertical;line-height:1.6;}
-textarea:focus,input:focus,select:focus{outline:none;border-color:var(--gold);background:#fff;}
+.side-foot{margin-top:auto;padding:20px 20px 0;border-top:1px solid var(--outline);}
+.userchip{
+  display:flex;align-items:center;gap:12px;padding:12px;border-radius:var(--r-btn);
+  background:var(--sunken);margin-bottom:12px;
+}
+.avatar{
+  width:48px;height:48px;flex:0 0 48px;border-radius:var(--r-pill);background:var(--sky-soft);
+  color:var(--sky-deep);display:flex;align-items:center;justify-content:center;
+  font-family:var(--f-display);font-weight:800;font-size:18px;
+  box-shadow:0 0 0 3px #fff,0 0 0 5px var(--sky);
+}
+.userchip .nm{font-size:16px;font-weight:700;line-height:1.3;}
+.userchip .rl{font-size:14px;color:var(--ink-muted);}
 
-/* ACCORDION */
-.acc-item{border:1px solid var(--paper-line);border-radius:10px;background:var(--white);margin-bottom:8px;overflow:hidden;}
-.acc-head{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;}
-.acc-head:hover{background:#FFFDF7;}
-.acc-head .num{font-size:12px;font-weight:600;color:var(--gold);min-width:38px;}
-.acc-head .ttl{flex:1;font-size:13.5px;font-weight:500;}
-.acc-head .state{font-size:11px;padding:2px 9px;border-radius:20px;background:#F0ECE0;color:var(--sub);white-space:nowrap;}
-.acc-head .state.filled{background:#DCEEE6;color:var(--teal);}
-.acc-head .chev{color:var(--sub);transition:.2s;font-size:12px;}
-.acc-item.open .chev{transform:rotate(180deg);}
-.acc-body{display:none;padding:0 14px 14px;border-top:1px solid var(--paper-line);}
-.acc-item.open .acc-body{display:block;}
-.acc-body .hint{font-size:12px;color:var(--sub);margin:10px 0 8px;background:#FAF7EE;border-left:3px solid var(--gold-light);padding:6px 10px;border-radius:0 6px 6px 0;}
+main{flex:1;min-width:0;padding-bottom:96px;}
+.topbar{
+  display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+  background:rgba(255,255,255,.92);backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--outline);padding:16px 32px;position:sticky;top:0;z-index:40;
+}
+.topbar h1{font-size:26px;}
+.topbar p{margin:2px 0 0;font-size:16px;color:var(--ink-muted);}
+.topright{margin-left:auto;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.hamb{display:none;width:56px;height:56px;border:2px solid var(--outline);border-radius:var(--r-btn);background:#fff;font-size:22px;cursor:pointer;}
+.page{padding:48px 32px;max-width:1280px;}
 
-/* AI BAR */
-.ai-bar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:8px;}
-.ai-status{font-size:12px;color:var(--teal);}
-.group-bar{background:#FFFDF7;border:1px dashed var(--gold-light);border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:13px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+/* ============================================================
+   BUTTONS
+============================================================ */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:10px;
+  font-family:var(--f-body);font-size:18px;font-weight:700;
+  min-height:56px;padding:0 28px;
+  background:var(--elev);color:var(--ink);border:2px solid var(--outline);
+  border-radius:var(--r-btn);cursor:pointer;
+  transition:transform 120ms var(--spring),background var(--t),border-color var(--t),box-shadow var(--t),color var(--t);
+}
+.btn:hover{border-color:var(--sky);color:var(--sky-deep);background:var(--sky-soft);}
+.btn:active{transform:scale(.97);}
+.btn:focus-visible{outline:none;box-shadow:0 0 0 4px var(--sky-soft);border-color:var(--sky);}
+.btn.big{min-height:64px;font-size:20px;padding:0 40px;}
+.btn.sm{min-height:44px;font-size:16px;padding:0 18px;border-radius:12px;}
+.btn.primary{background:var(--sky);color:#fff;border-color:var(--sky);}
+.btn.primary:hover{background:var(--sky-deep);border-color:var(--sky-deep);color:#fff;box-shadow:inset 0 -3px 0 var(--sky-bright);}
+.btn.leaf{background:var(--leaf);color:#fff;border-color:var(--leaf);}
+.btn.leaf:hover{background:var(--leaf-deep);border-color:var(--leaf-deep);color:#fff;}
+.btn.soft{background:var(--sky-soft);border-color:var(--sky-soft);color:var(--sky-deep);}
+.btn.soft:hover{border-color:var(--sky);}
+.btn.gentle{background:#fff;border-color:var(--coral);color:#B91C1C;}
+.btn.gentle:hover{background:var(--coral-soft);border-color:var(--coral);color:#B91C1C;}
+.btn.plain{border-color:transparent;background:transparent;color:var(--ink-muted);}
+.btn.plain:hover{background:var(--sunken);color:var(--ink);}
+.btn:disabled{opacity:.5;cursor:not-allowed;}
 
-/* TABLES */
-.tbl-wrap{overflow-x:auto;border:1px solid var(--paper-line);border-radius:10px;}
-.data-tbl{border-collapse:collapse;width:100%;font-size:12.5px;background:var(--white);}
-.data-tbl th{background:var(--navy);color:#fff;font-weight:500;padding:8px 6px;text-align:left;white-space:nowrap;}
-.data-tbl td{border-top:1px solid var(--paper-line);padding:4px 6px;vertical-align:top;}
-.data-tbl input{font-size:12.5px;padding:5px 7px;}
-.data-tbl tr.rowtot td{background:#F3EFE2;font-weight:600;}
-.row-actions{margin-top:10px;}
+/* ============================================================
+   SURFACES
+============================================================ */
+.card{
+  background:var(--elev);border:1px solid var(--outline);border-radius:var(--r-card);
+  padding:32px;margin-bottom:32px;
+}
+.card h3{font-size:24px;margin-bottom:8px;}
+.card .eyebrow{
+  display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:700;
+  color:var(--sky-deep);background:var(--sky-soft);border-radius:var(--r-pill);
+  padding:6px 14px;margin-bottom:14px;font-family:var(--f-display);
+}
+.lead{font-size:18px;color:var(--ink-muted);margin:0 0 8px;}
+.instr{font-size:19px;color:var(--ink-muted);line-height:1.75;}
 
-/* DASHBOARD */
-.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:14px;}
-.stat-card{background:var(--white);border:1px solid var(--paper-line);border-radius:12px;padding:18px;box-shadow:var(--card-shadow);}
-.stat-card .ring{width:52px;height:52px;border-radius:50%;border:4px solid var(--paper-line);display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:600;color:var(--navy);margin-bottom:10px;}
-.stat-card h4{margin:0;font-size:26px;color:var(--navy);}
-.stat-card p{margin:2px 0 0;font-size:12.5px;color:var(--sub);}
+label.fl{display:block;font-size:17px;font-weight:700;margin:28px 0 10px;color:var(--ink);}
+textarea,input[type=text],input[type=number],input[type=password],select{
+  width:100%;font-family:var(--f-body);font-size:18px;color:var(--ink);letter-spacing:.01em;
+  background:var(--elev);border:2px solid var(--outline);border-radius:var(--r-input);
+  padding:16px 20px;transition:border-color var(--t),box-shadow var(--t);
+}
+textarea{min-height:150px;resize:vertical;line-height:1.75;}
+textarea::placeholder,input::placeholder{color:var(--ink-faint);}
+textarea:focus,input:focus,select:focus{outline:none;border-color:var(--sky-deep);box-shadow:0 0 0 4px var(--sky-soft);}
+input:disabled,textarea:disabled,select:disabled{background:var(--sunken);color:var(--ink-muted);cursor:not-allowed;}
+.pin-input{font-family:var(--f-mono);letter-spacing:.5em;text-align:center;font-size:24px;}
 
-/* MODAL / TOAST */
-.modal{display:none;position:fixed;inset:0;background:rgba(13,33,54,.55);z-index:100;align-items:center;justify-content:center;padding:20px;}
+/* ============================================================
+   PILLS
+============================================================ */
+.pill{
+  display:inline-flex;align-items:center;gap:7px;
+  font-size:15px;font-weight:700;padding:7px 16px;border-radius:var(--r-pill);
+  background:var(--sunken);color:var(--ink-muted);white-space:nowrap;
+}
+.pill.sky{background:var(--sky-soft);color:var(--sky-deep);}
+.pill.leaf{background:var(--leaf-soft);color:var(--leaf-deep);}
+.pill.sun{background:var(--sun-soft);color:var(--sun-deep);}
+.pill.coral{background:var(--coral-soft);color:#B91C1C;}
+.pill.berry{background:var(--berry-soft);color:#7E22CE;}
+.pill svg{flex:0 0 auto;}
+
+/* ============================================================
+   LESSON / ACCORDION CARD
+============================================================ */
+.acc{
+  background:var(--elev);border:1px solid var(--outline);border-radius:var(--r-card);
+  margin-bottom:20px;overflow:hidden;transition:box-shadow var(--t),transform var(--t),border-color var(--t);
+}
+.acc:hover{box-shadow:var(--sh-card);transform:translateY(-2px);}
+.acc.open{border:3px solid var(--sky);box-shadow:var(--sh-sky);transform:none;}
+.acc.filled{border-left:6px solid var(--leaf);}
+.acc.open.filled{border-left-width:3px;}
+.acc-head{display:flex;align-items:center;gap:18px;padding:24px 28px;cursor:pointer;min-height:56px;}
+.acc-head .no{
+  width:56px;height:56px;flex:0 0 56px;border-radius:var(--r-pill);
+  background:var(--sky-soft);color:var(--sky-deep);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--f-mono);font-size:16px;font-weight:700;
+}
+.acc.filled .acc-head .no{background:var(--leaf-soft);color:var(--leaf-deep);}
+.acc-head .txt{flex:1;min-width:0;}
+.acc-head .ttl{font-family:var(--f-display);font-size:20px;font-weight:700;line-height:1.35;}
+.acc-head .by{font-size:14px;color:var(--ink-subtle);margin-top:4px;}
+.acc-head .chev{color:var(--ink-subtle);transition:transform var(--t);flex:0 0 24px;}
+.acc.open .chev{transform:rotate(180deg);}
+.acc-body{display:none;padding:0 28px 28px;}
+.acc.open .acc-body{display:block;}
+.hint{
+  background:var(--sunken);border-radius:var(--r-card);padding:20px 24px;margin:0 0 24px;
+  font-size:18px;line-height:1.75;color:var(--ink-muted);
+}
+.hint-head{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+.hint-head strong{font-family:var(--f-display);font-size:17px;color:var(--ink);}
+.toolrow{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:18px;}
+.ai-status{font-size:16px;color:var(--ink-muted);}
+.ai-status.ok{color:var(--leaf-deep);font-weight:700;}
+.ai-status.err{color:#B91C1C;font-weight:700;}
+
+.groupbar{
+  display:flex;align-items:center;gap:20px;flex-wrap:wrap;
+  background:var(--sky-soft);border-radius:var(--r-card);padding:24px 28px;margin-bottom:32px;
+}
+.groupbar .g{flex:1;min-width:220px;}
+.groupbar h4{font-family:var(--f-display);font-size:19px;margin-bottom:4px;color:var(--sky-deep);}
+.groupbar p{margin:0;font-size:16px;color:var(--ink-muted);}
+
+/* progress */
+.prog{height:8px;background:var(--sky-soft);border-radius:var(--r-pill);overflow:hidden;}
+.prog span{display:block;height:100%;background:var(--leaf);border-radius:var(--r-pill);transition:width 480ms ease-out;}
+
+/* ============================================================
+   TABLES
+============================================================ */
+.tblwrap{overflow-x:auto;background:var(--elev);border:1px solid var(--outline);border-radius:var(--r-card);}
+.tbl{border-collapse:collapse;width:100%;font-size:16px;}
+.tbl th{
+  background:var(--sunken);color:var(--ink-muted);font-family:var(--f-display);
+  font-size:15px;font-weight:700;padding:16px 14px;text-align:left;white-space:nowrap;
+  border-bottom:2px solid var(--outline);
+}
+.tbl td{border-top:1px solid var(--outline);padding:10px 12px;vertical-align:middle;}
+.tbl tbody tr{transition:background var(--t);}
+.tbl tbody tr:hover{background:var(--sky-soft);}
+.tbl input{font-size:16px;padding:12px 14px;border-radius:var(--r-chip);}
+.tbl tr.tot td{background:var(--sun-soft);font-weight:700;font-family:var(--f-display);font-size:17px;}
+.tbl .nm{font-family:var(--f-mono);color:var(--ink-subtle);font-size:15px;}
+.rowact{margin-top:24px;}
+
+/* ============================================================
+   DASHBOARD
+============================================================ */
+.hero{
+  position:relative;overflow:hidden;background:var(--sky-soft);
+  border-radius:var(--r-panel);padding:56px 48px;margin-bottom:48px;
+}
+.hero .deco{
+  position:absolute;right:-40px;top:-40px;width:280px;height:280px;border-radius:var(--r-pill);
+  background:rgba(255,255,255,.5);pointer-events:none;
+}
+.hero .deco2{
+  position:absolute;right:120px;bottom:-70px;width:180px;height:180px;border-radius:var(--r-pill);
+  background:rgba(251,191,36,.22);pointer-events:none;
+}
+.hero-in{position:relative;max-width:680px;}
+.hero h2{font-size:40px;line-height:1.2;margin:16px 0 12px;}
+.hero p{font-size:20px;color:var(--ink-muted);margin:0;line-height:1.7;}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:32px;}
+.stat{
+  background:var(--elev);border:1px solid var(--outline);border-radius:var(--r-card);padding:28px;
+  transition:box-shadow var(--t),transform var(--t);
+}
+.stat:hover{box-shadow:var(--sh-card);transform:translateY(-2px);}
+.stat .ico{
+  width:56px;height:56px;border-radius:var(--r-pill);display:flex;align-items:center;justify-content:center;
+  background:var(--sky-soft);color:var(--sky-deep);margin-bottom:18px;
+}
+.stat .ico.leaf{background:var(--leaf-soft);color:var(--leaf-deep);}
+.stat .ico.sun{background:var(--sun-soft);color:var(--sun-deep);}
+.stat .ico.berry{background:var(--berry-soft);color:#7E22CE;}
+.stat .lbl{font-size:16px;color:var(--ink-muted);}
+.stat h4{font-family:var(--f-display);font-size:44px;line-height:1;margin:8px 0 6px;font-variant-numeric:tabular-nums;}
+.stat .sub{font-size:15px;color:var(--ink-subtle);margin-bottom:18px;}
+.stat .pc{font-family:var(--f-mono);font-size:15px;color:var(--ink-muted);margin-top:10px;display:block;}
+
+.star{
+  width:64px;height:64px;border-radius:var(--r-pill);background:var(--sun);
+  display:flex;align-items:center;justify-content:center;color:#fff;
+  box-shadow:var(--sh-sun);
+}
+
+.steps{list-style:none;margin:0;padding:0;}
+.steps li{display:flex;gap:18px;align-items:flex-start;padding:20px 0;border-bottom:1px solid var(--outline);font-size:18px;color:var(--ink-muted);}
+.steps li:last-child{border-bottom:none;}
+.steps .n{
+  width:40px;height:40px;flex:0 0 40px;border-radius:var(--r-pill);background:var(--sky-soft);color:var(--sky-deep);
+  display:flex;align-items:center;justify-content:center;font-family:var(--f-mono);font-weight:700;font-size:16px;
+}
+
+/* activity feed */
+.feed{list-style:none;margin:0;padding:0;}
+.feed li{display:flex;gap:16px;align-items:flex-start;padding:16px 0;border-bottom:1px solid var(--outline);}
+.feed li:last-child{border-bottom:none;}
+.feed .av{
+  width:44px;height:44px;flex:0 0 44px;border-radius:var(--r-pill);background:var(--sunken);color:var(--ink-muted);
+  display:flex;align-items:center;justify-content:center;font-family:var(--f-display);font-weight:800;font-size:16px;
+}
+.feed .fb{flex:1;min-width:0;font-size:16px;}
+.feed .ft{font-family:var(--f-mono);font-size:14px;color:var(--ink-subtle);white-space:nowrap;}
+
+/* ============================================================
+   MODAL / TOAST
+============================================================ */
+.modal{display:none;position:fixed;inset:0;background:rgba(15,23,42,.4);backdrop-filter:blur(6px);z-index:150;align-items:center;justify-content:center;padding:24px;}
 .modal.show{display:flex;}
-.modal-box{background:var(--white);border-radius:14px;padding:24px;max-width:400px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.3);}
-.modal-box h3{margin:0 0 6px;color:var(--navy);font-size:17px;}
-#toast{position:fixed;bottom:24px;left:50%;transform:translate(-50%,20px);background:var(--navy-deep);color:#fff;padding:11px 20px;border-radius:24px;font-size:13.5px;opacity:0;pointer-events:none;transition:.25s;z-index:120;max-width:90vw;text-align:center;}
+.mbox{
+  background:var(--elev);border-radius:var(--r-panel);padding:40px;max-width:560px;width:100%;
+  box-shadow:var(--sh-modal);max-height:86vh;overflow-y:auto;
+}
+.mbox.wide{max-width:840px;}
+.mbox h3{font-size:26px;margin-bottom:10px;}
+#toast{
+  position:fixed;bottom:32px;left:50%;transform:translate(-50%,20px);
+  background:var(--ink);color:#fff;padding:18px 28px;border-radius:var(--r-pill);
+  font-size:17px;font-weight:700;opacity:0;pointer-events:none;
+  transition:opacity var(--t),transform var(--t);z-index:180;max-width:90vw;text-align:center;
+  display:flex;align-items:center;gap:12px;box-shadow:var(--sh-modal);
+}
 #toast.show{opacity:1;transform:translate(-50%,0);}
-#aiResult{display:none;white-space:pre-wrap;background:var(--white);border:1px solid var(--paper-line);border-left:4px solid var(--gold);border-radius:10px;padding:16px;font-size:13.5px;margin-top:12px;}
+#toast.leaf{background:var(--leaf-deep);}
+#toast.coral{background:#B91C1C;}
+#aiResult{
+  display:none;white-space:pre-wrap;font-family:var(--f-read);
+  background:var(--sunken);border-radius:var(--r-card);padding:28px;
+  font-size:18px;line-height:1.85;margin-top:24px;
+}
 
-@media(max-width:900px){
-  #sidebar{position:fixed;left:-280px;z-index:90;transition:.25s;box-shadow:0 0 40px rgba(0,0,0,.3);}
+/* audit */
+.diff-old{background:var(--coral-soft);border-radius:var(--r-chip);padding:8px 12px;font-size:15px;display:block;margin-bottom:6px;white-space:pre-wrap;}
+.diff-new{background:var(--leaf-soft);border-radius:var(--r-chip);padding:8px 12px;font-size:15px;display:block;white-space:pre-wrap;}
+.filters{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end;margin-bottom:24px;}
+.filters>div{flex:1;min-width:180px;}
+.filters label{display:block;font-size:15px;font-weight:700;margin-bottom:8px;}
+.empty{text-align:center;padding:56px 24px;color:var(--ink-muted);font-size:19px;}
+.empty .star{margin:0 auto 20px;}
+
+@media(max-width:980px){
+  #sidebar{position:fixed;left:-320px;z-index:120;transition:left var(--t);box-shadow:var(--sh-modal);}
   #sidebar.open{left:0;}
-  .hamb{display:block;}
-  .page{padding:16px 14px;}
-  .topbar{padding:12px 14px;}
+  .hamb{display:flex;align-items:center;justify-content:center;}
+  .page{padding:32px 20px;}
+  .topbar{padding:14px 20px;}
+  .hero{padding:36px 24px;}
+  .hero h2{font-size:30px;}
+  .card{padding:24px;}
+  .gate-card{padding:32px 24px;}
 }
 </style>
 </head>
 <body>
 
-<div class="layout">
+<!-- ============================================================
+     LOGIN GATE
+============================================================ -->
+<div id="gate">
+  <div class="gate-card">
+    <div class="gate-logo">ดก</div>
+    <h1>ระบบจัดทำแผนพัฒนาท้องถิ่น</h1>
+    <p class="lead">เทศบาลเมืองดอนแก้ว · ฉบับที่ 3 (พ.ศ. 2571–2575)</p>
+
+    <div class="tabs">
+      <button id="tabLogin" class="on" onclick="switchTab('login')">เข้าสู่ระบบ</button>
+      <button id="tabReg" onclick="switchTab('reg')">ลงทะเบียนใหม่</button>
+    </div>
+
+    <div id="paneLogin">
+      <label class="fl" style="margin-top:0">เลือกชื่อผู้ใช้งาน</label>
+      <select id="loginUser"><option value="">— ยังไม่มีผู้ใช้ในระบบ —</option></select>
+      <label class="fl">รหัส PIN</label>
+      <input type="password" id="loginPin" class="pin-input" inputmode="numeric" maxlength="6" placeholder="••••" autocomplete="off">
+      <button class="btn primary big" style="width:100%;margin-top:24px" onclick="doLogin()">เข้าสู่ระบบ</button>
+    </div>
+
+    <div id="paneReg" style="display:none">
+      <label class="fl" style="margin-top:0">ชื่อ–สกุล</label>
+      <input type="text" id="regName" placeholder="เช่น สมหญิง ใจดี">
+      <label class="fl">กอง / ฝ่าย</label>
+      <input type="text" id="regDept" placeholder="เช่น กองยุทธศาสตร์และงบประมาณ">
+      <label class="fl">ตั้งรหัส PIN (4–6 หลัก)</label>
+      <input type="password" id="regPin" class="pin-input" inputmode="numeric" maxlength="6" placeholder="••••" autocomplete="off">
+      <label class="fl">ยืนยัน PIN อีกครั้ง</label>
+      <input type="password" id="regPin2" class="pin-input" inputmode="numeric" maxlength="6" placeholder="••••" autocomplete="off">
+      <p class="lead" style="font-size:16px;margin-top:20px;">ผู้ลงทะเบียนคนแรกจะได้สิทธิ์ <strong>ผู้ดูแลระบบ</strong> โดยอัตโนมัติ — คนถัดไปเริ่มต้นเป็น <strong>เจ้าหน้าที่</strong></p>
+      <button class="btn leaf big" style="width:100%;margin-top:16px" onclick="doRegister()">ลงทะเบียนและเข้าใช้งาน</button>
+    </div>
+
+    <div class="gate-msg" id="gateMsg"></div>
+  </div>
+</div>
+
+<!-- ============================================================
+     APP
+============================================================ -->
+<div class="layout" id="app" style="display:none">
   <aside id="sidebar">
     <div class="brand">
-      <h2>แผนพัฒนาท้องถิ่น ฉบับที่ 3</h2>
-      <span>เทศบาลเมืองดอนแก้ว · พ.ศ. 2571-2575</span>
+      <div class="brand-row">
+        <div class="brand-mark">ดก</div>
+        <div>
+          <h2>แผนพัฒนาท้องถิ่น</h2>
+          <span>ฉบับที่ 3 · 2571–2575</span>
+        </div>
+      </div>
     </div>
-    <div class="navitem active" data-nav="dashboard">📊 ภาพรวม</div>
+
+    <div class="navitem active" data-nav="dashboard"><span class="ico">🏠</span><span class="lbl">ภาพรวม</span></div>
 
     <div class="navlabel">ส่วนที่ 1 · ข้อมูลพื้นฐาน</div>
-    <div class="navitem" data-nav="s1-group-0"><span>กายภาพ ประชากร คมนาคม</span><span class="pct" id="pct-g0">0%</span></div>
-    <div class="navitem" data-nav="s1-group-1"><span>สังคม การศึกษา วัฒนธรรม</span><span class="pct" id="pct-g1">0%</span></div>
-    <div class="navitem" data-nav="s1-group-2"><span>สาธารณูปโภค &amp; บริการสาธารณะ</span><span class="pct" id="pct-g2">0%</span></div>
-    <div class="navitem" data-nav="s1-group-3"><span>ทรัพยากรธรรมชาติ &amp; เศรษฐกิจ</span><span class="pct" id="pct-g3">0%</span></div>
+    <div class="navitem" data-nav="s1-group-0"><span class="ico">🗺️</span><span class="lbl">กายภาพ ประชากร คมนาคม</span><span class="pct" id="pct-g0">0%</span></div>
+    <div class="navitem" data-nav="s1-group-1"><span class="ico">📚</span><span class="lbl">สังคม การศึกษา วัฒนธรรม</span><span class="pct" id="pct-g1">0%</span></div>
+    <div class="navitem" data-nav="s1-group-2"><span class="ico">💧</span><span class="lbl">สาธารณูปโภค</span><span class="pct" id="pct-g2">0%</span></div>
+    <div class="navitem" data-nav="s1-group-3"><span class="ico">🌱</span><span class="lbl">ทรัพยากร &amp; เศรษฐกิจ</span><span class="pct" id="pct-g3">0%</span></div>
 
     <div class="navlabel">ส่วนที่ 2 · ประเด็นการพัฒนา</div>
-    <div class="navitem" data-nav="s2">วิสัยทัศน์ &amp; ความสัมพันธ์</div>
-    <div class="navitem" data-nav="s2b">ประเด็น/เป้าหมาย/วิเคราะห์</div>
+    <div class="navitem" data-nav="s2"><span class="ico">🎯</span><span class="lbl">วิสัยทัศน์ &amp; ความสัมพันธ์</span></div>
+    <div class="navitem" data-nav="s2b"><span class="ico">📋</span><span class="lbl">ประเด็น / เป้าหมาย</span></div>
 
     <div class="navlabel">ส่วนที่ 3 · สู่การปฏิบัติ</div>
-    <div class="navitem" data-nav="s3a">แบบ ผ.01 บัญชีสรุป</div>
-    <div class="navitem" data-nav="s3b">แบบ ผ.02 รายละเอียด</div>
+    <div class="navitem" data-nav="s3a"><span class="ico">📊</span><span class="lbl">แบบ ผ.01 บัญชีสรุป</span></div>
+    <div class="navitem" data-nav="s3b"><span class="ico">📝</span><span class="lbl">แบบ ผ.02 รายละเอียด</span></div>
 
     <div class="navlabel">เครื่องมือ</div>
-    <div class="navitem" data-nav="ai">✨ วิเคราะห์ด้วย AI</div>
-    <div class="navitem" data-nav="export">⬇ ส่งออกเอกสาร</div>
+    <div class="navitem" data-nav="audit"><span class="ico">🕘</span><span class="lbl">ประวัติการแก้ไข</span></div>
+    <div class="navitem" data-nav="users" id="navUsers"><span class="ico">👥</span><span class="lbl">จัดการผู้ใช้งาน</span></div>
+    <div class="navitem" data-nav="ai"><span class="ico">💡</span><span class="lbl">ผู้ช่วย AI</span></div>
+    <div class="navitem" data-nav="export"><span class="ico">📤</span><span class="lbl">ส่งออกเอกสาร</span></div>
+
+    <div class="side-foot">
+      <div class="userchip">
+        <div class="avatar" id="sideAvatar">?</div>
+        <div style="flex:1;min-width:0">
+          <div class="nm" id="sideName">—</div>
+          <div class="rl" id="sideRole">—</div>
+        </div>
+      </div>
+      <button class="btn sm plain" style="width:100%;margin-bottom:8px" onclick="toggleHC()">🔆 คอนทราสต์สูง</button>
+      <button class="btn sm gentle" style="width:100%" onclick="doLogout()">ออกจากระบบ</button>
+    </div>
   </aside>
 
   <main>
     <div class="topbar">
       <button class="hamb" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
       <div>
-        <h1 id="page-title">ภาพรวมการจัดทำแผน</h1>
+        <h1 id="page-title">ภาพรวม</h1>
         <p id="page-desc">—</p>
       </div>
       <div class="topright">
-        <span class="sync" id="syncStatus">● กำลังเชื่อมต่อ...</span>
-        <button class="btn sm" id="whoamiBtn" onclick="openNameModal()">👤 ผู้ใช้งาน</button>
-        <button class="btn sm primary" onclick="saveAll(true)">💾 บันทึกทั้งหมด</button>
+        <span class="pill" id="syncStatus">● กำลังเชื่อมต่อ</span>
+        <button class="btn sm primary" id="btnSaveAll" onclick="saveAll(true)">บันทึกทั้งหมด</button>
       </div>
     </div>
 
     <!-- DASHBOARD -->
     <div class="page" id="page-dashboard">
-      <div class="cards" id="dashCards"></div>
-      <div class="section-block" style="margin-top:18px;">
-        <h3>คำแนะนำการใช้งาน</h3>
-        <p class="muted">1) กรอกข้อมูลส่วนที่ 1 ทั้ง 37 ด้าน (กดที่หัวข้อเพื่อเปิด) — 2) กำหนดวิสัยทัศน์และประเด็นการพัฒนาในส่วนที่ 2 — 3) เพิ่มโครงการในแบบ ผ.02 ระบบจะสรุป ผ.01 ให้อัตโนมัติ — 4) ส่งออกเป็น Word / Excel / PDF</p>
-        <p class="muted">ข้อมูลบันทึกอัตโนมัติและซิงค์ให้เพื่อนร่วมงานเห็นพร้อมกันทุก 6 วินาที</p>
+      <div class="hero">
+        <div class="deco"></div><div class="deco deco2"></div>
+        <div class="hero-in">
+          <span class="pill sky">แผนพัฒนาท้องถิ่น ฉบับที่ 3</span>
+          <h2 id="greet">สวัสดีครับ</h2>
+          <p>ระบบจัดทำและติดตามแผนพัฒนาท้องถิ่น เทศบาลเมืองดอนแก้ว อำเภอแม่ริม จังหวัดเชียงใหม่ — ทำงานร่วมกันได้พร้อมกันหลายคน และตรวจสอบย้อนหลังได้ทุกการแก้ไข</p>
+        </div>
+      </div>
+
+      <div class="grid" id="dashCards"></div>
+
+      <div class="grid" style="margin-top:48px;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));">
+        <div class="card" style="margin-bottom:0">
+          <span class="eyebrow">เริ่มต้นใช้งาน</span>
+          <h3>ขั้นตอนการจัดทำแผน</h3>
+          <ol class="steps">
+            <li><span class="n">1</span><span>กรอกข้อมูล <strong>ส่วนที่ 1</strong> ทั้ง 37 ด้าน — แตะที่หัวข้อเพื่อเปิดช่องกรอก</span></li>
+            <li><span class="n">2</span><span>กำหนด <strong>วิสัยทัศน์และประเด็นการพัฒนา</strong> ในส่วนที่ 2</span></li>
+            <li><span class="n">3</span><span>เพิ่มโครงการใน <strong>แบบ ผ.02</strong> ระบบสรุป ผ.01 ให้อัตโนมัติ</span></li>
+            <li><span class="n">4</span><span>ส่งออกเป็น <strong>Word / Excel / PDF</strong> เพื่อจัดทำรูปเล่ม</span></li>
+          </ol>
+        </div>
+        <div class="card" style="margin-bottom:0">
+          <span class="eyebrow">ความเคลื่อนไหว</span>
+          <h3>การแก้ไขล่าสุด</h3>
+          <p class="lead" style="font-size:16px">ใครแก้อะไรไปบ้างในระบบ</p>
+          <ul class="feed" id="dashFeed"></ul>
+          <button class="btn sm soft" style="margin-top:16px" onclick="goTo('audit')">ดูประวัติทั้งหมด</button>
+        </div>
       </div>
     </div>
 
-    <!-- SECTION 1 -->
+    <!-- SECTION 1 GROUPS -->
     <div class="page" id="page-s1-group-0" style="display:none">
-      <div class="group-bar"><span>วิเคราะห์ทุกหัวข้อที่กรอกแล้วในกลุ่มนี้ด้วย AI พร้อมกัน</span><button class="btn sm ai" onclick="analyzeGroupAI(0)">🔍 วิเคราะห์ทั้งกลุ่ม</button></div>
+      <div class="groupbar"><div class="g"><h4>ผู้ช่วย AI ประจำกลุ่ม</h4><p>วิเคราะห์และเรียบเรียงทุกหัวข้อที่กรอกข้อมูลแล้วในกลุ่มนี้พร้อมกัน</p></div><button class="btn soft" onclick="analyzeGroupAI(0)">วิเคราะห์ทั้งกลุ่ม</button></div>
       <div id="acc-group-0"></div>
     </div>
     <div class="page" id="page-s1-group-1" style="display:none">
-      <div class="group-bar"><span>วิเคราะห์ทุกหัวข้อที่กรอกแล้วในกลุ่มนี้ด้วย AI พร้อมกัน</span><button class="btn sm ai" onclick="analyzeGroupAI(1)">🔍 วิเคราะห์ทั้งกลุ่ม</button></div>
+      <div class="groupbar"><div class="g"><h4>ผู้ช่วย AI ประจำกลุ่ม</h4><p>วิเคราะห์และเรียบเรียงทุกหัวข้อที่กรอกข้อมูลแล้วในกลุ่มนี้พร้อมกัน</p></div><button class="btn soft" onclick="analyzeGroupAI(1)">วิเคราะห์ทั้งกลุ่ม</button></div>
       <div id="acc-group-1"></div>
     </div>
     <div class="page" id="page-s1-group-2" style="display:none">
-      <div class="group-bar"><span>วิเคราะห์ทุกหัวข้อที่กรอกแล้วในกลุ่มนี้ด้วย AI พร้อมกัน</span><button class="btn sm ai" onclick="analyzeGroupAI(2)">🔍 วิเคราะห์ทั้งกลุ่ม</button></div>
+      <div class="groupbar"><div class="g"><h4>ผู้ช่วย AI ประจำกลุ่ม</h4><p>วิเคราะห์และเรียบเรียงทุกหัวข้อที่กรอกข้อมูลแล้วในกลุ่มนี้พร้อมกัน</p></div><button class="btn soft" onclick="analyzeGroupAI(2)">วิเคราะห์ทั้งกลุ่ม</button></div>
       <div id="acc-group-2"></div>
     </div>
     <div class="page" id="page-s1-group-3" style="display:none">
-      <div class="group-bar"><span>วิเคราะห์ทุกหัวข้อที่กรอกแล้วในกลุ่มนี้ด้วย AI พร้อมกัน</span><button class="btn sm ai" onclick="analyzeGroupAI(3)">🔍 วิเคราะห์ทั้งกลุ่ม</button></div>
+      <div class="groupbar"><div class="g"><h4>ผู้ช่วย AI ประจำกลุ่ม</h4><p>วิเคราะห์และเรียบเรียงทุกหัวข้อที่กรอกข้อมูลแล้วในกลุ่มนี้พร้อมกัน</p></div><button class="btn soft" onclick="analyzeGroupAI(3)">วิเคราะห์ทั้งกลุ่ม</button></div>
       <div id="acc-group-3"></div>
     </div>
 
-    <!-- SECTION 2A -->
+    <!-- SECTION 2 -->
     <div class="page" id="page-s2" style="display:none">
-      <div class="section-block">
-        <h3>2.1 วิสัยทัศน์ (Vision)</h3>
-        <textarea id="f_2_1" placeholder="ระบุวิสัยทัศน์การพัฒนาเทศบาลเมืองดอนแก้ว..."></textarea>
+      <div class="card">
+        <span class="eyebrow">ข้อ 2.1 – 2.2</span>
+        <h3>วิสัยทัศน์และนโยบาย</h3>
+        <label class="fl">2.1 วิสัยทัศน์ (Vision)</label>
+        <textarea id="f_2_1" data-label="2.1 วิสัยทัศน์" placeholder="ระบุวิสัยทัศน์การพัฒนาเทศบาลเมืองดอนแก้ว..."></textarea>
         <label class="fl">2.2 นโยบายผู้บริหารท้องถิ่น</label>
-        <textarea id="f_2_2" placeholder="ระบุนโยบายของผู้บริหารท้องถิ่น..."></textarea>
+        <textarea id="f_2_2" data-label="2.2 นโยบายผู้บริหาร" placeholder="ระบุนโยบายของผู้บริหารท้องถิ่น..."></textarea>
       </div>
-      <div class="section-block">
-        <h3>2.3 ความสัมพันธ์ระหว่างประเด็นการพัฒนาท้องถิ่นกับแผนระดับต่าง ๆ</h3>
-        <label class="fl">2.3.1 ยุทธศาสตร์ชาติ 20 ปี (พ.ศ. 2561-2580)</label>
-        <textarea id="f_2_3_1"></textarea>
+      <div class="card">
+        <span class="eyebrow">ข้อ 2.3</span>
+        <h3>ความสัมพันธ์กับแผนระดับต่าง ๆ</h3>
+        <label class="fl">2.3.1 ยุทธศาสตร์ชาติ 20 ปี (พ.ศ. 2561–2580)</label>
+        <textarea id="f_2_3_1" data-label="2.3.1 ยุทธศาสตร์ชาติ"></textarea>
         <label class="fl">2.3.2 แผนพัฒนาเศรษฐกิจและสังคมแห่งชาติ ฉบับที่ 13/14</label>
-        <textarea id="f_2_3_2"></textarea>
+        <textarea id="f_2_3_2" data-label="2.3.2 แผนพัฒนาเศรษฐกิจฯ"></textarea>
         <label class="fl">2.3.3 เป้าหมายการพัฒนาที่ยั่งยืน (SDGs)</label>
-        <textarea id="f_2_3_3"></textarea>
+        <textarea id="f_2_3_3" data-label="2.3.3 SDGs"></textarea>
         <label class="fl">2.3.4 แผนพัฒนากลุ่มจังหวัด/ภาค</label>
-        <textarea id="f_2_3_4"></textarea>
+        <textarea id="f_2_3_4" data-label="2.3.4 กลุ่มจังหวัด/ภาค"></textarea>
         <label class="fl">2.3.5 แผนพัฒนาจังหวัดเชียงใหม่</label>
-        <textarea id="f_2_3_5"></textarea>
+        <textarea id="f_2_3_5" data-label="2.3.5 แผนพัฒนาจังหวัด"></textarea>
         <label class="fl">2.3.6 ประเด็นการพัฒนาของ อปท. ในเขตจังหวัด</label>
-        <textarea id="f_2_3_6"></textarea>
+        <textarea id="f_2_3_6" data-label="2.3.6 ประเด็น อปท."></textarea>
       </div>
     </div>
 
-    <!-- SECTION 2B -->
     <div class="page" id="page-s2b" style="display:none">
-      <div class="section-block">
-        <h3>2.4 ประเด็นการพัฒนาท้องถิ่น</h3>
-        <div class="tbl-wrap"><table class="data-tbl" id="tbl_issues">
-          <thead><tr><th style="width:30px">#</th><th>ประเด็นการพัฒนาท้องถิ่น</th><th>แนวทาง/กลยุทธ์</th><th>ตัวชี้วัด (KPIs)</th><th style="width:44px"></th></tr></thead>
+      <div class="card">
+        <span class="eyebrow">ข้อ 2.4</span>
+        <h3>ประเด็นการพัฒนาท้องถิ่น</h3>
+        <div class="tblwrap"><table class="tbl" id="tbl_issues">
+          <thead><tr><th style="width:52px">#</th><th>ประเด็นการพัฒนา</th><th>แนวทาง / กลยุทธ์</th><th>ตัวชี้วัด (KPIs)</th><th style="width:80px"></th></tr></thead>
           <tbody></tbody></table></div>
-        <div class="row-actions"><button class="btn sm" onclick="addRow('tbl_issues')">+ เพิ่มประเด็น</button></div>
+        <div class="rowact"><button class="btn" onclick="addRow('tbl_issues')">+ เพิ่มประเด็น</button></div>
       </div>
-      <div class="section-block">
-        <h3>2.5 จุดมุ่งหมายการพัฒนาท้องถิ่น (Goals) รายปี</h3>
-        <div class="tbl-wrap"><table class="data-tbl" id="tbl_goals">
-          <thead><tr><th>ประเด็นการพัฒนา</th><th>จุดมุ่งหมาย (Goals)</th><th>2571</th><th>2572</th><th>2573</th><th>2574</th><th>2575</th><th style="width:44px"></th></tr></thead>
+      <div class="card">
+        <span class="eyebrow">ข้อ 2.5</span>
+        <h3>จุดมุ่งหมายการพัฒนา (Goals) รายปี</h3>
+        <div class="tblwrap"><table class="tbl" id="tbl_goals">
+          <thead><tr><th>ประเด็นการพัฒนา</th><th>จุดมุ่งหมาย</th><th>2571</th><th>2572</th><th>2573</th><th>2574</th><th>2575</th><th style="width:80px"></th></tr></thead>
           <tbody></tbody></table></div>
-        <div class="row-actions"><button class="btn sm" onclick="addRow('tbl_goals')">+ เพิ่มแถว</button></div>
+        <div class="rowact"><button class="btn" onclick="addRow('tbl_goals')">+ เพิ่มแถว</button></div>
       </div>
-      <div class="section-block">
-        <h3>2.6 การวิเคราะห์ปัจจัยและสถานการณ์การเปลี่ยนแปลง</h3>
-        <div class="tbl-wrap"><table class="data-tbl" id="tbl_factors">
-          <thead><tr><th style="width:30px">#</th><th>ประเด็น</th><th>หลักการวิเคราะห์</th><th>ผลการวิเคราะห์</th><th>ผลกระทบต่อการพัฒนา</th><th style="width:44px"></th></tr></thead>
+      <div class="card">
+        <span class="eyebrow">ข้อ 2.6</span>
+        <h3>การวิเคราะห์ปัจจัยและสถานการณ์การเปลี่ยนแปลง</h3>
+        <div class="tblwrap"><table class="tbl" id="tbl_factors">
+          <thead><tr><th style="width:52px">#</th><th>ประเด็น</th><th>หลักการวิเคราะห์</th><th>ผลการวิเคราะห์</th><th>ผลกระทบ</th><th style="width:80px"></th></tr></thead>
           <tbody></tbody></table></div>
-        <div class="row-actions"><button class="btn sm" onclick="addRow('tbl_factors')">+ เพิ่มแถว</button></div>
+        <div class="rowact"><button class="btn" onclick="addRow('tbl_factors')">+ เพิ่มแถว</button></div>
       </div>
-      <div class="section-block">
-        <h3>2.7 สรุปภาพรวมประเด็นการพัฒนาท้องถิ่น</h3>
-        <div class="tbl-wrap"><table class="data-tbl" id="tbl_summary">
-          <thead><tr><th style="width:30px">#</th><th>ประเด็น</th><th>จุดมุ่งหมาย (Goals)</th><th>ผลที่คาดว่าจะได้รับ</th><th>หน่วยงานรับผิดชอบ</th><th style="width:44px"></th></tr></thead>
+      <div class="card">
+        <span class="eyebrow">ข้อ 2.7</span>
+        <h3>สรุปภาพรวมประเด็นการพัฒนาท้องถิ่น</h3>
+        <div class="tblwrap"><table class="tbl" id="tbl_summary">
+          <thead><tr><th style="width:52px">#</th><th>ประเด็น</th><th>จุดมุ่งหมาย</th><th>ผลที่คาดว่าจะได้รับ</th><th>หน่วยงาน</th><th style="width:80px"></th></tr></thead>
           <tbody></tbody></table></div>
-        <div class="row-actions"><button class="btn sm" onclick="addRow('tbl_summary')">+ เพิ่มแถว</button></div>
+        <div class="rowact"><button class="btn" onclick="addRow('tbl_summary')">+ เพิ่มแถว</button></div>
       </div>
     </div>
 
-    <!-- SECTION 3A -->
+    <!-- SECTION 3 -->
     <div class="page" id="page-s3a" style="display:none">
-      <div class="section-block">
-        <h3>แบบ ผ.01 บัญชีสรุปโครงการพัฒนาท้องถิ่น</h3>
-        <p class="muted">คำนวณอัตโนมัติจากข้อมูลที่กรอกในแบบ ผ.02</p>
-        <div class="tbl-wrap"><table class="data-tbl" id="tbl_p01">
-          <thead><tr><th>ประเด็นการพัฒนา</th><th style="width:130px">จำนวนโครงการ</th><th style="width:180px">งบประมาณรวม (บาท)</th></tr></thead>
+      <div class="card">
+        <span class="eyebrow">แบบ ผ.01</span>
+        <h3>บัญชีสรุปโครงการพัฒนาท้องถิ่น</h3>
+        <p class="lead">คำนวณอัตโนมัติจากข้อมูลที่กรอกในแบบ ผ.02</p>
+        <div class="tblwrap" style="margin-top:24px"><table class="tbl" id="tbl_p01">
+          <thead><tr><th>ประเด็นการพัฒนา</th><th style="width:160px">จำนวนโครงการ</th><th style="width:210px">งบประมาณรวม (บาท)</th></tr></thead>
           <tbody></tbody><tfoot></tfoot></table></div>
       </div>
     </div>
-
-    <!-- SECTION 3B -->
     <div class="page" id="page-s3b" style="display:none"><div id="p02-groups"></div></div>
+
+    <!-- AUDIT -->
+    <div class="page" id="page-audit" style="display:none">
+      <div class="card">
+        <span class="eyebrow">ตรวจสอบย้อนหลัง</span>
+        <h3>ประวัติการแก้ไขข้อมูล</h3>
+        <p class="lead">ทุกการเปลี่ยนแปลงถูกบันทึกไว้ว่าใครแก้ เมื่อไร และเปลี่ยนจากอะไรเป็นอะไร</p>
+        <div class="filters" style="margin-top:28px">
+          <div><label>ผู้แก้ไข</label><select id="fltUser" onchange="renderAudit()"><option value="">ทุกคน</option></select></div>
+          <div><label>ส่วนของแผน</label><select id="fltSection" onchange="renderAudit()">
+            <option value="">ทุกส่วน</option>
+            <option value="ส่วนที่ 1">ส่วนที่ 1</option>
+            <option value="ส่วนที่ 2">ส่วนที่ 2</option>
+            <option value="ผ.02">ผ.02 โครงการ</option>
+            <option value="ระบบ">ระบบ / บัญชีผู้ใช้</option>
+          </select></div>
+          <div><label>ค้นหาคำในหัวข้อ</label><input type="text" id="fltText" placeholder="เช่น ประชากร" oninput="renderAudit()"></div>
+          <div style="flex:0 0 auto"><button class="btn" onclick="exportAuditCsv()">ส่งออก CSV</button></div>
+        </div>
+        <div id="auditList"></div>
+      </div>
+    </div>
+
+    <!-- USERS -->
+    <div class="page" id="page-users" style="display:none">
+      <div class="card">
+        <span class="eyebrow">เฉพาะผู้ดูแลระบบ</span>
+        <h3>จัดการผู้ใช้งาน</h3>
+        <p class="lead">กำหนดสิทธิ์ รีเซ็ต PIN หรือระงับการใช้งาน</p>
+        <div class="tblwrap" style="margin-top:24px"><table class="tbl" id="tbl_users">
+          <thead><tr><th>ชื่อ–สกุล</th><th>กอง / ฝ่าย</th><th style="width:200px">สิทธิ์</th><th style="width:130px">สถานะ</th><th style="width:170px">เข้าใช้ล่าสุด</th><th style="width:200px"></th></tr></thead>
+          <tbody></tbody></table></div>
+      </div>
+    </div>
 
     <!-- AI -->
     <div class="page" id="page-ai" style="display:none">
-      <div class="section-block">
-        <h3>เชื่อมต่อ Google Gemini</h3>
-        <p class="muted">คีย์จะถูกเก็บไว้ในเบราว์เซอร์ของคุณเท่านั้น ไม่ถูกส่งขึ้นระบบส่วนกลาง — ขอคีย์ฟรีได้ที่ Google AI Studio</p>
-        <label class="fl">Google API Key (Gemini)</label>
-        <input type="password" id="geminiKey" placeholder="วาง API Key ที่นี่">
-        <div class="row-actions"><button class="btn sm" onclick="saveKey()">บันทึกคีย์ในเครื่องนี้</button></div>
+      <div class="card">
+        <span class="eyebrow">การเชื่อมต่อ</span>
+        <h3>ผู้ช่วย AI (Google Gemini)</h3>
+        <p class="instr">คีย์จะถูกเก็บไว้ในเบราว์เซอร์ของคุณเท่านั้น ไม่ถูกส่งขึ้นระบบส่วนกลาง — ขอคีย์ฟรีได้ที่ Google AI Studio</p>
+        <label class="fl">Google API Key</label>
+        <input type="password" id="geminiKey" style="font-family:var(--f-mono)" placeholder="วาง API Key ที่นี่">
+        <div class="rowact"><button class="btn" onclick="saveKey()">บันทึกคีย์ในเครื่องนี้</button></div>
       </div>
-      <div class="section-block">
-        <h3>เลือกรูปแบบการวิเคราะห์</h3>
-        <select id="aiTask">
-          <option value="completeness">ตรวจสอบความครบถ้วนของข้อมูลส่วนที่ 1 (37 ด้าน)</option>
-          <option value="alignment">ตรวจสอบความสอดคล้องกับแผนระดับชาติ/SDGs</option>
-          <option value="budget">ตรวจสอบความสมเหตุสมผลของโครงการและงบประมาณ (ผ.02)</option>
+      <div class="card">
+        <span class="eyebrow">การวิเคราะห์</span>
+        <h3>เลือกรูปแบบการตรวจสอบ</h3>
+        <select id="aiTask" style="margin-top:16px">
+          <option value="completeness">ตรวจความครบถ้วนของข้อมูลส่วนที่ 1 (37 ด้าน)</option>
+          <option value="alignment">ตรวจความสอดคล้องกับแผนระดับชาติ / SDGs</option>
+          <option value="budget">ตรวจความสมเหตุสมผลของโครงการและงบประมาณ</option>
           <option value="full">วิเคราะห์ภาพรวมทั้งฉบับ</option>
         </select>
-        <div class="row-actions"><button class="btn primary" onclick="runGemini()">✨ เริ่มวิเคราะห์</button></div>
-        <p class="muted" id="aiStatus" style="margin-top:10px"></p>
+        <div class="rowact"><button class="btn primary big" onclick="runGemini()">เริ่มวิเคราะห์</button></div>
+        <p class="lead" id="aiStatus" style="margin-top:16px"></p>
         <div id="aiResult"></div>
       </div>
     </div>
 
     <!-- EXPORT -->
     <div class="page" id="page-export" style="display:none">
-      <div class="section-block">
+      <div class="card">
+        <span class="eyebrow">ส่งออก</span>
         <h3>ส่งออกร่างเอกสาร</h3>
-        <div class="row-actions" style="display:flex;gap:10px;flex-wrap:wrap;">
-          <button class="btn primary" onclick="exportWord()">📄 Word (.doc)</button>
-          <button class="btn" onclick="exportExcel()">📊 Excel (.xlsx)</button>
-          <button class="btn" onclick="exportPdf()">🖨 PDF (ผ่านหน้าต่างพิมพ์)</button>
+        <p class="instr">เลือกรูปแบบไฟล์ที่ต้องการนำไปจัดรูปเล่มต่อ</p>
+        <div class="rowact" style="display:flex;gap:16px;flex-wrap:wrap;">
+          <button class="btn primary" onclick="exportWord()">Word (.doc)</button>
+          <button class="btn" onclick="exportExcel()">Excel (.xlsx)</button>
+          <button class="btn" onclick="exportPdf()">PDF (หน้าต่างพิมพ์)</button>
         </div>
       </div>
-      <div class="section-block">
+      <div class="card">
+        <span class="eyebrow">ความปลอดภัยของข้อมูล</span>
         <h3>สำรอง / กู้คืนข้อมูล</h3>
-        <p class="muted">ไฟล์ JSON ใช้สำรองข้อมูลทั้งหมด — การนำเข้าจะเขียนทับข้อมูลส่วนกลาง</p>
-        <div class="row-actions" style="display:flex;gap:10px;flex-wrap:wrap;">
-          <button class="btn" onclick="exportJson()">⬇ ส่งออกไฟล์สำรอง</button>
-          <button class="btn danger" onclick="importJson()">⬆ นำเข้าไฟล์สำรอง</button>
+        <p class="instr">แนะนำให้กดสำรองข้อมูลทุกครั้งก่อนมีการแก้ไขโค้ดหรือปรับโครงสร้างระบบ</p>
+        <div class="rowact" style="display:flex;gap:16px;flex-wrap:wrap;">
+          <button class="btn leaf" onclick="exportJson()">ส่งออกไฟล์สำรอง</button>
+          <button class="btn gentle" onclick="importJson()">นำเข้าไฟล์สำรอง</button>
         </div>
         <input type="file" id="fileInput" accept="application/json" style="display:none">
       </div>
@@ -300,985 +720,1152 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:var(--gold);ba
   </main>
 </div>
 
-<div class="modal" id="nameModal">
-  <div class="modal-box">
-    <h3>ยินดีต้อนรับ</h3>
-    <p class="muted">กรุณาระบุชื่อผู้กรอกข้อมูล เพื่อให้เพื่อนร่วมงานทราบว่าใครแก้ไขล่าสุด</p>
-    <input type="text" id="userNameInput" placeholder="เช่น นางสาวสมหญิง (กองยุทธศาสตร์ฯ)">
-    <div class="row-actions"><button class="btn primary" onclick="confirmName()">เริ่มใช้งาน</button></div>
+<!-- MODALS -->
+<div class="modal" id="histModal"><div class="mbox wide">
+  <span class="eyebrow">ประวัติเฉพาะหัวข้อ</span>
+  <h3 id="histTitle">—</h3>
+  <div id="histBody" style="margin-top:20px"></div>
+  <button class="btn" style="width:100%;margin-top:24px" onclick="closeModal('histModal')">ปิด</button>
+</div></div>
+
+<div class="modal" id="pinModal"><div class="mbox">
+  <h3>ตั้งรหัส PIN ใหม่</h3>
+  <p class="lead" id="pinTarget">—</p>
+  <label class="fl">PIN ใหม่ (4–6 หลัก)</label>
+  <input type="password" id="newPin" class="pin-input" inputmode="numeric" maxlength="6" placeholder="••••">
+  <div style="display:flex;gap:12px;margin-top:24px">
+    <button class="btn plain" style="flex:1" onclick="closeModal('pinModal')">ยกเลิก</button>
+    <button class="btn primary" style="flex:1" onclick="confirmResetPin()">บันทึก</button>
   </div>
-</div>
+</div></div>
 
 <div id="toast"></div>
 
 <script>
 /* ============================================================
-   CONSTANTS & STATE
+   CONSTANTS
 ============================================================ */
-const USERNAME_KEY       = "donkaeo_username";
-const LOCAL_CACHE_KEY    = "donkaeo_plan_cache";
-const GEMINI_KEY_STORAGE = "donkaeo_gemini_key";
-const YEARS = ["2571","2572","2573","2574","2575"];
+const SESSION_KEY="donkaeo_session_v2";
+const LOCAL_CACHE_KEY="donkaeo_plan_cache_v2";
+const LOCAL_USERS_KEY="donkaeo_users_v2";
+const LOCAL_AUDIT_KEY="donkaeo_audit_v2";
+const GEMINI_KEY_STORAGE="donkaeo_gemini_key";
+const YEARS=["2571","2572","2573","2574","2575"];
+const ROLE_LABEL={admin:"ผู้ดูแลระบบ",editor:"เจ้าหน้าที่",viewer:"ผู้อ่านอย่างเดียว"};
 
-let DATA = {
-  s1:{}, issues:[], goals:[], factors:[], summary:[], p02:{},
-  "2_1":"","2_2":"","2_3_1":"","2_3_2":"","2_3_3":"","2_3_4":"","2_3_5":"","2_3_6":""
-};
+let DATA={s1:{},issues:[],goals:[],factors:[],summary:[],p02:{},meta:{},
+  "2_1":"","2_2":"","2_3_1":"","2_3_2":"","2_3_3":"","2_3_4":"","2_3_5":"","2_3_6":""};
 
-const S1_FIELDS = [
-  [ /* กลุ่ม 0 : กายภาพ ประชากร และคมนาคม (1.1–1.10) */
-    {id:"1_1", t:"ด้านกายภาพ", h:"ที่ตั้ง อาณาเขตติดต่อ เนื้อที่ ลักษณะภูมิประเทศ ภูมิอากาศ ลักษณะของดิน แหล่งน้ำธรรมชาติ และลักษณะของไม้/ป่าไม้"},
-    {id:"1_2", t:"ด้านขอบเขตความรับผิดชอบ", h:"เขตการปกครอง จำนวนหมู่บ้าน/ชุมชน พื้นที่รับผิดชอบ อำนาจหน้าที่ตามกฎหมาย และโครงสร้างส่วนราชการของเทศบาล"},
-    {id:"1_3", t:"ด้านประชากร", h:"จำนวนประชากรแยกชาย/หญิง ช่วงวัย จำนวนครัวเรือน ความหนาแน่น ประชากรแฝง/ผู้ย้ายถิ่น และแนวโน้มการเปลี่ยนแปลง 5 ปี"},
-    {id:"1_4", t:"ด้านการคมนาคมทางบก", h:"ถนนสายหลัก/สายรอง ระยะทาง สภาพผิวจราจร สะพาน จุดเสี่ยงอุบัติเหตุ และสถิติการจราจร"},
-    {id:"1_5", t:"ด้านการพัฒนาระบบคมนาคมและโลจิสติกส์", h:"โครงข่ายเชื่อมโยงกับเส้นทางหลัก ศูนย์กระจายสินค้า คลังสินค้า และแผนพัฒนาเส้นทางในอนาคต"},
-    {id:"1_6", t:"ด้านการคมนาคมทางน้ำ", h:"ลำน้ำสายหลัก ท่าเรือ/ท่าน้ำ การใช้ประโยชน์เพื่อการสัญจรหรือท่องเที่ยว (หากไม่มีให้ระบุว่าไม่มี)"},
-    {id:"1_7", t:"ด้านการคมนาคมทางอากาศ", h:"ท่าอากาศยานใกล้เคียง ระยะทางจากพื้นที่ ผลกระทบด้านเสียง/ข้อจำกัดการใช้ประโยชน์ที่ดิน"},
-    {id:"1_8", t:"ด้านการขนส่งสาธารณะ", h:"รถโดยสารประจำทาง รถสองแถว รถรับส่งนักเรียน เส้นทางให้บริการ ความครอบคลุม และปัญหาการเข้าถึง"},
-    {id:"1_9", t:"ด้านการพัฒนาเมืองอัจฉริยะ (Smart City)", h:"ความคืบหน้า Smart City 7 ด้าน ระบบ CCTV เซนเซอร์ IoT ข้อมูลเปิด (Open Data) และแพลตฟอร์มบริการประชาชน"},
-    {id:"1_10",t:"ด้านการสื่อสาร เทคโนโลยีและดิจิทัล", h:"สัญญาณโทรศัพท์/อินเทอร์เน็ตความเร็วสูง หอกระจายข่าว เสียงตามสาย ระบบ e-Service และทักษะดิจิทัลของประชาชน"}
-  ],
-  [ /* กลุ่ม 1 : สังคม การศึกษา และวัฒนธรรม (1.11–1.20) */
-    {id:"1_11",t:"ด้านการศึกษาและการพัฒนาคน", h:"ศพด. โรงเรียนในพื้นที่ จำนวนนักเรียน/ครู อัตราการเรียนต่อ แหล่งเรียนรู้ชุมชน และการเรียนรู้ตลอดชีวิต"},
-    {id:"1_12",t:"ด้านอัตลักษณ์ท้องถิ่น", h:"เอกลักษณ์เด่นของดอนแก้ว สัญลักษณ์ชุมชน ทุนทางสังคม และสิ่งที่สร้างความภาคภูมิใจร่วมของคนในพื้นที่"},
-    {id:"1_13",t:"ด้านความเชื่อ ศาสนา จารีต ประเพณี วัฒนธรรม", h:"วัด/ศาสนสถาน จำนวนผู้นับถือแต่ละศาสนา ประเพณีประจำปี พิธีกรรมสำคัญ และการสืบทอด"},
-    {id:"1_14",t:"ด้านภูมิปัญญาท้องถิ่น ภาษาถิ่น", h:"ปราชญ์ชาวบ้าน องค์ความรู้ดั้งเดิม หัตถกรรม สมุนไพร ภาษาล้านนา และการอนุรักษ์/ถ่ายทอด"},
-    {id:"1_15",t:"ด้านสาธารณสุข", h:"รพ.สต. คลินิก จำนวน อสม. สถิติโรคสำคัญ การส่งเสริมสุขภาพ และการดูแลผู้สูงอายุระยะยาว (LTC)"},
-    {id:"1_16",t:"ด้านสังคมสงเคราะห์", h:"เบี้ยยังชีพผู้สูงอายุ/ผู้พิการ/ผู้ป่วยเอดส์ ผู้ยากไร้ ผู้ด้อยโอกาส เด็กและเยาวชน สตรี และการช่วยเหลือผู้ประสบปัญหาทางสังคม"},
-    {id:"1_17",t:"ด้านความปลอดภัยในชีวิตและทรัพย์สิน", h:"สถิติคดีอาชญากรรม กล้อง CCTV จุดตรวจ ชุดรักษาความปลอดภัยหมู่บ้าน และไฟส่องสว่างจุดเสี่ยง"},
-    {id:"1_18",t:"ด้านยาเสพติด", h:"สถานการณ์การแพร่ระบาด กลุ่มเสี่ยง จำนวนผู้เข้ารับการบำบัด มาตรการป้องกัน และการติดตามช่วยเหลือหลังบำบัด"},
-    {id:"1_19",t:"ด้านการป้องกันและบรรเทาสาธารณภัย", h:"ประเภทภัยที่เกิดบ่อย (อุทกภัย ภัยแล้ง อัคคีภัย หมอกควัน แผ่นดินไหว) อปพร. เครื่องมือ/รถดับเพลิง และแผนเผชิญเหตุ"},
-    {id:"1_20",t:"ด้านองค์กรภาคประชาสังคมและองค์กรจัดตั้งเพื่อการพัฒนาชุมชน", h:"กลุ่ม/ชมรม/สภาองค์กรชุมชน กองทุนหมู่บ้าน กลุ่มสตรี ผู้สูงอายุ เยาวชน และบทบาทการมีส่วนร่วมในการพัฒนา"}
-  ],
-  [ /* กลุ่ม 2 : สาธารณูปโภคและบริการสาธารณะ (1.21–1.25) */
-    {id:"1_21",t:"ด้านการไฟฟ้าและแสงสว่าง", h:"ครัวเรือนที่มีไฟฟ้าใช้ จำนวนโคมไฟสาธารณะ จุดที่ยังไม่ครอบคลุม และการใช้พลังงานทดแทน/โซลาร์เซลล์"},
-    {id:"1_22",t:"ด้านการบริหารจัดการบ่อบำบัดน้ำเสีย", h:"ระบบบำบัดน้ำเสียรวม/ชุมชน กำลังการบำบัด คุณภาพน้ำทิ้ง ค่าใช้จ่ายในการดูแล และปัญหาที่พบ"},
-    {id:"1_23",t:"ด้านการบริหารจัดการขยะ", h:"ปริมาณขยะต่อวัน อัตราการคัดแยก วิธีกำจัด ธนาคารขยะ ขยะอันตราย และค่าใช้จ่ายในการจัดการ"},
-    {id:"1_24",t:"ด้านการบริหารจัดการตลาด", h:"จำนวนตลาดในความรับผิดชอบ จำนวนแผงค้า รายได้ค่าธรรมเนียม สุขาภิบาลตลาด และปัญหาการจัดระเบียบ"},
-    {id:"1_25",t:"ด้านแหล่งน้ำ การประปา และการบริหารจัดการน้ำ", h:"ประปาหมู่บ้าน/ภูมิภาค ครัวเรือนที่เข้าถึง คุณภาพน้ำ อ่างเก็บน้ำ ลำเหมือง ระบบระบายน้ำ และการรับมือภัยแล้ง/น้ำท่วม"}
-  ],
-  [ /* กลุ่ม 3 : ทรัพยากรธรรมชาติและเศรษฐกิจ (1.26–1.37) */
-    {id:"1_26",t:"ด้านทรัพยากรธรรมชาติและสิ่งแวดล้อม", h:"คุณภาพอากาศและฝุ่น PM2.5 คุณภาพน้ำผิวดิน พื้นที่สีเขียว ความหลากหลายทางชีวภาพ และปัญหาสิ่งแวดล้อมเด่น"},
-    {id:"1_27",t:"ด้านป่าชุมชน", h:"พื้นที่ป่าชุมชน การขึ้นทะเบียน คณะกรรมการดูแล การใช้ประโยชน์ การป้องกันไฟป่า และการฟื้นฟู"},
-    {id:"1_28",t:"ด้านการส่งเสริมอาชีพและแก้ไขปัญหาความยากจน", h:"กลุ่มอาชีพ การฝึกอบรม ข้อมูล TPMAP ครัวเรือนยากจน รายได้เฉลี่ย และผลการช่วยเหลือ"},
-    {id:"1_29",t:"ด้านการเกษตร", h:"พื้นที่เพาะปลูก พืชเศรษฐกิจหลัก จำนวนเกษตรกร ผลผลิตเฉลี่ย เกษตรอินทรีย์ และปัญหาด้านต้นทุน/ราคา"},
-    {id:"1_30",t:"ด้านการประมงและปศุสัตว์", h:"การเลี้ยงสัตว์น้ำ ปศุสัตว์ จำนวนฟาร์ม/เกษตรกร ผลผลิต และปัญหาโรคระบาด/กลิ่นรบกวน"},
-    {id:"1_31",t:"ด้านการบริการและท่องเที่ยว", h:"แหล่งท่องเที่ยว จำนวนนักท่องเที่ยว ที่พัก ร้านอาหาร รายได้จากการท่องเที่ยว และการท่องเที่ยวชุมชน"},
-    {id:"1_32",t:"ด้านอุตสาหกรรม", h:"จำนวนโรงงาน ประเภทกิจการ ขนาดการลงทุน ผลกระทบต่อชุมชน และมาตรการกำกับดูแล"},
-    {id:"1_33",t:"ด้านการพาณิชย์และกลุ่มอาชีพ", h:"ร้านค้า สถานประกอบการ ตลาดสด วิสาหกิจชุมชน OTOP และช่องทางการตลาดออนไลน์"},
-    {id:"1_34",t:"ด้านแรงงาน", h:"กำลังแรงงานในพื้นที่ อัตราการว่างงาน แรงงานนอกระบบ แรงงานต่างด้าว และการพัฒนาฝีมือแรงงาน"},
-    {id:"1_35",t:"ด้านกีฬาและนันทนาการ", h:"สนามกีฬา ลานออกกำลังกาย สวนสาธารณะ ชมรมกีฬา และกิจกรรมนันทนาการประจำปี"},
-    {id:"1_36",t:"ด้านรายได้", h:"รายได้เฉลี่ยครัวเรือน/บุคคล โครงสร้างรายได้ตามอาชีพ ภาวะหนี้สิน และรายได้ของเทศบาล (ภาษี ค่าธรรมเนียม เงินอุดหนุน)"},
-    {id:"1_37",t:"ด้านอื่น ๆ", h:"ข้อมูลอื่นที่มีความสำคัญต่อการวางแผนพัฒนาแต่ไม่อยู่ในหัวข้อข้างต้น (โปรดระบุให้ชัดเจน)"}
-  ]
-];
+const S1_FIELDS=[
+[
+ {id:"1_1",t:"ด้านกายภาพ",h:"ที่ตั้ง อาณาเขตติดต่อ เนื้อที่ ลักษณะภูมิประเทศ ภูมิอากาศ ลักษณะของดิน แหล่งน้ำธรรมชาติ และลักษณะของไม้/ป่าไม้"},
+ {id:"1_2",t:"ด้านขอบเขตความรับผิดชอบ",h:"เขตการปกครอง จำนวนหมู่บ้าน/ชุมชน พื้นที่รับผิดชอบ อำนาจหน้าที่ตามกฎหมาย และโครงสร้างส่วนราชการของเทศบาล"},
+ {id:"1_3",t:"ด้านประชากร",h:"จำนวนประชากรแยกชาย/หญิง ช่วงวัย จำนวนครัวเรือน ความหนาแน่น ประชากรแฝง/ผู้ย้ายถิ่น และแนวโน้มการเปลี่ยนแปลง 5 ปี"},
+ {id:"1_4",t:"ด้านการคมนาคมทางบก",h:"ถนนสายหลัก/สายรอง ระยะทาง สภาพผิวจราจร สะพาน จุดเสี่ยงอุบัติเหตุ และสถิติการจราจร"},
+ {id:"1_5",t:"ด้านการพัฒนาระบบคมนาคมและโลจิสติกส์",h:"โครงข่ายเชื่อมโยงกับเส้นทางหลัก ศูนย์กระจายสินค้า คลังสินค้า และแผนพัฒนาเส้นทางในอนาคต"},
+ {id:"1_6",t:"ด้านการคมนาคมทางน้ำ",h:"ลำน้ำสายหลัก ท่าเรือ/ท่าน้ำ การใช้ประโยชน์เพื่อการสัญจรหรือท่องเที่ยว (หากไม่มีให้ระบุว่าไม่มี)"},
+ {id:"1_7",t:"ด้านการคมนาคมทางอากาศ",h:"ท่าอากาศยานใกล้เคียง ระยะทางจากพื้นที่ ผลกระทบด้านเสียง/ข้อจำกัดการใช้ประโยชน์ที่ดิน"},
+ {id:"1_8",t:"ด้านการขนส่งสาธารณะ",h:"รถโดยสารประจำทาง รถสองแถว รถรับส่งนักเรียน เส้นทางให้บริการ ความครอบคลุม และปัญหาการเข้าถึง"},
+ {id:"1_9",t:"ด้านการพัฒนาเมืองอัจฉริยะ (Smart City)",h:"ความคืบหน้า Smart City 7 ด้าน ระบบ CCTV เซนเซอร์ IoT ข้อมูลเปิด (Open Data) และแพลตฟอร์มบริการประชาชน"},
+ {id:"1_10",t:"ด้านการสื่อสาร เทคโนโลยีและดิจิทัล",h:"สัญญาณโทรศัพท์/อินเทอร์เน็ตความเร็วสูง หอกระจายข่าว เสียงตามสาย ระบบ e-Service และทักษะดิจิทัลของประชาชน"}
+],[
+ {id:"1_11",t:"ด้านการศึกษาและการพัฒนาคน",h:"ศพด. โรงเรียนในพื้นที่ จำนวนนักเรียน/ครู อัตราการเรียนต่อ แหล่งเรียนรู้ชุมชน และการเรียนรู้ตลอดชีวิต"},
+ {id:"1_12",t:"ด้านอัตลักษณ์ท้องถิ่น",h:"เอกลักษณ์เด่นของดอนแก้ว สัญลักษณ์ชุมชน ทุนทางสังคม และสิ่งที่สร้างความภาคภูมิใจร่วมของคนในพื้นที่"},
+ {id:"1_13",t:"ด้านความเชื่อ ศาสนา จารีต ประเพณี วัฒนธรรม",h:"วัด/ศาสนสถาน จำนวนผู้นับถือแต่ละศาสนา ประเพณีประจำปี พิธีกรรมสำคัญ และการสืบทอด"},
+ {id:"1_14",t:"ด้านภูมิปัญญาท้องถิ่น ภาษาถิ่น",h:"ปราชญ์ชาวบ้าน องค์ความรู้ดั้งเดิม หัตถกรรม สมุนไพร ภาษาล้านนา และการอนุรักษ์/ถ่ายทอด"},
+ {id:"1_15",t:"ด้านสาธารณสุข",h:"รพ.สต. คลินิก จำนวน อสม. สถิติโรคสำคัญ การส่งเสริมสุขภาพ และการดูแลผู้สูงอายุระยะยาว (LTC)"},
+ {id:"1_16",t:"ด้านสังคมสงเคราะห์",h:"เบี้ยยังชีพผู้สูงอายุ/ผู้พิการ/ผู้ป่วยเอดส์ ผู้ยากไร้ ผู้ด้อยโอกาส เด็กและเยาวชน สตรี และการช่วยเหลือผู้ประสบปัญหาทางสังคม"},
+ {id:"1_17",t:"ด้านความปลอดภัยในชีวิตและทรัพย์สิน",h:"สถิติคดีอาชญากรรม กล้อง CCTV จุดตรวจ ชุดรักษาความปลอดภัยหมู่บ้าน และไฟส่องสว่างจุดเสี่ยง"},
+ {id:"1_18",t:"ด้านยาเสพติด",h:"สถานการณ์การแพร่ระบาด กลุ่มเสี่ยง จำนวนผู้เข้ารับการบำบัด มาตรการป้องกัน และการติดตามช่วยเหลือหลังบำบัด"},
+ {id:"1_19",t:"ด้านการป้องกันและบรรเทาสาธารณภัย",h:"ประเภทภัยที่เกิดบ่อย (อุทกภัย ภัยแล้ง อัคคีภัย หมอกควัน แผ่นดินไหว) อปพร. เครื่องมือ/รถดับเพลิง และแผนเผชิญเหตุ"},
+ {id:"1_20",t:"ด้านองค์กรภาคประชาสังคมและองค์กรจัดตั้งเพื่อการพัฒนาชุมชน",h:"กลุ่ม/ชมรม/สภาองค์กรชุมชน กองทุนหมู่บ้าน กลุ่มสตรี ผู้สูงอายุ เยาวชน และบทบาทการมีส่วนร่วมในการพัฒนา"}
+],[
+ {id:"1_21",t:"ด้านการไฟฟ้าและแสงสว่าง",h:"ครัวเรือนที่มีไฟฟ้าใช้ จำนวนโคมไฟสาธารณะ จุดที่ยังไม่ครอบคลุม และการใช้พลังงานทดแทน/โซลาร์เซลล์"},
+ {id:"1_22",t:"ด้านการบริหารจัดการบ่อบำบัดน้ำเสีย",h:"ระบบบำบัดน้ำเสียรวม/ชุมชน กำลังการบำบัด คุณภาพน้ำทิ้ง ค่าใช้จ่ายในการดูแล และปัญหาที่พบ"},
+ {id:"1_23",t:"ด้านการบริหารจัดการขยะ",h:"ปริมาณขยะต่อวัน อัตราการคัดแยก วิธีกำจัด ธนาคารขยะ ขยะอันตราย และค่าใช้จ่ายในการจัดการ"},
+ {id:"1_24",t:"ด้านการบริหารจัดการตลาด",h:"จำนวนตลาดในความรับผิดชอบ จำนวนแผงค้า รายได้ค่าธรรมเนียม สุขาภิบาลตลาด และปัญหาการจัดระเบียบ"},
+ {id:"1_25",t:"ด้านแหล่งน้ำ การประปา และการบริหารจัดการน้ำ",h:"ประปาหมู่บ้าน/ภูมิภาค ครัวเรือนที่เข้าถึง คุณภาพน้ำ อ่างเก็บน้ำ ลำเหมือง ระบบระบายน้ำ และการรับมือภัยแล้ง/น้ำท่วม"}
+],[
+ {id:"1_26",t:"ด้านทรัพยากรธรรมชาติและสิ่งแวดล้อม",h:"คุณภาพอากาศและฝุ่น PM2.5 คุณภาพน้ำผิวดิน พื้นที่สีเขียว ความหลากหลายทางชีวภาพ และปัญหาสิ่งแวดล้อมเด่น"},
+ {id:"1_27",t:"ด้านป่าชุมชน",h:"พื้นที่ป่าชุมชน การขึ้นทะเบียน คณะกรรมการดูแล การใช้ประโยชน์ การป้องกันไฟป่า และการฟื้นฟู"},
+ {id:"1_28",t:"ด้านการส่งเสริมอาชีพและแก้ไขปัญหาความยากจน",h:"กลุ่มอาชีพ การฝึกอบรม ข้อมูล TPMAP ครัวเรือนยากจน รายได้เฉลี่ย และผลการช่วยเหลือ"},
+ {id:"1_29",t:"ด้านการเกษตร",h:"พื้นที่เพาะปลูก พืชเศรษฐกิจหลัก จำนวนเกษตรกร ผลผลิตเฉลี่ย เกษตรอินทรีย์ และปัญหาด้านต้นทุน/ราคา"},
+ {id:"1_30",t:"ด้านการประมงและปศุสัตว์",h:"การเลี้ยงสัตว์น้ำ ปศุสัตว์ จำนวนฟาร์ม/เกษตรกร ผลผลิต และปัญหาโรคระบาด/กลิ่นรบกวน"},
+ {id:"1_31",t:"ด้านการบริการและท่องเที่ยว",h:"แหล่งท่องเที่ยว จำนวนนักท่องเที่ยว ที่พัก ร้านอาหาร รายได้จากการท่องเที่ยว และการท่องเที่ยวชุมชน"},
+ {id:"1_32",t:"ด้านอุตสาหกรรม",h:"จำนวนโรงงาน ประเภทกิจการ ขนาดการลงทุน ผลกระทบต่อชุมชน และมาตรการกำกับดูแล"},
+ {id:"1_33",t:"ด้านการพาณิชย์และกลุ่มอาชีพ",h:"ร้านค้า สถานประกอบการ ตลาดสด วิสาหกิจชุมชน OTOP และช่องทางการตลาดออนไลน์"},
+ {id:"1_34",t:"ด้านแรงงาน",h:"กำลังแรงงานในพื้นที่ อัตราการว่างงาน แรงงานนอกระบบ แรงงานต่างด้าว และการพัฒนาฝีมือแรงงาน"},
+ {id:"1_35",t:"ด้านกีฬาและนันทนาการ",h:"สนามกีฬา ลานออกกำลังกาย สวนสาธารณะ ชมรมกีฬา และกิจกรรมนันทนาการประจำปี"},
+ {id:"1_36",t:"ด้านรายได้",h:"รายได้เฉลี่ยครัวเรือน/บุคคล โครงสร้างรายได้ตามอาชีพ ภาวะหนี้สิน และรายได้ของเทศบาล (ภาษี ค่าธรรมเนียม เงินอุดหนุน)"},
+ {id:"1_37",t:"ด้านอื่น ๆ",h:"ข้อมูลอื่นที่มีความสำคัญต่อการวางแผนพัฒนาแต่ไม่อยู่ในหัวข้อข้างต้น (โปรดระบุให้ชัดเจน)"}
+]];
 
-/* บัฟเฟอร์สำหรับปุ่ม "ย้อนกลับ" หลังให้ AI แทนที่ข้อความ */
-let aiUndoBuffer = {};
+let aiUndoBuffer={};
 
 /* ============================================================
-   SHARED CLOUD STORAGE (Firebase Realtime Database)
-   ⚠️ นำ Firebase Config ของคุณมาวางแทนค่าด้านล่าง
+   FIREBASE
 ============================================================ */
-const firebaseConfig = {
-  apiKey: "AIzaSyD54EUDBMax-M6lsPBaSD5cRd_jh6xu4Y0",
-  authDomain: "donkaeo-plan.firebaseapp.com",
-  databaseURL: "https://donkaeo-plan-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "donkaeo-plan",
-  storageBucket: "donkaeo-plan.firebasestorage.app",
-  messagingSenderId: "939638592444",
-  appId: "1:939638592444:web:ff1259f256a5f907d611b9"
+const firebaseConfig={
+  apiKey:"AIzaSyD54EUDBMax-M6lsPBaSD5cRd_jh6xu4Y0",
+  authDomain:"donkaeo-plan.firebaseapp.com",
+  databaseURL:"https://donkaeo-plan-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId:"donkaeo-plan",
+  storageBucket:"donkaeo-plan.firebasestorage.app",
+  messagingSenderId:"939638592444",
+  appId:"1:939638592444:web:ff1259f256a5f907d611b9"
 };
-
-let db = null;
+let db=null;
 try{
-  if (typeof firebase !== "undefined" && firebaseConfig.apiKey && !firebaseConfig.apiKey.startsWith("YOUR_")) {
-    firebase.initializeApp(firebaseConfig);
-    db = firebase.database();
+  if(typeof firebase!=="undefined" && firebaseConfig.apiKey && !firebaseConfig.apiKey.startsWith("YOUR_")){
+    firebase.initializeApp(firebaseConfig); db=firebase.database();
   }
-}catch(e){ console.warn("Firebase init failed:", e); }
+}catch(e){ console.warn("Firebase init failed:",e); }
 
-const GROUPS = ["s1","s2","tables","p02"];
-const GROUP_KEY = {s1:"plan_s1", s2:"plan_s2", tables:"plan_tables", p02:"plan_p02"};
-const S2_KEYS = ["2_1","2_2","2_3_1","2_3_2","2_3_3","2_3_4","2_3_5","2_3_6"];
+const GROUPS=["s1","s2","tables","p02","meta"];
+const GROUP_KEY={s1:"plan_s1",s2:"plan_s2",tables:"plan_tables",p02:"plan_p02",meta:"plan_meta"};
+const S2_KEYS=["2_1","2_2","2_3_1","2_3_2","2_3_3","2_3_4","2_3_5","2_3_6"];
 
-let remoteMeta = {};
-let editingGroup = {};
-let saveTimers = {};
-let cloudAvailable = true;
-let currentUser = localStorage.getItem(USERNAME_KEY) || "";
+let editingGroup={},saveTimers={},cloudAvailable=true;
+let USERS={},SESSION=null,AUDIT=[];
 
-function groupSnapshot(group){
-  if(group==="s1") return DATA.s1;
-  if(group==="s2"){ const o={}; S2_KEYS.forEach(k=>o[k]=DATA[k]||""); return o; }
-  if(group==="tables") return {issues:DATA.issues, goals:DATA.goals, factors:DATA.factors, summary:DATA.summary};
-  if(group==="p02") return DATA.p02;
-}
-function applyGroupData(group, data){
-  if(!data) return;
-  if(group==="s1") DATA.s1 = data;
-  else if(group==="s2") Object.assign(DATA, data);
-  else if(group==="tables"){ DATA.issues=data.issues||[]; DATA.goals=data.goals||[]; DATA.factors=data.factors||[]; DATA.summary=data.summary||[]; }
-  else if(group==="p02") DATA.p02 = data||{};
-}
-
-async function pullGroup(group){
-  if(!db) return null;
-  try{
-    const snapshot = await db.ref('donkaeo_plan/' + GROUP_KEY[group]).once('value');
-    const val = snapshot.val();
-    if(val){ remoteMeta[group] = val.updatedAt || 0; return val; }
-  }catch(e){ console.error("Pull error:", e); cloudAvailable=false; }
-  return null;
-}
-
-async function pushGroup(group){
-  const payload = { data: groupSnapshot(group), updatedAt: Date.now(), updatedBy: currentUser || "ไม่ระบุชื่อ" };
-  try{
-    if(!db) throw new Error("Firebase ไม่ได้ถูกตั้งค่า");
-    await db.ref('donkaeo_plan/' + GROUP_KEY[group]).set(payload);
-    remoteMeta[group] = payload.updatedAt;
-    cloudAvailable = true;
-    setSyncStatus("synced");
-  }catch(e){
-    cloudAvailable = false;
-    setSyncStatus("offline");
+/* ============================================================
+   AUTH
+============================================================ */
+async function sha256(str){
+  if(window.crypto&&crypto.subtle){
+    const buf=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(str));
+    return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,"0")).join("");
   }
-  try{ localStorage.setItem(LOCAL_CACHE_KEY, JSON.stringify(DATA)); }catch(e){}
+  let h=0; for(let i=0;i<str.length;i++){h=((h<<5)-h)+str.charCodeAt(i);h|=0;}
+  return "fb"+Math.abs(h).toString(16);
 }
+function uid(){ return "u"+Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
 
-function queueSave(group){
-  editingGroup[group]=true;
-  setSyncStatus("editing");
-  clearTimeout(saveTimers[group]);
-  saveTimers[group]=setTimeout(async ()=>{
-    collectAllInputs();
-    await pushGroup(group);
-    editingGroup[group]=false;
-    renderDashboard();
-  }, 900);
-}
-
-async function initialLoad(){
-  setSyncStatus("connecting");
-  let anyRemote = false;
+async function loadUsers(){
   if(db){
-    for(const g of GROUPS){
-      const payload = await pullGroup(g);
-      if(payload){ applyGroupData(g, payload.data); anyRemote=true; }
-    }
+    try{ const s=await db.ref("donkaeo_plan/users").once("value"); USERS=s.val()||{}; return; }
+    catch(e){ cloudAvailable=false; }
   }
-  if(!anyRemote){
+  try{ USERS=JSON.parse(localStorage.getItem(LOCAL_USERS_KEY)||"{}"); }catch(e){ USERS={}; }
+}
+async function persistUser(u){
+  USERS[u.uid]=u;
+  if(db){ try{ await db.ref("donkaeo_plan/users/"+u.uid).set(u); }catch(e){} }
+  try{ localStorage.setItem(LOCAL_USERS_KEY,JSON.stringify(USERS)); }catch(e){}
+}
+async function deleteUser(id){
+  delete USERS[id];
+  if(db){ try{ await db.ref("donkaeo_plan/users/"+id).remove(); }catch(e){} }
+  try{ localStorage.setItem(LOCAL_USERS_KEY,JSON.stringify(USERS)); }catch(e){}
+}
+
+function switchTab(which){
+  const L=which==="login";
+  document.getElementById("tabLogin").classList.toggle("on",L);
+  document.getElementById("tabReg").classList.toggle("on",!L);
+  document.getElementById("paneLogin").style.display=L?"block":"none";
+  document.getElementById("paneReg").style.display=L?"none":"block";
+  gateMsg("");
+}
+function gateMsg(text,type){
+  const el=document.getElementById("gateMsg");
+  if(!text){ el.className="gate-msg"; el.textContent=""; return; }
+  el.className="gate-msg show "+(type||"err");
+  el.innerHTML=(type==="ok"?"✓ ":"! ")+escHtml(text);
+}
+function fillLoginSelect(){
+  const sel=document.getElementById("loginUser");
+  const list=Object.values(USERS).filter(u=>u.active!==false)
+    .sort((a,b)=>(a.name||"").localeCompare(b.name||"","th"));
+  if(list.length===0){
+    sel.innerHTML='<option value="">— ยังไม่มีผู้ใช้ กรุณาลงทะเบียนใหม่ —</option>';
+    switchTab("reg"); return;
+  }
+  sel.innerHTML=list.map(u=>'<option value="'+u.uid+'">'+escHtml(u.name)+(u.dept?" · "+escHtml(u.dept):"")+"</option>").join("");
+}
+
+async function doRegister(){
+  const name=document.getElementById("regName").value.trim();
+  const dept=document.getElementById("regDept").value.trim();
+  const p1=document.getElementById("regPin").value.trim();
+  const p2=document.getElementById("regPin2").value.trim();
+  if(name.length<2) return gateMsg("กรุณากรอกชื่อ–สกุลให้ครบถ้วน");
+  if(!/^\d{4,6}$/.test(p1)) return gateMsg("PIN ต้องเป็นตัวเลข 4–6 หลัก");
+  if(p1!==p2) return gateMsg("PIN ทั้งสองช่องยังไม่ตรงกัน ลองพิมพ์อีกครั้ง");
+  if(Object.values(USERS).some(u=>u.name===name)) return gateMsg("มีชื่อนี้ในระบบแล้ว กรุณาใช้ชื่ออื่นหรือเข้าสู่ระบบ");
+  const isFirst=Object.keys(USERS).length===0;
+  const u={uid:uid(),name,dept,role:isFirst?"admin":"editor",pin:await sha256(p1),
+    createdAt:Date.now(),lastLogin:Date.now(),active:true};
+  await persistUser(u);
+  startSession(u);
+  await logAudit({section:"ระบบ",field:"บัญชีผู้ใช้",label:"ลงทะเบียนผู้ใช้ใหม่",action:"register",
+    before:"",after:name+" ("+ROLE_LABEL[u.role]+")"});
+  gateMsg("ลงทะเบียนสำเร็จ กำลังเข้าสู่ระบบ","ok");
+}
+
+async function doLogin(){
+  const id=document.getElementById("loginUser").value;
+  const pin=document.getElementById("loginPin").value.trim();
+  if(!id) return gateMsg("กรุณาเลือกชื่อผู้ใช้งาน");
+  if(!pin) return gateMsg("กรุณากรอกรหัส PIN");
+  const u=USERS[id];
+  if(!u) return gateMsg("ไม่พบบัญชีผู้ใช้นี้");
+  if(u.active===false) return gateMsg("บัญชีนี้ถูกระงับการใช้งาน กรุณาติดต่อผู้ดูแลระบบ");
+  if(await sha256(pin)!==u.pin) return gateMsg("รหัส PIN ยังไม่ถูกต้อง — ลองอีกครั้ง");
+  u.lastLogin=Date.now(); await persistUser(u);
+  startSession(u);
+  await logAudit({section:"ระบบ",field:"บัญชีผู้ใช้",label:"เข้าสู่ระบบ",action:"login",before:"",after:""});
+}
+
+function startSession(u){
+  SESSION={uid:u.uid,name:u.name,dept:u.dept,role:u.role,at:Date.now()};
+  localStorage.setItem(SESSION_KEY,JSON.stringify(SESSION));
+  document.getElementById("gate").classList.add("hidden");
+  document.getElementById("app").style.display="flex";
+  paintUser();
+  boot();
+}
+function paintUser(){
+  document.getElementById("sideName").textContent=SESSION.name;
+  document.getElementById("sideRole").textContent=ROLE_LABEL[SESSION.role]+(SESSION.dept?" · "+SESSION.dept:"");
+  document.getElementById("sideAvatar").textContent=(SESSION.name||"?").trim().charAt(0);
+  document.getElementById("navUsers").style.display=SESSION.role==="admin"?"flex":"none";
+  const h=new Date().getHours();
+  const wish=h<12?"สวัสดีตอนเช้า":h<17?"สวัสดีตอนบ่าย":"สวัสดีตอนเย็น";
+  document.getElementById("greet").textContent=wish+" คุณ"+SESSION.name;
+  const ro=SESSION.role==="viewer";
+  document.getElementById("btnSaveAll").style.display=ro?"none":"inline-flex";
+}
+async function doLogout(){
+  if(!confirm("ต้องการออกจากระบบใช่หรือไม่? ข้อมูลที่กรอกไว้ถูกบันทึกแล้ว")) return;
+  await logAudit({section:"ระบบ",field:"บัญชีผู้ใช้",label:"ออกจากระบบ",action:"logout",before:"",after:""});
+  localStorage.removeItem(SESSION_KEY);
+  location.reload();
+}
+function isViewer(){ return SESSION && SESSION.role==="viewer"; }
+function guardEdit(){
+  if(isViewer()){ toast("บัญชีนี้มีสิทธิ์อ่านอย่างเดียว — ติดต่อผู้ดูแลเพื่อขอสิทธิ์แก้ไข","coral"); return false; }
+  return true;
+}
+function applyRoleLock(){
+  if(!isViewer()) return;
+  document.querySelectorAll("main textarea, main input, main select").forEach(el=>{
+    if(el.id==="fltText"||el.id==="fltUser"||el.id==="fltSection"||el.id==="geminiKey"||el.id==="aiTask") return;
+    el.disabled=true;
+  });
+  document.querySelectorAll("main .rowact, main .toolrow, main .groupbar button").forEach(el=>el.style.display="none");
+}
+
+/* ============================================================
+   AUDIT
+============================================================ */
+async function logAudit(e){
+  if(!SESSION) return;
+  const rec={ts:Date.now(),uid:SESSION.uid,name:SESSION.name,dept:SESSION.dept||"",
+    section:e.section||"",field:e.field||"",label:e.label||"",action:e.action||"edit",
+    before:String(e.before==null?"":e.before).slice(0,1200),
+    after:String(e.after==null?"":e.after).slice(0,1200)};
+  AUDIT.unshift(rec);
+  if(AUDIT.length>600) AUDIT.length=600;
+  if(db){ try{ await db.ref("donkaeo_plan/audit").push(rec); }catch(err){} }
+  else{ try{ localStorage.setItem(LOCAL_AUDIT_KEY,JSON.stringify(AUDIT.slice(0,400))); }catch(err){} }
+  renderFeed();
+}
+async function loadAudit(){
+  if(db){
     try{
-      const raw=localStorage.getItem(LOCAL_CACHE_KEY);
-      if(raw) DATA=Object.assign(DATA, JSON.parse(raw));
+      const s=await db.ref("donkaeo_plan/audit").limitToLast(500).once("value");
+      const v=s.val()||{};
+      AUDIT=Object.values(v).sort((a,b)=>b.ts-a.ts);
+      return;
     }catch(e){}
   }
-  setSyncStatus(cloudAvailable && db ? "synced" : "offline");
+  try{ AUDIT=JSON.parse(localStorage.getItem(LOCAL_AUDIT_KEY)||"[]"); }catch(e){ AUDIT=[]; }
 }
-
-function isTyping(){
-  const a=document.activeElement;
-  return !!a && (a.tagName==="INPUT" || a.tagName==="TEXTAREA" || a.tagName==="SELECT");
+function fmtTime(ts){
+  const d=new Date(ts);
+  const p=n=>String(n).padStart(2,"0");
+  return p(d.getDate())+"/"+p(d.getMonth()+1)+"/"+(d.getFullYear()+543).toString().slice(2)+" "+p(d.getHours())+":"+p(d.getMinutes());
 }
-
-function pollLoop(){
-  if(!db) return;
-  setInterval(async ()=>{
-    if(isTyping()) return;
-    for(const g of GROUPS){
-      if(editingGroup[g]) continue;
-      const payload = await pullGroup(g);
-      if(payload) applyGroupData(g, payload.data);
-    }
-    renderEverything(true);
-  }, 6000);
+function timeAgo(ts){
+  const s=Math.floor((Date.now()-ts)/1000);
+  if(s<60) return "เมื่อสักครู่";
+  if(s<3600) return Math.floor(s/60)+" นาทีที่แล้ว";
+  if(s<86400) return Math.floor(s/3600)+" ชั่วโมงที่แล้ว";
+  if(s<604800) return Math.floor(s/86400)+" วันที่แล้ว";
+  return fmtTime(ts);
 }
+const ACTION_LABEL={edit:"แก้ไข",add:"เพิ่ม",delete:"ลบ",ai:"ใช้ AI",undo:"ย้อนกลับ",
+  login:"เข้าสู่ระบบ",logout:"ออกจากระบบ",register:"ลงทะเบียน",import:"นำเข้าข้อมูล",role:"เปลี่ยนสิทธิ์",pin:"รีเซ็ต PIN",status:"เปลี่ยนสถานะ"};
+const ACTION_PILL={edit:"sky",add:"leaf",delete:"coral",ai:"berry",undo:"sun",
+  login:"",logout:"",register:"leaf",import:"coral",role:"berry",pin:"sun",status:"sun"};
 
-function setSyncStatus(state){
-  const el=document.getElementById("syncStatus");
-  if(!el) return;
-  const map={
-    connecting:["● กำลังเชื่อมต่อ...","#EEE7D5","#5B6472"],
-    synced:["● ข้อมูลซิงค์แล้ว (ใช้งานร่วมกันได้)","#DCEEE6","#2F6B5E"],
-    editing:["● กำลังบันทึกการแก้ไข...","#FBF0DC","#B8912F"],
-    offline:["⚠ ออฟไลน์ — บันทึกเฉพาะเครื่องนี้","#FBEBE7","#A63D3D"]
-  };
-  const [txt,bg,fg]=map[state]||map.connecting;
-  el.textContent=txt; el.style.background=bg; el.style.color=fg;
+function renderFeed(){
+  const ul=document.getElementById("dashFeed");
+  if(!ul) return;
+  const list=AUDIT.slice(0,6);
+  if(list.length===0){ ul.innerHTML='<li style="color:var(--ink-subtle)">ยังไม่มีการแก้ไข — เริ่มกรอกข้อมูลได้เลย</li>'; return; }
+  ul.innerHTML=list.map(a=>
+    '<li><div class="av">'+escHtml((a.name||"?").charAt(0))+'</div>'+
+    '<div class="fb"><strong>'+escHtml(a.name)+'</strong> '+escHtml(ACTION_LABEL[a.action]||a.action)+
+    ' <span style="color:var(--ink-muted)">'+escHtml(a.label||a.field)+'</span></div>'+
+    '<div class="ft">'+timeAgo(a.ts)+'</div></li>').join("");
+}
+function fillAuditFilter(){
+  const sel=document.getElementById("fltUser");
+  const names=[...new Set(AUDIT.map(a=>a.name))].sort((a,b)=>a.localeCompare(b,"th"));
+  const cur=sel.value;
+  sel.innerHTML='<option value="">ทุกคน</option>'+names.map(n=>'<option>'+escHtml(n)+'</option>').join("");
+  sel.value=cur;
+}
+function renderAudit(){
+  const box=document.getElementById("auditList");
+  if(!box) return;
+  const fu=document.getElementById("fltUser").value;
+  const fs=document.getElementById("fltSection").value;
+  const ft=document.getElementById("fltText").value.trim().toLowerCase();
+  const rows=AUDIT.filter(a=>
+    (!fu||a.name===fu)&&(!fs||(a.section||"").indexOf(fs)===0)&&
+    (!ft||((a.label||"")+(a.field||"")).toLowerCase().indexOf(ft)>=0)
+  ).slice(0,300);
+  if(rows.length===0){
+    box.innerHTML='<div class="empty"><div class="star">⭐</div><p>ยังไม่มีรายการที่ตรงกับเงื่อนไข — ลองปรับตัวกรองดูครับ</p></div>';
+    return;
+  }
+  box.innerHTML='<div class="tblwrap"><table class="tbl"><thead><tr>'+
+    '<th style="width:150px">เวลา</th><th style="width:170px">ผู้แก้ไข</th><th style="width:120px">การกระทำ</th>'+
+    '<th>หัวข้อ</th><th style="width:110px"></th></tr></thead><tbody>'+
+    rows.map((a,i)=>
+      '<tr><td class="mono" style="font-size:15px">'+fmtTime(a.ts)+'</td>'+
+      '<td><strong>'+escHtml(a.name)+'</strong><div style="font-size:14px;color:var(--ink-subtle)">'+escHtml(a.dept||"")+'</div></td>'+
+      '<td><span class="pill '+(ACTION_PILL[a.action]||"")+'">'+escHtml(ACTION_LABEL[a.action]||a.action)+'</span></td>'+
+      '<td><div style="font-size:14px;color:var(--ink-subtle)">'+escHtml(a.section||"")+'</div>'+escHtml(a.label||a.field)+'</td>'+
+      '<td>'+((a.before||a.after)?'<button class="btn sm plain" onclick="toggleDiff('+i+')">ดูรายละเอียด</button>':'')+'</td></tr>'+
+      '<tr id="diff'+i+'" style="display:none"><td colspan="5" style="background:var(--sunken)">'+
+        (a.before?'<span class="diff-old">ค่าเดิม: '+escHtml(trunc(a.before,600))+'</span>':'')+
+        (a.after?'<span class="diff-new">ค่าใหม่: '+escHtml(trunc(a.after,600))+'</span>':'')+
+      '</td></tr>'
+    ).join("")+'</tbody></table></div>'+
+    '<p class="lead" style="margin-top:16px;font-size:15px">แสดง '+rows.length+' รายการล่าสุด (เก็บสูงสุด 500 รายการ)</p>';
+}
+function trunc(s,n){ s=String(s); return s.length>n? s.slice(0,n)+" …":s; }
+function toggleDiff(i){
+  const el=document.getElementById("diff"+i);
+  el.style.display=el.style.display==="none"?"table-row":"none";
+}
+function exportAuditCsv(){
+  const head=["วันเวลา","ผู้แก้ไข","กอง/ฝ่าย","ส่วน","หัวข้อ","การกระทำ","ค่าเดิม","ค่าใหม่"];
+  const q=s=>'"'+String(s==null?"":s).replace(/"/g,'""').replace(/\r?\n/g," ")+'"';
+  const csv=[head.map(q).join(",")].concat(
+    AUDIT.map(a=>[fmtTime(a.ts),a.name,a.dept,a.section,a.label||a.field,ACTION_LABEL[a.action]||a.action,a.before,a.after].map(q).join(","))
+  ).join("\r\n");
+  downloadBlob(new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8"}),"ประวัติการแก้ไข_ดอนแก้ว.csv");
+  toast("ส่งออกประวัติเป็น CSV แล้ว","leaf");
+}
+function openFieldHistory(fieldId,label){
+  const rows=AUDIT.filter(a=>a.field===fieldId).slice(0,40);
+  document.getElementById("histTitle").textContent=label;
+  document.getElementById("histBody").innerHTML= rows.length===0
+    ? '<div class="empty"><p>ยังไม่มีประวัติการแก้ไขหัวข้อนี้</p></div>'
+    : rows.map(a=>
+      '<div style="border:1px solid var(--outline);border-radius:var(--r-card);padding:20px;margin-bottom:14px">'+
+      '<div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:12px">'+
+      '<span class="pill '+(ACTION_PILL[a.action]||"")+'">'+escHtml(ACTION_LABEL[a.action]||a.action)+'</span>'+
+      '<strong>'+escHtml(a.name)+'</strong>'+
+      '<span class="mono" style="font-size:14px;color:var(--ink-subtle)">'+fmtTime(a.ts)+'</span></div>'+
+      (a.before?'<span class="diff-old">ค่าเดิม: '+escHtml(trunc(a.before,400))+'</span>':'')+
+      (a.after?'<span class="diff-new">ค่าใหม่: '+escHtml(trunc(a.after,400))+'</span>':'')+
+      '</div>').join("");
+  document.getElementById("histModal").classList.add("show");
+}
+function closeModal(id){ document.getElementById(id).classList.remove("show"); }
+
+/* ============================================================
+   USERS PAGE
+============================================================ */
+let pinTargetUid=null;
+function renderUsers(){
+  const tb=document.querySelector("#tbl_users tbody");
+  if(!tb) return;
+  const list=Object.values(USERS).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+  tb.innerHTML=list.map(u=>
+    '<tr><td><strong>'+escHtml(u.name)+'</strong>'+(u.uid===SESSION.uid?' <span class="pill sky">คุณ</span>':'')+'</td>'+
+    '<td>'+escHtml(u.dept||"—")+'</td>'+
+    '<td><select onchange="changeRole(\''+u.uid+'\',this.value)"'+(u.uid===SESSION.uid?' disabled':'')+'>'+
+      ['admin','editor','viewer'].map(r=>'<option value="'+r+'"'+(u.role===r?' selected':'')+'>'+ROLE_LABEL[r]+'</option>').join("")+
+    '</select></td>'+
+    '<td>'+(u.active===false?'<span class="pill coral">✕ ระงับ</span>':'<span class="pill leaf">✓ ใช้งาน</span>')+'</td>'+
+    '<td class="mono" style="font-size:15px">'+(u.lastLogin?fmtTime(u.lastLogin):"—")+'</td>'+
+    '<td><div style="display:flex;gap:8px;flex-wrap:wrap">'+
+      '<button class="btn sm plain" onclick="openResetPin(\''+u.uid+'\')">รีเซ็ต PIN</button>'+
+      (u.uid===SESSION.uid?'':'<button class="btn sm gentle" onclick="toggleActive(\''+u.uid+'\')">'+(u.active===false?"เปิดใช้":"ระงับ")+'</button>')+
+    '</div></td></tr>').join("");
+}
+async function changeRole(id,role){
+  const u=USERS[id]; if(!u) return;
+  const old=u.role; u.role=role; await persistUser(u);
+  await logAudit({section:"ระบบ",field:"บัญชีผู้ใช้",label:"เปลี่ยนสิทธิ์ของ "+u.name,action:"role",
+    before:ROLE_LABEL[old],after:ROLE_LABEL[role]});
+  toast("ปรับสิทธิ์ของ "+u.name+" เป็น "+ROLE_LABEL[role]+" แล้ว","leaf");
+  renderUsers();
+}
+async function toggleActive(id){
+  const u=USERS[id]; if(!u) return;
+  u.active=!(u.active!==false); await persistUser(u);
+  await logAudit({section:"ระบบ",field:"บัญชีผู้ใช้",label:(u.active?"เปิดใช้งาน":"ระงับ")+"บัญชี "+u.name,action:"status",
+    before:u.active?"ระงับ":"ใช้งาน",after:u.active?"ใช้งาน":"ระงับ"});
+  renderUsers(); fillLoginSelect();
+}
+function openResetPin(id){
+  pinTargetUid=id;
+  document.getElementById("pinTarget").textContent="สำหรับบัญชี: "+USERS[id].name;
+  document.getElementById("newPin").value="";
+  document.getElementById("pinModal").classList.add("show");
+}
+async function confirmResetPin(){
+  const p=document.getElementById("newPin").value.trim();
+  if(!/^\d{4,6}$/.test(p)){ toast("PIN ต้องเป็นตัวเลข 4–6 หลัก","coral"); return; }
+  const u=USERS[pinTargetUid]; u.pin=await sha256(p); await persistUser(u);
+  await logAudit({section:"ระบบ",field:"บัญชีผู้ใช้",label:"รีเซ็ต PIN ของ "+u.name,action:"pin",before:"",after:""});
+  closeModal("pinModal"); toast("ตั้ง PIN ใหม่ให้ "+u.name+" เรียบร้อย","leaf");
 }
 
 /* ============================================================
-   USER / TOAST / COLLECT
+   CLOUD SYNC
 ============================================================ */
-function openNameModal(){
-  document.getElementById("nameModal").classList.add("show");
-  document.getElementById("userNameInput").value=currentUser;
+function groupSnapshot(g){
+  if(g==="s1") return DATA.s1;
+  if(g==="s2"){ const o={}; S2_KEYS.forEach(k=>o[k]=DATA[k]||""); return o; }
+  if(g==="tables") return {issues:DATA.issues,goals:DATA.goals,factors:DATA.factors,summary:DATA.summary};
+  if(g==="p02") return DATA.p02;
+  if(g==="meta") return DATA.meta;
 }
-function confirmName(){
-  currentUser=document.getElementById("userNameInput").value.trim()||"ไม่ระบุชื่อ";
-  localStorage.setItem(USERNAME_KEY,currentUser);
-  document.getElementById("nameModal").classList.remove("show");
-  document.getElementById("whoamiBtn").textContent="👤 "+currentUser;
-  showToastMsg("สวัสดีคุณ "+currentUser);
+function applyGroupData(g,d){
+  if(!d) return;
+  if(g==="s1") DATA.s1=d;
+  else if(g==="s2") Object.assign(DATA,d);
+  else if(g==="tables"){DATA.issues=d.issues||[];DATA.goals=d.goals||[];DATA.factors=d.factors||[];DATA.summary=d.summary||[];}
+  else if(g==="p02") DATA.p02=d||{};
+  else if(g==="meta") DATA.meta=d||{};
 }
-function showToastMsg(msg){
+async function pullGroup(g){
+  if(!db) return null;
+  try{ const s=await db.ref("donkaeo_plan/"+GROUP_KEY[g]).once("value"); return s.val()||null; }
+  catch(e){ cloudAvailable=false; return null; }
+}
+async function pushGroup(g){
+  const payload={data:groupSnapshot(g),updatedAt:Date.now(),updatedBy:SESSION?SESSION.name:"ไม่ระบุ"};
+  try{
+    if(!db) throw new Error("no firebase");
+    await db.ref("donkaeo_plan/"+GROUP_KEY[g]).set(payload);
+    cloudAvailable=true; setSync("synced");
+  }catch(e){ cloudAvailable=false; setSync("offline"); }
+  try{ localStorage.setItem(LOCAL_CACHE_KEY,JSON.stringify(DATA)); }catch(e){}
+}
+function queueSave(g){
+  if(isViewer()) return;
+  editingGroup[g]=true; setSync("saving");
+  clearTimeout(saveTimers[g]);
+  saveTimers[g]=setTimeout(async()=>{
+    collectAllInputs(); await pushGroup(g);
+    editingGroup[g]=false; renderDashboard();
+  },900);
+}
+async function initialLoad(){
+  setSync("connecting");
+  let any=false;
+  if(db){ for(const g of GROUPS){ const p=await pullGroup(g); if(p){ applyGroupData(g,p.data); any=true; } } }
+  if(!any){ try{ const r=localStorage.getItem(LOCAL_CACHE_KEY); if(r) DATA=Object.assign(DATA,JSON.parse(r)); }catch(e){} }
+  setSync(db&&cloudAvailable?"synced":"offline");
+}
+function isTyping(){ const a=document.activeElement; return !!a&&["INPUT","TEXTAREA","SELECT"].includes(a.tagName); }
+function pollLoop(){
+  if(!db) return;
+  setInterval(async()=>{
+    if(isTyping()) return;
+    for(const g of GROUPS){ if(editingGroup[g]) continue; const p=await pullGroup(g); if(p) applyGroupData(g,p.data); }
+    await loadAudit(); fillAuditFilter(); renderFeed();
+    renderEverything();
+  },8000);
+}
+function setSync(state){
+  const el=document.getElementById("syncStatus"); if(!el) return;
+  const m={connecting:["● กำลังเชื่อมต่อ",""],synced:["✓ ซิงค์แล้ว","leaf"],
+    saving:["● กำลังบันทึก","sun"],offline:["! บันทึกเฉพาะเครื่องนี้","coral"]};
+  const [t,c]=m[state]||m.connecting;
+  el.className="pill "+c; el.textContent=t;
+}
+
+/* ============================================================
+   HELPERS
+============================================================ */
+function toast(msg,tone){
   const t=document.getElementById("toast");
-  t.textContent=msg; t.classList.add("show");
-  clearTimeout(t._timer);
-  t._timer=setTimeout(()=>t.classList.remove("show"),2400);
+  t.className="show "+(tone||"");
+  t.textContent=msg;
+  clearTimeout(t._t); t._t=setTimeout(()=>t.className="",2800);
 }
+function escAttr(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;");}
+function escHtml(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
 function collectAllInputs(){
-  S1_FIELDS.flat().forEach(f=>{
-    const el=document.getElementById("ta_"+f.id);
-    if(el) DATA.s1[f.id]=el.value;
-  });
-  S2_KEYS.forEach(k=>{
-    const el=document.getElementById("f_"+k);
-    if(el) DATA[k]=el.value;
-  });
+  S1_FIELDS.flat().forEach(f=>{const el=document.getElementById("ta_"+f.id); if(el) DATA.s1[f.id]=el.value;});
+  S2_KEYS.forEach(k=>{const el=document.getElementById("f_"+k); if(el) DATA[k]=el.value;});
 }
-function saveAll(showToast){
+function saveAll(show){
+  if(!guardEdit()) return;
   collectAllInputs();
-  GROUPS.forEach(g=>{ editingGroup[g]=true; clearTimeout(saveTimers[g]); });
+  GROUPS.forEach(g=>{editingGroup[g]=true;clearTimeout(saveTimers[g]);});
   Promise.all(GROUPS.map(pushGroup)).then(()=>{
     GROUPS.forEach(g=>editingGroup[g]=false);
-    if(showToast) showToastMsg(db ? "บันทึกและซิงค์กับเพื่อนร่วมงานแล้ว" : "บันทึกลงเครื่องนี้แล้ว (ยังไม่ได้ตั้งค่า Firebase)");
+    if(show) toast(db?"บันทึกและซิงค์ให้ทุกคนแล้ว":"บันทึกลงเครื่องนี้แล้ว","leaf");
     renderDashboard();
   });
 }
-function escAttr(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;"); }
-function escHtml(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function stampMeta(fieldId){
+  DATA.meta[fieldId]={by:SESSION.name,at:Date.now()};
+  queueSave("meta");
+}
+function toggleHC(){
+  document.body.classList.toggle("hc");
+  localStorage.setItem("donkaeo_hc",document.body.classList.contains("hc")?"1":"0");
+}
+function readAloud(text){
+  if(!("speechSynthesis" in window)){ toast("เบราว์เซอร์นี้ยังไม่รองรับการอ่านออกเสียง","coral"); return; }
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(text); u.lang="th-TH"; u.rate=.95;
+  speechSynthesis.speak(u);
+}
 
 /* ============================================================
-   RENDER: Section 1 accordions
+   SECTION 1 RENDER
 ============================================================ */
 function renderS1(){
   S1_FIELDS.forEach((group,gi)=>{
-    const wrap=document.getElementById("acc-group-"+gi);
-    if(!wrap) return;
-    const openIdx=new Set();
-    wrap.querySelectorAll(".acc-item").forEach((el,idx)=>{ if(el.classList.contains("open")) openIdx.add(idx); });
+    const wrap=document.getElementById("acc-group-"+gi); if(!wrap) return;
+    const open=new Set();
+    wrap.querySelectorAll(".acc").forEach((el,i)=>{ if(el.classList.contains("open")) open.add(i); });
     wrap.innerHTML="";
     group.forEach((f,fi)=>{
-      const val = DATA.s1[f.id]||"";
-      const filled = val.trim().length>0;
-      const no = f.id.replace('1_','1.');
+      const val=DATA.s1[f.id]||"", filled=val.trim().length>0, no=f.id.replace("1_","1.");
+      const meta=DATA.meta[f.id];
       const item=document.createElement("div");
-      item.className="acc-item";
+      item.className="acc"+(filled?" filled":"");
       item.innerHTML=
-        '<div class="acc-head" onclick="this.parentElement.classList.toggle(\'open\')">'+
-          '<div class="num">'+no+'</div>'+
-          '<div class="ttl">'+escHtml(f.t)+'</div>'+
-          '<div class="state '+(filled?'filled':'')+'">'+(filled?'กรอกแล้ว':'ยังไม่กรอก')+'</div>'+
-          '<div class="chev">▾</div>'+
+      '<div class="acc-head" onclick="if(!event.target.closest(\'button\'))this.parentElement.classList.toggle(\'open\')">'+
+        '<div class="no">'+no+'</div>'+
+        '<div class="txt"><div class="ttl">'+escHtml(f.t)+'</div>'+
+          '<div class="by">'+(meta?("แก้ล่าสุดโดย "+escHtml(meta.by)+" · "+timeAgo(meta.at)):"ยังไม่มีการกรอกข้อมูล")+'</div></div>'+
+        '<span class="pill '+(filled?"leaf":"")+'">'+(filled?"✓ กรอกแล้ว":"○ ยังไม่กรอก")+'</span>'+
+        '<div class="chev">▾</div>'+
+      '</div>'+
+      '<div class="acc-body">'+
+        '<div class="hint"><div class="hint-head"><strong>สิ่งที่ควรระบุในหัวข้อนี้</strong>'+
+          '<button class="btn sm plain" onclick="readAloud(this.dataset.t)" data-t="'+escAttr(f.h)+'">🔊 อ่านให้ฟัง</button></div>'+
+          escHtml(f.h)+'</div>'+
+        '<div class="toolrow">'+
+          '<button class="btn sm soft" onclick="generateFieldAI(\''+f.id+'\')">ร่างข้อมูลด้วย AI</button>'+
+          '<button class="btn sm soft" onclick="analyzeFieldAI(\''+f.id+'\')">วิเคราะห์และเรียบเรียง</button>'+
+          '<button class="btn sm plain" id="undo_'+f.id+'" style="display:none" onclick="undoAI(\''+f.id+'\')">↩ ย้อนกลับ</button>'+
+          '<button class="btn sm plain" onclick="openFieldHistory(\''+f.id+'\',\''+escAttr(no+" "+f.t)+'\')">🕘 ประวัติ</button>'+
+          '<span id="ai_status_'+f.id+'" class="ai-status"></span>'+
         '</div>'+
-        '<div class="acc-body">'+
-          '<div class="hint">'+escHtml(f.h)+'</div>'+
-          '<div class="ai-bar">'+
-            '<button class="btn sm ai" onclick="generateFieldAI(\''+f.id+'\')">✨ ร่างข้อมูลใหม่</button>'+
-            '<button class="btn sm ai" onclick="analyzeFieldAI(\''+f.id+'\')">🔍 วิเคราะห์ &amp; เรียบเรียงแทนที่</button>'+
-            '<button class="btn sm" id="undo_'+f.id+'" style="display:none" onclick="undoAI(\''+f.id+'\')">↩ ย้อนกลับ</button>'+
-            '<span id="ai_status_'+f.id+'" class="ai-status"></span>'+
-          '</div>'+
-          '<textarea id="ta_'+f.id+'" placeholder="พิมพ์ข้อมูล/สถิติ '+escAttr(f.t)+'..."></textarea>'+
-        '</div>';
-      if(openIdx.has(fi)) item.classList.add("open");
+        '<textarea id="ta_'+f.id+'" placeholder="พิมพ์ข้อมูลและสถิติของ'+escAttr(f.t)+'..."></textarea>'+
+      '</div>';
+      if(open.has(fi)) item.classList.add("open");
       wrap.appendChild(item);
-      const ta=item.querySelector("textarea");
-      ta.value=val;
-      if(aiUndoBuffer[f.id]!==undefined){
-        const ub=item.querySelector("#undo_"+f.id);
-        if(ub) ub.style.display="inline-block";
-      }
-      ta.addEventListener("input",(e)=>{
+      const ta=item.querySelector("textarea"); ta.value=val;
+      if(aiUndoBuffer[f.id]!==undefined){ const b=item.querySelector("#undo_"+f.id); if(b) b.style.display="inline-flex"; }
+      ta.addEventListener("focus",e=>{ e.target.dataset.before=e.target.value; });
+      ta.addEventListener("input",e=>{
         DATA.s1[f.id]=e.target.value;
-        const filled2=e.target.value.trim().length>0;
-        const stateEl=item.querySelector(".state");
-        stateEl.textContent = filled2?"กรอกแล้ว":"ยังไม่กรอก";
-        stateEl.classList.toggle("filled",filled2);
+        const ok=e.target.value.trim().length>0;
+        item.classList.toggle("filled",ok);
+        const p=item.querySelector(".acc-head .pill");
+        p.className="pill "+(ok?"leaf":""); p.textContent=ok?"✓ กรอกแล้ว":"○ ยังไม่กรอก";
         queueSave("s1");
+      });
+      ta.addEventListener("blur",e=>{
+        const b=e.target.dataset.before||"";
+        if(b!==e.target.value){
+          logAudit({section:"ส่วนที่ 1",field:f.id,label:no+" "+f.t,action:"edit",before:b,after:e.target.value});
+          stampMeta(f.id);
+          const by=item.querySelector(".by");
+          if(by) by.textContent="แก้ล่าสุดโดย "+SESSION.name+" · เมื่อสักครู่";
+        }
       });
     });
   });
+  if(isViewer()) applyRoleLock();
 }
-
 function findField(id){ return S1_FIELDS.flat().find(f=>f.id===id); }
 
 /* ============================================================
-   GEMINI HELPERS
+   GEMINI
 ============================================================ */
 async function callGemini(prompt){
-  const apiKey=(document.getElementById("geminiKey").value||"").trim();
-  if(!apiKey) throw new Error("ยังไม่ได้ใส่ API Key (ไปที่หน้า 'วิเคราะห์ด้วย AI')");
-  const resp=await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key="+encodeURIComponent(apiKey),{
-    method:"POST", headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({contents:[{parts:[{text:prompt}]}]})
-  });
-  if(!resp.ok){
-    const t=await resp.text();
-    throw new Error("HTTP "+resp.status+" "+t.slice(0,180));
-  }
-  const json=await resp.json();
-  const text=json?.candidates?.[0]?.content?.parts?.map(p=>p.text).join("\n");
-  if(!text) throw new Error("ไม่ได้รับผลลัพธ์จาก Gemini");
-  return text.trim();
+  const key=(document.getElementById("geminiKey").value||"").trim();
+  if(!key) throw new Error("ยังไม่ได้ใส่ API Key — ไปที่หน้า 'ผู้ช่วย AI' ก่อนนะครับ");
+  const r=await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key="+encodeURIComponent(key),
+    {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({contents:[{parts:[{text:prompt}]}]})});
+  if(!r.ok){ const t=await r.text(); throw new Error("HTTP "+r.status+" "+t.slice(0,160)); }
+  const j=await r.json();
+  const txt=j?.candidates?.[0]?.content?.parts?.map(p=>p.text).join("\n");
+  if(!txt) throw new Error("ยังไม่ได้รับผลลัพธ์กลับมา ลองใหม่อีกครั้ง");
+  return txt.trim();
 }
-
-function setFieldValue(id, text){
+function setFieldValue(id,text){
   const ta=document.getElementById("ta_"+id);
-  DATA.s1[id]=text;
-  queueSave("s1");
+  DATA.s1[id]=text; queueSave("s1"); stampMeta(id);
   if(ta){
-    ta.value=text;
-    const item=ta.closest('.acc-item');
-    if(item){
-      const st=item.querySelector(".state");
-      st.textContent="กรอกแล้ว"; st.classList.add("filled");
-    }
+    ta.value=text; ta.dataset.before=text;
+    const item=ta.closest(".acc");
+    if(item){ item.classList.add("filled");
+      const p=item.querySelector(".acc-head .pill"); p.className="pill leaf"; p.textContent="✓ กรอกแล้ว"; }
   }
-  const ub=document.getElementById("undo_"+id);
-  if(ub) ub.style.display="inline-block";
+  const b=document.getElementById("undo_"+id); if(b) b.style.display="inline-flex";
   renderDashboard();
 }
-
-/* ปุ่ม 1: ร่างข้อมูลใหม่ (ต่อท้ายของเดิม) */
 async function generateFieldAI(id){
+  if(!guardEdit()) return;
   const f=findField(id); if(!f) return;
-  const statusEl=document.getElementById("ai_status_"+id);
-  const ta=document.getElementById("ta_"+id);
-  statusEl.textContent="⏳ กำลังร่างข้อมูล...";
-  const prompt=
-    "คุณเป็นเจ้าหน้าที่วิเคราะห์นโยบายและแผน เทศบาลเมืองดอนแก้ว อำเภอแม่ริม จังหวัดเชียงใหม่\n"+
-    "ช่วยร่างเนื้อหาส่วนที่ 1 'สภาพทั่วไปและข้อมูลพื้นฐาน' หัวข้อ "+f.id.replace('1_','1.')+" "+f.t+"\n"+
-    "ขอบเขตเนื้อหาที่ต้องครอบคลุม: "+f.h+"\n\n"+
-    "ข้อกำหนด:\n"+
-    "- เขียนภาษาราชการเชิงวิชาการ กระชับ 4-6 บรรทัด\n"+
-    "- ตัวเลข/สถิติที่ต้องยืนยันจากเอกสารจริง ให้เว้นเป็น [........] เพื่อให้เจ้าหน้าที่เติมเอง ห้ามแต่งตัวเลขขึ้นเอง\n"+
-    "- ไม่ต้องมีคำขึ้นต้น คำลงท้าย หรือหัวข้อซ้ำ ส่งเฉพาะเนื้อหา";
+  const s=document.getElementById("ai_status_"+id), ta=document.getElementById("ta_"+id);
+  s.className="ai-status"; s.textContent="กำลังร่างข้อมูล...";
+  const prompt="คุณเป็นเจ้าหน้าที่วิเคราะห์นโยบายและแผน เทศบาลเมืองดอนแก้ว อำเภอแม่ริม จังหวัดเชียงใหม่\n"+
+    "ช่วยร่างเนื้อหาส่วนที่ 1 'สภาพทั่วไปและข้อมูลพื้นฐาน' หัวข้อ "+f.id.replace("1_","1.")+" "+f.t+"\n"+
+    "ขอบเขตที่ต้องครอบคลุม: "+f.h+"\n\nข้อกำหนด:\n"+
+    "- ภาษาราชการเชิงวิชาการ กระชับ 4-6 บรรทัด\n"+
+    "- ตัวเลข/สถิติที่ต้องยืนยันจากเอกสารจริง ให้เว้นเป็น [........] ห้ามแต่งตัวเลขขึ้นเอง\n"+
+    "- ส่งเฉพาะเนื้อหา ไม่ต้องมีคำขึ้นต้นหรือหัวข้อซ้ำ";
   try{
-    const text=await callGemini(prompt);
+    const t=await callGemini(prompt);
     aiUndoBuffer[id]=ta.value;
-    setFieldValue(id, (ta.value.trim()? ta.value.trim()+"\n\n":"")+text);
-    statusEl.textContent="✅ ร่างเสร็จ — โปรดตรวจสอบและเติมตัวเลขจริง";
-    setTimeout(()=>{ if(statusEl) statusEl.textContent=""; },6000);
-  }catch(e){ statusEl.textContent="❌ "+e.message; }
+    const merged=(ta.value.trim()?ta.value.trim()+"\n\n":"")+t;
+    await logAudit({section:"ส่วนที่ 1",field:id,label:f.id.replace("1_","1.")+" "+f.t,action:"ai",before:ta.value,after:merged});
+    setFieldValue(id,merged);
+    s.className="ai-status ok"; s.textContent="✓ ร่างเสร็จแล้ว — ตรวจสอบและเติมตัวเลขจริงด้วยนะครับ";
+    setTimeout(()=>{if(s)s.textContent="";},7000);
+  }catch(e){ s.className="ai-status err"; s.textContent="ยังทำไม่สำเร็จ: "+e.message; }
 }
-
-/* ปุ่ม 2: วิเคราะห์ข้อมูลที่กรอก แล้วแทนที่ด้วยผลลัพธ์ */
-async function analyzeFieldAI(id){
-  const f=findField(id); if(!f) return;
-  const statusEl=document.getElementById("ai_status_"+id);
-  const ta=document.getElementById("ta_"+id);
-  const raw=(ta.value||"").trim();
-  if(!raw){ statusEl.textContent="⚠ ยังไม่มีข้อมูลให้วิเคราะห์ — กรอกก่อนหรือกด 'ร่างข้อมูลใหม่'"; return; }
-  if(!confirm("AI จะวิเคราะห์และเรียบเรียงข้อความในหัวข้อ \""+f.t+"\" ใหม่ทั้งหมด แล้วแทนที่ข้อความเดิม\n(กด 'ย้อนกลับ' เพื่อกู้คืนได้)\n\nดำเนินการต่อหรือไม่?")) return;
-
-  statusEl.textContent="⏳ กำลังวิเคราะห์และเรียบเรียง...";
-  try{
-    const text=await callGemini(buildFieldAnalyzePrompt(f, raw));
-    aiUndoBuffer[id]=raw;
-    setFieldValue(id, text);
-    statusEl.textContent="✅ วิเคราะห์และแทนที่แล้ว — ตรวจทานก่อนใช้จริง";
-    setTimeout(()=>{ if(statusEl) statusEl.textContent=""; },7000);
-  }catch(e){ statusEl.textContent="❌ "+e.message; }
-}
-
-function buildFieldAnalyzePrompt(f, raw){
+function buildFieldAnalyzePrompt(f,raw){
   return "คุณเป็นผู้เชี่ยวชาญการจัดทำแผนพัฒนาท้องถิ่นตามระเบียบกระทรวงมหาดไทยว่าด้วยการจัดทำแผนพัฒนาขององค์กรปกครองส่วนท้องถิ่น พ.ศ. 2548 และที่แก้ไขเพิ่มเติม\n\n"+
-    "หัวข้อ: "+f.id.replace('1_','1.')+" "+f.t+"\n"+
-    "ขอบเขตที่ควรครอบคลุม: "+f.h+"\n\n"+
-    "ข้อมูลดิบที่เจ้าหน้าที่กรอกไว้:\n\"\"\"\n"+raw+"\n\"\"\"\n\n"+
-    "ภารกิจ: วิเคราะห์ข้อมูลดิบข้างต้น แล้วเขียนขึ้นใหม่ให้พร้อมบรรจุลงเล่มแผนพัฒนาท้องถิ่น โดยส่งผลลัพธ์ตามโครงสร้างนี้เท่านั้น:\n\n"+
-    "[เนื้อหาเรียบเรียงใหม่ 5-8 บรรทัด ภาษาราชการ ลำดับความคิดต่อเนื่อง]\n\n"+
-    "ผลการวิเคราะห์:\n"+
-    "- จุดแข็ง/โอกาส: ...\n"+
-    "- ปัญหา/ข้อจำกัดที่พบ: ...\n"+
-    "- ข้อมูลที่ยังขาดและควรจัดเก็บเพิ่ม: ...\n"+
-    "- ข้อเสนอแนะเชื่อมโยงสู่ประเด็นการพัฒนา: ...\n\n"+
-    "ข้อห้ามเด็ดขาด: ห้ามสร้างตัวเลขสถิติที่ไม่ปรากฏในข้อมูลดิบ หากจำเป็นต้องมีตัวเลขให้ใส่ [........] แทน";
+  "หัวข้อ: "+f.id.replace("1_","1.")+" "+f.t+"\nขอบเขต: "+f.h+"\n\n"+
+  "ข้อมูลดิบที่เจ้าหน้าที่กรอกไว้:\n\"\"\"\n"+raw+"\n\"\"\"\n\n"+
+  "ภารกิจ: วิเคราะห์แล้วเขียนใหม่ให้พร้อมบรรจุลงเล่ม โดยส่งตามโครงสร้างนี้เท่านั้น:\n\n"+
+  "[เนื้อหาเรียบเรียงใหม่ 5-8 บรรทัด ภาษาราชการ]\n\nผลการวิเคราะห์:\n"+
+  "- จุดแข็ง/โอกาส: ...\n- ปัญหา/ข้อจำกัด: ...\n- ข้อมูลที่ยังขาดและควรจัดเก็บเพิ่ม: ...\n- ข้อเสนอแนะเชื่อมโยงสู่ประเด็นการพัฒนา: ...\n\n"+
+  "ข้อห้าม: ห้ามสร้างตัวเลขที่ไม่ปรากฏในข้อมูลดิบ หากจำเป็นให้ใส่ [........] แทน";
 }
-
-function undoAI(id){
+async function analyzeFieldAI(id){
+  if(!guardEdit()) return;
+  const f=findField(id); if(!f) return;
+  const s=document.getElementById("ai_status_"+id), ta=document.getElementById("ta_"+id);
+  const raw=(ta.value||"").trim();
+  if(!raw){ s.className="ai-status"; s.textContent="ยังไม่มีข้อมูลให้วิเคราะห์ — ลองกรอกก่อน หรือกด 'ร่างข้อมูลด้วย AI'"; return; }
+  if(!confirm("AI จะเรียบเรียงหัวข้อ \""+f.t+"\" ใหม่ทั้งหมดแล้วแทนที่ข้อความเดิม\nกด 'ย้อนกลับ' เพื่อกู้คืนได้ และมีบันทึกไว้ในประวัติเสมอ\n\nดำเนินการต่อหรือไม่?")) return;
+  s.className="ai-status"; s.textContent="กำลังวิเคราะห์และเรียบเรียง...";
+  try{
+    const t=await callGemini(buildFieldAnalyzePrompt(f,raw));
+    aiUndoBuffer[id]=raw;
+    await logAudit({section:"ส่วนที่ 1",field:id,label:f.id.replace("1_","1.")+" "+f.t,action:"ai",before:raw,after:t});
+    setFieldValue(id,t);
+    s.className="ai-status ok"; s.textContent="✓ เรียบเรียงเสร็จแล้ว — ตรวจทานก่อนใช้จริง";
+    setTimeout(()=>{if(s)s.textContent="";},7000);
+  }catch(e){ s.className="ai-status err"; s.textContent="ยังทำไม่สำเร็จ: "+e.message; }
+}
+async function undoAI(id){
   if(aiUndoBuffer[id]===undefined) return;
-  const prev=aiUndoBuffer[id];
+  const f=findField(id), prev=aiUndoBuffer[id], cur=DATA.s1[id]||"";
   delete aiUndoBuffer[id];
-  const ta=document.getElementById("ta_"+id);
-  DATA.s1[id]=prev; queueSave("s1");
-  if(ta){
-    ta.value=prev;
-    const st=ta.closest('.acc-item').querySelector(".state");
-    const ok=prev.trim().length>0;
-    st.textContent=ok?"กรอกแล้ว":"ยังไม่กรอก"; st.classList.toggle("filled",ok);
-  }
-  const btn=document.getElementById("undo_"+id); if(btn) btn.style.display="none";
-  const stt=document.getElementById("ai_status_"+id); if(stt) stt.textContent="↩ กู้คืนข้อความเดิมแล้ว";
-  renderDashboard();
+  await logAudit({section:"ส่วนที่ 1",field:id,label:f.id.replace("1_","1.")+" "+f.t,action:"undo",before:cur,after:prev});
+  setFieldValue(id,prev);
+  const b=document.getElementById("undo_"+id); if(b) b.style.display="none";
+  const s=document.getElementById("ai_status_"+id); if(s){ s.className="ai-status ok"; s.textContent="↩ กู้คืนข้อความเดิมแล้ว"; }
+  renderS1();
 }
-
-/* วิเคราะห์รวดเดียวทั้งกลุ่ม */
 async function analyzeGroupAI(gi){
+  if(!guardEdit()) return;
   const fields=S1_FIELDS[gi].filter(f=>(DATA.s1[f.id]||"").trim().length>0);
-  if(fields.length===0){ showToastMsg("กลุ่มนี้ยังไม่มีข้อมูลให้วิเคราะห์"); return; }
-  if(!confirm("จะวิเคราะห์และแทนที่ข้อความ "+fields.length+" หัวข้อในกลุ่มนี้\nใช้เวลาสักครู่ (กด 'ย้อนกลับ' ในแต่ละหัวข้อเพื่อกู้คืนได้)\n\nดำเนินการต่อหรือไม่?")) return;
-  let ok=0, fail=0;
+  if(fields.length===0){ toast("กลุ่มนี้ยังไม่มีข้อมูลให้วิเคราะห์ — เริ่มกรอกก่อนนะครับ"); return; }
+  if(!confirm("จะวิเคราะห์และเรียบเรียง "+fields.length+" หัวข้อในกลุ่มนี้\nทุกการเปลี่ยนแปลงถูกบันทึกในประวัติและย้อนกลับได้\n\nดำเนินการต่อหรือไม่?")) return;
+  let ok=0,fail=0;
   for(const f of fields){
-    showToastMsg("กำลังวิเคราะห์: "+f.t);
-    const done=await analyzeFieldAIQuiet(f.id);
-    done ? ok++ : fail++;
+    toast("กำลังวิเคราะห์: "+f.t);
+    const raw=(DATA.s1[f.id]||"").trim();
+    try{
+      const t=await callGemini(buildFieldAnalyzePrompt(f,raw));
+      aiUndoBuffer[f.id]=raw; DATA.s1[f.id]=t;
+      await logAudit({section:"ส่วนที่ 1",field:f.id,label:f.id.replace("1_","1.")+" "+f.t,action:"ai",before:raw,after:t});
+      stampMeta(f.id); queueSave("s1"); ok++;
+    }catch(e){ fail++; }
   }
   renderS1();
-  showToastMsg("เสร็จสิ้น — สำเร็จ "+ok+" หัวข้อ"+(fail? " / ผิดพลาด "+fail+" หัวข้อ":""));
-}
-async function analyzeFieldAIQuiet(id){
-  const f=findField(id);
-  const raw=(DATA.s1[id]||"").trim(); if(!raw) return false;
-  try{
-    const text=await callGemini(buildFieldAnalyzePrompt(f, raw));
-    aiUndoBuffer[id]=raw;
-    DATA.s1[id]=text;
-    const ta=document.getElementById("ta_"+id); if(ta) ta.value=text;
-    queueSave("s1");
-    return true;
-  }catch(e){ console.warn(id, e.message); return false; }
+  toast("เสร็จแล้ว — สำเร็จ "+ok+" หัวข้อ"+(fail?" / ยังไม่สำเร็จ "+fail+" หัวข้อ":""),fail?"":"leaf");
 }
 
 /* ============================================================
-   RENDER: Dynamic tables (section 2)
+   TABLES (SECTION 2)
 ============================================================ */
-const TABLE_DEFS = {
-  tbl_issues:{cols:["issue","approach","kpi"], data:"issues", withNum:true},
-  tbl_goals:{cols:["issue","goal","y71","y72","y73","y74","y75"], data:"goals", withNum:false},
-  tbl_factors:{cols:["issue","principle","result","impact"], data:"factors", withNum:true},
-  tbl_summary:{cols:["issue","goal","expect","dept"], data:"summary", withNum:true}
+const TDEF={
+  tbl_issues:{cols:["issue","approach","kpi"],data:"issues",num:true,sec:"ส่วนที่ 2",title:"2.4 ประเด็นการพัฒนา",
+    names:{issue:"ประเด็น",approach:"แนวทาง",kpi:"ตัวชี้วัด"}},
+  tbl_goals:{cols:["issue","goal","y71","y72","y73","y74","y75"],data:"goals",num:false,sec:"ส่วนที่ 2",title:"2.5 จุดมุ่งหมาย",
+    names:{issue:"ประเด็น",goal:"จุดมุ่งหมาย",y71:"ปี 2571",y72:"ปี 2572",y73:"ปี 2573",y74:"ปี 2574",y75:"ปี 2575"}},
+  tbl_factors:{cols:["issue","principle","result","impact"],data:"factors",num:true,sec:"ส่วนที่ 2",title:"2.6 วิเคราะห์ปัจจัย",
+    names:{issue:"ประเด็น",principle:"หลักการวิเคราะห์",result:"ผลการวิเคราะห์",impact:"ผลกระทบ"}},
+  tbl_summary:{cols:["issue","goal","expect","dept"],data:"summary",num:true,sec:"ส่วนที่ 2",title:"2.7 สรุปภาพรวม",
+    names:{issue:"ประเด็น",goal:"จุดมุ่งหมาย",expect:"ผลที่คาดว่าจะได้รับ",dept:"หน่วยงาน"}}
 };
-
-function addRow(tblId, prefill){
-  const def=TABLE_DEFS[tblId];
-  const row={}; def.cols.forEach(c=>row[c]="");
-  if(prefill) Object.assign(row,prefill);
-  DATA[def.data].push(row);
-  renderTable(tblId);
-  queueSave("tables");
-  if(tblId==="tbl_issues") renderP01();
+function addRow(t){
+  if(!guardEdit()) return;
+  const d=TDEF[t],row={}; d.cols.forEach(c=>row[c]="");
+  DATA[d.data].push(row); renderTable(t); queueSave("tables");
+  logAudit({section:d.sec,field:t,label:d.title+" — เพิ่มแถวที่ "+DATA[d.data].length,action:"add",before:"",after:""});
+  if(t==="tbl_issues") renderP01();
 }
-function removeRow(tblId, idx){
-  const def=TABLE_DEFS[tblId];
-  DATA[def.data].splice(idx,1);
-  renderTable(tblId);
-  queueSave("tables");
-  if(tblId==="tbl_issues") renderP01();
+function removeRow(t,i){
+  if(!guardEdit()) return;
+  const d=TDEF[t],row=DATA[d.data][i];
+  if(!confirm("ต้องการลบแถวที่ "+(i+1)+" ใช่หรือไม่? การลบถูกบันทึกในประวัติและตรวจสอบย้อนหลังได้")) return;
+  DATA[d.data].splice(i,1); renderTable(t); queueSave("tables");
+  logAudit({section:d.sec,field:t,label:d.title+" — ลบแถวที่ "+(i+1),action:"delete",
+    before:d.cols.map(c=>d.names[c]+": "+(row[c]||"-")).join(" | "),after:""});
+  if(t==="tbl_issues") renderP01();
 }
-function renderTable(tblId){
-  const def=TABLE_DEFS[tblId];
-  const tbody=document.querySelector("#"+tblId+" tbody");
-  if(!tbody) return;
-  tbody.innerHTML="";
-  DATA[def.data].forEach((row,idx)=>{
+function renderTable(t){
+  const d=TDEF[t],tb=document.querySelector("#"+t+" tbody"); if(!tb) return;
+  tb.innerHTML="";
+  DATA[d.data].forEach((row,i)=>{
     const tr=document.createElement("tr");
-    let cells="";
-    if(def.withNum) cells+="<td>"+(idx+1)+"</td>";
-    def.cols.forEach(c=>{
-      const isYear=c.charAt(0)==="y";
-      cells+='<td><input type="text" value="'+escAttr(row[c])+'" style="min-width:'+(isYear?'60px':'130px')+'"'+
-             ' oninput="updateCell(\''+tblId+'\','+idx+',\''+c+'\',this.value)"></td>';
+    let c="";
+    if(d.num) c+='<td class="nm">'+(i+1)+"</td>";
+    d.cols.forEach(k=>{
+      const yr=k.charAt(0)==="y";
+      c+='<td><input type="text" value="'+escAttr(row[k])+'" style="min-width:'+(yr?"78px":"160px")+'"'+
+        ' data-t="'+t+'" data-i="'+i+'" data-c="'+k+'"'+
+        ' onfocus="this.dataset.before=this.value" onblur="tblBlur(this)"'+
+        ' oninput="updateCell(\''+t+'\','+i+',\''+k+'\',this.value)"></td>';
     });
-    cells+='<td><button class="btn sm danger" onclick="removeRow(\''+tblId+'\','+idx+')">ลบ</button></td>';
-    tr.innerHTML=cells;
-    tbody.appendChild(tr);
+    c+='<td><button class="btn sm gentle" onclick="removeRow(\''+t+'\','+i+')">ลบ</button></td>';
+    tr.innerHTML=c; tb.appendChild(tr);
   });
+  if(isViewer()) applyRoleLock();
 }
-function updateCell(tblId, idx, col, val){
-  DATA[TABLE_DEFS[tblId].data][idx][col]=val;
-  queueSave("tables");
+function updateCell(t,i,c,v){ DATA[TDEF[t].data][i][c]=v; queueSave("tables"); }
+function tblBlur(el){
+  const b=el.dataset.before||"";
+  if(b===el.value) return;
+  const d=TDEF[el.dataset.t];
+  logAudit({section:d.sec,field:el.dataset.t+"."+el.dataset.i+"."+el.dataset.c,
+    label:d.title+" · แถว "+(Number(el.dataset.i)+1)+" · "+d.names[el.dataset.c],
+    action:"edit",before:b,after:el.value});
 }
 
 /* ============================================================
-   RENDER: ผ.02 + ผ.01
+   ผ.02 / ผ.01
 ============================================================ */
-function issueKey(text,idx){ return "issue_"+idx; }
-
+function issueKey(_,i){ return "issue_"+i; }
 function renderP02(){
-  const container=document.getElementById("p02-groups");
-  if(!container) return;
-  container.innerHTML="";
+  const box=document.getElementById("p02-groups"); if(!box) return;
+  box.innerHTML="";
   if(DATA.issues.length===0){
-    container.innerHTML='<div class="section-block"><p class="muted">ยังไม่มีประเด็นการพัฒนา กรุณาไปเพิ่มที่ "ส่วนที่ 2 · ประเด็น/เป้าหมาย/วิเคราะห์" ข้อ 2.4 ก่อน</p></div>';
+    box.innerHTML='<div class="card"><div class="empty"><div class="star">⭐</div>'+
+      '<h3 style="margin-bottom:8px">ยังไม่มีประเด็นการพัฒนา</h3>'+
+      '<p>เพิ่มประเด็นในส่วนที่ 2 ข้อ 2.4 ก่อน แล้วกลับมาเพิ่มโครงการที่นี่ได้เลย</p>'+
+      '<button class="btn primary" style="margin-top:20px" onclick="goTo(\'s2b\')">ไปที่ข้อ 2.4</button></div></div>';
     renderP01(); return;
   }
   DATA.issues.forEach((issue,idx)=>{
-    const key=issueKey(issue.issue,idx);
-    if(!DATA.p02[key]) DATA.p02[key]=[];
-    const block=document.createElement("div");
-    block.className="section-block";
-    const issueName = issue.issue || "(ยังไม่ได้ตั้งชื่อประเด็นที่ "+(idx+1)+")";
-    block.innerHTML=
-      '<h3>'+(idx+1)+'. ประเด็นการพัฒนาท้องถิ่น: '+escHtml(issueName)+'</h3>'+
-      '<div class="tbl-wrap"><table class="data-tbl" id="p02_'+idx+'">'+
-        '<thead><tr>'+
-          '<th style="width:26px">#</th><th>โครงการ</th><th>วัตถุประสงค์</th><th>เป้าหมาย (ผลผลิต)</th>'+
-          YEARS.map(y=>'<th style="width:78px">'+y+'</th>').join("")+
-          '<th>ตัวชี้วัด (KPI)</th><th>ผลที่คาดว่าจะได้รับ</th><th>ที่มาของโครงการ</th><th>หน่วยงานรับผิดชอบ</th><th style="width:44px"></th>'+
-        '</tr></thead><tbody></tbody><tfoot></tfoot></table></div>'+
-      '<div class="row-actions"><button class="btn sm" onclick="addProject('+idx+')">+ เพิ่มโครงการ</button></div>';
-    container.appendChild(block);
-    renderProjectsTable(idx);
+    const k=issueKey(null,idx);
+    if(!DATA.p02[k]) DATA.p02[k]=[];
+    const b=document.createElement("div"); b.className="card";
+    b.innerHTML='<span class="eyebrow">ประเด็นที่ '+(idx+1)+'</span>'+
+      '<h3>'+escHtml(issue.issue||"(ยังไม่ได้ตั้งชื่อประเด็น)")+'</h3>'+
+      '<div class="tblwrap" style="margin-top:20px"><table class="tbl" id="p02_'+idx+'"><thead><tr>'+
+      '<th style="width:48px">#</th><th>โครงการ</th><th>วัตถุประสงค์</th><th>เป้าหมาย (ผลผลิต)</th>'+
+      YEARS.map(y=>'<th style="width:104px">'+y+'</th>').join("")+
+      '<th>ตัวชี้วัด</th><th>ผลที่คาดว่าจะได้รับ</th><th>ที่มาโครงการ</th><th>หน่วยงาน</th><th style="width:80px"></th>'+
+      '</tr></thead><tbody></tbody><tfoot></tfoot></table></div>'+
+      '<div class="rowact"><button class="btn" onclick="addProject('+idx+')">+ เพิ่มโครงการ</button></div>';
+    box.appendChild(b); renderProjects(idx);
   });
   renderP01();
 }
-
-function addProject(issueIdx){
-  const key=issueKey(null,issueIdx);
-  if(!DATA.p02[key]) DATA.p02[key]=[];
-  const proj={project:"",obj:"",target:"",budget:{},kpi:"",result:"",source:"",dept:""};
-  YEARS.forEach(y=>proj.budget[y]="");
-  DATA.p02[key].push(proj);
-  renderProjectsTable(issueIdx);
-  renderP01();
+function addProject(i){
+  if(!guardEdit()) return;
+  const k=issueKey(null,i); if(!DATA.p02[k]) DATA.p02[k]=[];
+  const p={project:"",obj:"",target:"",budget:{},kpi:"",result:"",source:"",dept:""};
+  YEARS.forEach(y=>p.budget[y]="");
+  DATA.p02[k].push(p); renderProjects(i); renderP01(); queueSave("p02");
+  logAudit({section:"ผ.02",field:k,label:"เพิ่มโครงการในประเด็นที่ "+(i+1),action:"add",before:"",after:""});
+}
+function removeProject(i,pi){
+  if(!guardEdit()) return;
+  const p=DATA.p02[issueKey(null,i)][pi];
+  if(!confirm("ต้องการลบโครงการ \""+(p.project||"ไม่มีชื่อ")+"\" ใช่หรือไม่?")) return;
+  DATA.p02[issueKey(null,i)].splice(pi,1);
+  renderProjects(i); renderP01(); queueSave("p02");
+  logAudit({section:"ผ.02",field:issueKey(null,i),label:"ลบโครงการในประเด็นที่ "+(i+1),action:"delete",
+    before:"โครงการ: "+(p.project||"-")+" | งบ: "+YEARS.map(y=>y+"="+(p.budget[y]||0)).join(", "),after:""});
+}
+function updateProject(i,pi,f,v,y){
+  const p=DATA.p02[issueKey(null,i)][pi]; if(!p) return;
+  if(y){ p.budget[y]=v; updateTotals(i); renderP01(); } else p[f]=v;
   queueSave("p02");
 }
-function removeProject(issueIdx,pIdx){
-  DATA.p02[issueKey(null,issueIdx)].splice(pIdx,1);
-  renderProjectsTable(issueIdx);
-  renderP01();
-  queueSave("p02");
+function p02Blur(el){
+  const b=el.dataset.before||"";
+  if(b===el.value) return;
+  logAudit({section:"ผ.02",field:"p02."+el.dataset.i+"."+el.dataset.p,
+    label:"ผ.02 · ประเด็นที่ "+(Number(el.dataset.i)+1)+" · โครงการที่ "+(Number(el.dataset.p)+1)+" · "+el.dataset.n,
+    action:"edit",before:b,after:el.value});
 }
-/* อัปเดตค่าโดยไม่ re-render ทั้งตาราง → cursor ไม่เด้ง */
-function updateProject(issueIdx,pIdx,field,val,year){
-  const proj=DATA.p02[issueKey(null,issueIdx)][pIdx];
-  if(!proj) return;
-  if(year){ proj.budget[year]=val; updateP02Totals(issueIdx); renderP01(); }
-  else proj[field]=val;
-  queueSave("p02");
+function updateTotals(i){
+  const ps=DATA.p02[issueKey(null,i)]||[], tf=document.querySelector("#p02_"+i+" tfoot"); if(!tf) return;
+  const t={}; YEARS.forEach(y=>t[y]=0);
+  ps.forEach(p=>YEARS.forEach(y=>t[y]+=parseFloat(p.budget[y])||0));
+  tf.innerHTML='<tr class="tot"><td colspan="4">รวมทั้งประเด็น</td>'+
+    YEARS.map(y=>'<td class="mono">'+t[y].toLocaleString()+"</td>").join("")+'<td colspan="5"></td></tr>';
 }
-function updateP02Totals(issueIdx){
-  const projs=DATA.p02[issueKey(null,issueIdx)]||[];
-  const tfoot=document.querySelector("#p02_"+issueIdx+" tfoot");
-  if(!tfoot) return;
-  const totals={}; YEARS.forEach(y=>totals[y]=0);
-  projs.forEach(p=>YEARS.forEach(y=>totals[y]+=parseFloat(p.budget[y])||0));
-  tfoot.innerHTML='<tr class="rowtot"><td colspan="4">รวม</td>'+
-    YEARS.map(y=>'<td>'+totals[y].toLocaleString()+'</td>').join("")+'<td colspan="5"></td></tr>';
-}
-function renderProjectsTable(issueIdx){
-  const projs=DATA.p02[issueKey(null,issueIdx)]||[];
-  const tbody=document.querySelector("#p02_"+issueIdx+" tbody");
-  if(!tbody) return;
-  tbody.innerHTML="";
-  projs.forEach((p,pIdx)=>{
+function renderProjects(i){
+  const ps=DATA.p02[issueKey(null,i)]||[], tb=document.querySelector("#p02_"+i+" tbody"); if(!tb) return;
+  const F=[["project","โครงการ"],["obj","วัตถุประสงค์"],["target","เป้าหมาย"]];
+  const G=[["kpi","ตัวชี้วัด"],["result","ผลที่คาดว่าจะได้รับ"],["source","ที่มาโครงการ"],["dept","หน่วยงาน"]];
+  tb.innerHTML="";
+  ps.forEach((p,pi)=>{
     const tr=document.createElement("tr");
-    let budgetCells="";
-    YEARS.forEach(y=>{
-      budgetCells+='<td><input type="number" value="'+escAttr(p.budget[y])+'" oninput="updateProject('+issueIdx+','+pIdx+',null,this.value,\''+y+'\')"></td>';
-    });
-    tr.innerHTML=
-      '<td>'+(pIdx+1)+'</td>'+
-      '<td><input type="text" value="'+escAttr(p.project)+'" oninput="updateProject('+issueIdx+','+pIdx+',\'project\',this.value)"></td>'+
-      '<td><input type="text" value="'+escAttr(p.obj)+'" oninput="updateProject('+issueIdx+','+pIdx+',\'obj\',this.value)"></td>'+
-      '<td><input type="text" value="'+escAttr(p.target)+'" oninput="updateProject('+issueIdx+','+pIdx+',\'target\',this.value)"></td>'+
-      budgetCells+
-      '<td><input type="text" value="'+escAttr(p.kpi)+'" oninput="updateProject('+issueIdx+','+pIdx+',\'kpi\',this.value)"></td>'+
-      '<td><input type="text" value="'+escAttr(p.result)+'" oninput="updateProject('+issueIdx+','+pIdx+',\'result\',this.value)"></td>'+
-      '<td><input type="text" value="'+escAttr(p.source)+'" oninput="updateProject('+issueIdx+','+pIdx+',\'source\',this.value)"></td>'+
-      '<td><input type="text" value="'+escAttr(p.dept)+'" oninput="updateProject('+issueIdx+','+pIdx+',\'dept\',this.value)"></td>'+
-      '<td><button class="btn sm danger" onclick="removeProject('+issueIdx+','+pIdx+')">ลบ</button></td>';
-    tbody.appendChild(tr);
+    const inp=(k,n)=>'<td><input type="text" value="'+escAttr(p[k])+'" data-i="'+i+'" data-p="'+pi+'" data-n="'+n+'"'+
+      ' onfocus="this.dataset.before=this.value" onblur="p02Blur(this)" oninput="updateProject('+i+','+pi+',\''+k+'\',this.value)"></td>';
+    let bud="";
+    YEARS.forEach(y=>{ bud+='<td><input type="number" class="mono" value="'+escAttr(p.budget[y])+'" data-i="'+i+'" data-p="'+pi+'" data-n="งบ '+y+'"'+
+      ' onfocus="this.dataset.before=this.value" onblur="p02Blur(this)" oninput="updateProject('+i+','+pi+',null,this.value,\''+y+'\')"></td>'; });
+    tr.innerHTML='<td class="nm">'+(pi+1)+"</td>"+F.map(f=>inp(f[0],f[1])).join("")+bud+
+      G.map(f=>inp(f[0],f[1])).join("")+
+      '<td><button class="btn sm gentle" onclick="removeProject('+i+','+pi+')">ลบ</button></td>';
+    tb.appendChild(tr);
   });
-  updateP02Totals(issueIdx);
+  updateTotals(i);
+  if(isViewer()) applyRoleLock();
 }
-
 function renderP01(){
-  const tbody=document.querySelector("#tbl_p01 tbody");
-  const tfoot=document.querySelector("#tbl_p01 tfoot");
-  if(!tbody) return;
-  tbody.innerHTML="";
-  let grandCount=0, grandBudget=0;
-  DATA.issues.forEach((issue,idx)=>{
-    const projs=DATA.p02[issueKey(null,idx)]||[];
-    let sum=0;
-    projs.forEach(p=>YEARS.forEach(y=>sum+=parseFloat(p.budget[y])||0));
-    grandCount+=projs.length; grandBudget+=sum;
+  const tb=document.querySelector("#tbl_p01 tbody"),tf=document.querySelector("#tbl_p01 tfoot");
+  if(!tb) return;
+  tb.innerHTML=""; let gc=0,gb=0;
+  DATA.issues.forEach((iss,i)=>{
+    const ps=DATA.p02[issueKey(null,i)]||[]; let s=0;
+    ps.forEach(p=>YEARS.forEach(y=>s+=parseFloat(p.budget[y])||0));
+    gc+=ps.length; gb+=s;
     const tr=document.createElement("tr");
-    tr.innerHTML='<td>'+(idx+1)+'. '+escHtml(issue.issue||'(ไม่มีชื่อ)')+'</td><td>'+projs.length+'</td><td>'+sum.toLocaleString()+'</td>';
-    tbody.appendChild(tr);
+    tr.innerHTML='<td style="padding:16px 14px">'+(i+1)+". "+escHtml(iss.issue||"(ยังไม่ตั้งชื่อ)")+
+      '</td><td class="mono" style="padding:16px 14px">'+ps.length+
+      '</td><td class="mono" style="padding:16px 14px">'+s.toLocaleString()+"</td>";
+    tb.appendChild(tr);
   });
-  tfoot.innerHTML='<tr class="rowtot"><td>รวมทั้งสิ้น</td><td>'+grandCount+'</td><td>'+grandBudget.toLocaleString()+'</td></tr>';
+  tf.innerHTML='<tr class="tot"><td style="padding:16px 14px">รวมทั้งสิ้น</td><td class="mono" style="padding:16px 14px">'+gc+
+    '</td><td class="mono" style="padding:16px 14px">'+gb.toLocaleString()+"</td></tr>";
 }
 
 /* ============================================================
-   RENDER: Dashboard
+   DASHBOARD
 ============================================================ */
-function pctOf(list){
-  if(list.length===0) return 0;
-  const filled=list.filter(f=>(DATA.s1[f.id]||"").trim().length>0).length;
-  return Math.round(filled/list.length*100);
-}
+function pctOf(l){ if(!l.length) return 0; return Math.round(l.filter(f=>(DATA.s1[f.id]||"").trim()).length/l.length*100); }
 function renderDashboard(){
-  const pcts=S1_FIELDS.map(pctOf);
-  pcts.forEach((p,i)=>{
-    const el=document.getElementById("pct-g"+i);
-    if(el) el.textContent=p+"%";
-    const nav=document.querySelector('[data-nav="s1-group-'+i+'"]');
-    if(nav) nav.classList.toggle("done", pcts[i]===100);
+  const p=S1_FIELDS.map(pctOf);
+  p.forEach((v,i)=>{
+    const e=document.getElementById("pct-g"+i); if(e) e.textContent=v+"%";
+    const n=document.querySelector('[data-nav="s1-group-'+i+'"]'); if(n) n.classList.toggle("done",v===100);
   });
-  const totalFields=S1_FIELDS.flat().length;
-  const totalFilled=S1_FIELDS.flat().filter(f=>(DATA.s1[f.id]||"").trim().length>0).length;
-  const s2filled=["2_1","2_2"].filter(k=>(DATA[k]||"").trim().length>0).length;
-  const projCount=Object.values(DATA.p02).reduce((a,arr)=>a+(arr?arr.length:0),0);
-
+  const all=S1_FIELDS.flat(), fill=all.filter(f=>(DATA.s1[f.id]||"").trim()).length;
+  const s2=["2_1","2_2"].filter(k=>(DATA[k]||"").trim()).length;
+  const pc=Object.values(DATA.p02).reduce((a,x)=>a+(x?x.length:0),0);
   const cards=[
-    {label:"ส่วนที่ 1: ข้อมูลพื้นฐาน", val:totalFilled+"/"+totalFields, sub:"ด้านที่กรอกแล้ว", pct:Math.round(totalFilled/totalFields*100)},
-    {label:"ส่วนที่ 2: ประเด็นการพัฒนา", val:DATA.issues.length, sub:"ประเด็นที่กำหนดไว้", pct:Math.min(100,DATA.issues.length*20)},
-    {label:"ส่วนที่ 3: โครงการพัฒนา", val:projCount, sub:"โครงการทั้งหมด (ผ.02)", pct:Math.min(100,projCount*10)},
-    {label:"วิสัยทัศน์ & นโยบาย", val:s2filled+"/2", sub:"กรอกแล้ว", pct:s2filled*50}
+    {ic:"📖",tone:"",lbl:"ส่วนที่ 1 · ข้อมูลพื้นฐาน",val:fill+" / "+all.length,sub:"ด้านที่กรอกแล้ว",pct:Math.round(fill/all.length*100)},
+    {ic:"🎯",tone:"berry",lbl:"ส่วนที่ 2 · ประเด็นการพัฒนา",val:DATA.issues.length,sub:"ประเด็นที่กำหนดไว้",pct:Math.min(100,DATA.issues.length*20)},
+    {ic:"🚀",tone:"leaf",lbl:"ส่วนที่ 3 · โครงการ (ผ.02)",val:pc,sub:"โครงการทั้งหมด",pct:Math.min(100,pc*10)},
+    {ic:"⭐",tone:"sun",lbl:"วิสัยทัศน์ & นโยบาย",val:s2+" / 2",sub:"หัวข้อที่กรอกแล้ว",pct:s2*50}
   ];
-  const wrap=document.getElementById("dashCards");
-  if(wrap) wrap.innerHTML=cards.map(c=>
-    '<div class="stat-card">'+
-      '<div class="ring" style="border-color:'+(c.pct>=100?'#2F6B5E':'#E2D9C2')+';color:'+(c.pct>=100?'#2F6B5E':'#16324F')+'">'+c.pct+'%</div>'+
-      '<h4>'+c.val+'</h4><p>'+c.label+' — '+c.sub+'</p></div>').join("");
+  const w=document.getElementById("dashCards");
+  if(w) w.innerHTML=cards.map(c=>
+    '<div class="stat"><div class="ico '+c.tone+'">'+c.ic+'</div>'+
+    '<div class="lbl">'+c.lbl+'</div><h4>'+c.val+'</h4><div class="sub">'+c.sub+'</div>'+
+    '<div class="prog"><span style="width:'+c.pct+'%"></span></div>'+
+    '<span class="pc">'+(c.pct>=100?"✓ ครบถ้วนแล้ว":"คืบหน้า "+c.pct+"%")+'</span></div>').join("");
+  renderFeed();
 }
 
 /* ============================================================
-   NAVIGATION
+   NAV
 ============================================================ */
-const PAGE_TITLES = {
-  dashboard:["ภาพรวมการจัดทำแผน","ติดตามความคืบหน้าการกรอกข้อมูลแผนพัฒนาท้องถิ่น ฉบับที่ 3 (พ.ศ. 2571-2575)"],
-  "s1-group-0":["ส่วนที่ 1 · กายภาพ ประชากร และคมนาคม","ด้านที่ 1.1 – 1.10"],
-  "s1-group-1":["ส่วนที่ 1 · สังคม การศึกษา และวัฒนธรรม","ด้านที่ 1.11 – 1.20"],
-  "s1-group-2":["ส่วนที่ 1 · สาธารณูปโภคและบริการสาธารณะ","ด้านที่ 1.21 – 1.25"],
-  "s1-group-3":["ส่วนที่ 1 · ทรัพยากรธรรมชาติและเศรษฐกิจ","ด้านที่ 1.26 – 1.37"],
-  s2:["ส่วนที่ 2 · วิสัยทัศน์และความสัมพันธ์","วิสัยทัศน์ นโยบายผู้บริหาร และความสัมพันธ์กับแผนระดับต่าง ๆ"],
-  s2b:["ส่วนที่ 2 · ประเด็น เป้าหมาย และการวิเคราะห์","ประเด็นการพัฒนาท้องถิ่น จุดมุ่งหมาย การวิเคราะห์ปัจจัย และสรุปภาพรวม"],
-  s3a:["ส่วนที่ 3 · แบบ ผ.01","บัญชีสรุปโครงการพัฒนาท้องถิ่น (คำนวณอัตโนมัติจาก ผ.02)"],
-  s3b:["ส่วนที่ 3 · แบบ ผ.02","บัญชีรายละเอียดโครงการพัฒนาท้องถิ่น แยกตามประเด็นการพัฒนา"],
-  ai:["วิเคราะห์ข้อมูลด้วย AI","ใช้ Google Gemini ช่วยตรวจสอบและให้ข้อเสนอแนะบนข้อมูลที่กรอกไว้"],
-  export:["ส่งออกเอกสาร","ส่งออกร่างแผนพัฒนาท้องถิ่นเป็น Word, Excel และ PDF"]
+const TITLES={
+  dashboard:["ภาพรวม","ติดตามความคืบหน้าแผนพัฒนาท้องถิ่น ฉบับที่ 3 (พ.ศ. 2571–2575)"],
+  "s1-group-0":["กายภาพ ประชากร และคมนาคม","ส่วนที่ 1 · ด้านที่ 1.1 – 1.10"],
+  "s1-group-1":["สังคม การศึกษา และวัฒนธรรม","ส่วนที่ 1 · ด้านที่ 1.11 – 1.20"],
+  "s1-group-2":["สาธารณูปโภคและบริการสาธารณะ","ส่วนที่ 1 · ด้านที่ 1.21 – 1.25"],
+  "s1-group-3":["ทรัพยากรธรรมชาติและเศรษฐกิจ","ส่วนที่ 1 · ด้านที่ 1.26 – 1.37"],
+  s2:["วิสัยทัศน์และความสัมพันธ์","ส่วนที่ 2 · วิสัยทัศน์ นโยบาย และความสัมพันธ์กับแผนระดับต่าง ๆ"],
+  s2b:["ประเด็น เป้าหมาย และการวิเคราะห์","ส่วนที่ 2 · ข้อ 2.4 – 2.7"],
+  s3a:["แบบ ผ.01","ส่วนที่ 3 · บัญชีสรุปโครงการพัฒนาท้องถิ่น"],
+  s3b:["แบบ ผ.02","ส่วนที่ 3 · บัญชีรายละเอียดโครงการ แยกตามประเด็น"],
+  audit:["ประวัติการแก้ไข","ตรวจสอบย้อนหลังว่าใครแก้อะไร เมื่อไร"],
+  users:["จัดการผู้ใช้งาน","กำหนดสิทธิ์และดูแลบัญชีผู้ใช้ในระบบ"],
+  ai:["ผู้ช่วย AI","ให้ Gemini ช่วยตรวจสอบและให้ข้อเสนอแนะบนข้อมูลที่กรอกไว้"],
+  export:["ส่งออกเอกสาร","ส่งออกร่างแผนเป็น Word, Excel และ PDF"]
 };
-
-function goTo(pageKey){
-  const target=document.getElementById("page-"+pageKey);
-  if(!target) return;
+function goTo(k){
+  const t=document.getElementById("page-"+k); if(!t) return;
+  if(k==="users"&&SESSION.role!=="admin"){ toast("หน้านี้สำหรับผู้ดูแลระบบเท่านั้น","coral"); return; }
   document.querySelectorAll(".page").forEach(p=>p.style.display="none");
-  target.style.display="block";
-  document.querySelectorAll(".navitem").forEach(n=>n.classList.toggle("active", n.dataset.nav===pageKey));
-  document.getElementById("page-title").textContent=PAGE_TITLES[pageKey][0];
-  document.getElementById("page-desc").textContent=PAGE_TITLES[pageKey][1];
+  t.style.display="block";
+  document.querySelectorAll(".navitem").forEach(n=>n.classList.toggle("active",n.dataset.nav===k));
+  document.getElementById("page-title").textContent=TITLES[k][0];
+  document.getElementById("page-desc").textContent=TITLES[k][1];
   document.getElementById("sidebar").classList.remove("open");
   window.scrollTo(0,0);
-  if(pageKey==="s3b") renderP02();
-  if(pageKey==="s3a") renderP01();
+  if(k==="s3b") renderP02();
+  if(k==="s3a") renderP01();
+  if(k==="audit"){ fillAuditFilter(); renderAudit(); }
+  if(k==="users") renderUsers();
 }
 document.querySelectorAll(".navitem").forEach(n=>n.addEventListener("click",()=>goTo(n.dataset.nav)));
 
 /* ============================================================
-   IMPORT / EXPORT JSON
+   IMPORT / EXPORT
 ============================================================ */
+function downloadBlob(b,n){
+  const u=URL.createObjectURL(b),a=document.createElement("a");
+  a.href=u; a.download=n; document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(u);
+}
 function exportJson(){
   collectAllInputs();
-  const blob=new Blob([JSON.stringify(DATA,null,2)],{type:"application/json"});
-  downloadBlob(blob, "donkaeo-plan-backup.json");
-  showToastMsg("ส่งออกไฟล์สำรองแล้ว");
+  downloadBlob(new Blob([JSON.stringify(DATA,null,2)],{type:"application/json"}),"donkaeo-plan-backup.json");
+  toast("ส่งออกไฟล์สำรองแล้ว เก็บไว้ให้ปลอดภัยนะครับ","leaf");
 }
-function importJson(){ document.getElementById("fileInput").click(); }
-document.getElementById("fileInput").addEventListener("change",(e)=>{
-  const file=e.target.files[0]; if(!file) return;
-  const reader=new FileReader();
-  reader.onload=async ()=>{
-    if(!confirm("การนำเข้าไฟล์นี้จะเขียนทับข้อมูลที่เพื่อนร่วมงานกรอกไว้บนระบบส่วนกลางทั้งหมด ยืนยันหรือไม่?")){
-      e.target.value=""; return;
-    }
+function importJson(){ if(guardEdit()) document.getElementById("fileInput").click(); }
+document.getElementById("fileInput").addEventListener("change",e=>{
+  const f=e.target.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=async()=>{
+    if(!confirm("การนำเข้าจะเขียนทับข้อมูลส่วนกลางที่ทุกคนกรอกไว้ทั้งหมด\nการกระทำนี้ถูกบันทึกในประวัติ\n\nยืนยันหรือไม่?")){ e.target.value=""; return; }
     try{
-      const parsed=JSON.parse(reader.result);
-      DATA=Object.assign({s1:{},issues:[],goals:[],factors:[],summary:[],p02:{}}, parsed);
+      const p=JSON.parse(r.result);
+      DATA=Object.assign({s1:{},issues:[],goals:[],factors:[],summary:[],p02:{},meta:{}},p);
       renderEverything();
       await Promise.all(GROUPS.map(pushGroup));
-      showToastMsg("นำเข้าข้อมูลและซิงค์ไปยังเพื่อนร่วมงานแล้ว");
-    }catch(err){ showToastMsg("ไฟล์ไม่ถูกต้อง: "+err.message); }
+      await logAudit({section:"ระบบ",field:"import",label:"นำเข้าไฟล์สำรอง "+f.name,action:"import",before:"",after:f.name});
+      toast("นำเข้าข้อมูลและซิงค์เรียบร้อยแล้ว","leaf");
+    }catch(err){ toast("ไฟล์ยังไม่ถูกต้อง: "+err.message,"coral"); }
     e.target.value="";
   };
-  reader.readAsText(file);
+  r.readAsText(f);
 });
-function downloadBlob(blob, filename){
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement("a");
-  a.href=url; a.download=filename; document.body.appendChild(a); a.click();
-  document.body.removeChild(a); URL.revokeObjectURL(url);
-}
-
-/* ============================================================
-   EXPORT: Excel
-============================================================ */
 function exportExcel(){
   collectAllInputs();
-  const wb=XLSX.utils.book_new();
-
-  const s1rows=[["ด้านที่","หัวข้อ","ข้อมูล"]];
-  S1_FIELDS.flat().forEach(f=>s1rows.push([f.id.replace('1_','1.'), f.t, DATA.s1[f.id]||""]));
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(s1rows), "ส่วนที่1 ข้อมูลพื้นฐาน");
-
-  const s2rows=[
-    ["หัวข้อ","เนื้อหา"],
-    ["2.1 วิสัยทัศน์", DATA["2_1"]||""],
-    ["2.2 นโยบายผู้บริหาร", DATA["2_2"]||""],
-    ["2.3.1 ยุทธศาสตร์ชาติ 20 ปี", DATA["2_3_1"]||""],
-    ["2.3.2 แผนพัฒนาเศรษฐกิจฯ ฉบับ13/14", DATA["2_3_2"]||""],
-    ["2.3.3 SDGs", DATA["2_3_3"]||""],
-    ["2.3.4 กลุ่มจังหวัด/ภาค", DATA["2_3_4"]||""],
-    ["2.3.5 แผนพัฒนาจังหวัด", DATA["2_3_5"]||""],
-    ["2.3.6 ประเด็นพัฒนา อปท.ระดับจังหวัด", DATA["2_3_6"]||""]
-  ];
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(s2rows), "ส่วนที่2 วิสัยทัศน์");
-
-  const issueRows=[["#","ประเด็นการพัฒนา","แนวทาง/กลยุทธ์","ตัวชี้วัด KPIs"]];
-  DATA.issues.forEach((r,i)=>issueRows.push([i+1,r.issue,r.approach,r.kpi]));
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(issueRows), "2.4 ประเด็นพัฒนา");
-
-  const goalRows=[["ประเด็นการพัฒนา","Goals","ปี71","ปี72","ปี73","ปี74","ปี75"]];
-  DATA.goals.forEach(r=>goalRows.push([r.issue,r.goal,r.y71,r.y72,r.y73,r.y74,r.y75]));
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(goalRows), "2.5 เป้าหมาย");
-
-  const factorRows=[["#","ประเด็น","หลักการวิเคราะห์","ผลการวิเคราะห์","ผลกระทบ"]];
-  DATA.factors.forEach((r,i)=>factorRows.push([i+1,r.issue,r.principle,r.result,r.impact]));
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(factorRows), "2.6 วิเคราะห์ปัจจัย");
-
-  const sumRows=[["#","ประเด็น","Goals","ผลที่คาดว่าจะได้รับ","หน่วยงาน"]];
-  DATA.summary.forEach((r,i)=>sumRows.push([i+1,r.issue,r.goal,r.expect,r.dept]));
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sumRows), "2.7 สรุปภาพรวม");
-
-  const p01rows=[["ประเด็นการพัฒนา","จำนวนโครงการ","งบประมาณรวม (บาท)"]];
-  let gCount=0,gBudget=0;
-  DATA.issues.forEach((issue,idx)=>{
-    const projs=DATA.p02[issueKey(null,idx)]||[];
-    let sum=0; projs.forEach(p=>YEARS.forEach(y=>sum+=parseFloat(p.budget[y])||0));
-    gCount+=projs.length; gBudget+=sum;
-    p01rows.push([issue.issue, projs.length, sum]);
-  });
-  p01rows.push(["รวมทั้งสิ้น", gCount, gBudget]);
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(p01rows), "ผ.01");
-
-  const p02rows=[["ประเด็นการพัฒนา","โครงการ","วัตถุประสงค์","เป้าหมาย"].concat(YEARS,["ตัวชี้วัด (KPI)","ผลที่คาดว่าจะได้รับ","ที่มาของโครงการ","หน่วยงานรับผิดชอบ"])];
-  DATA.issues.forEach((issue,idx)=>{
-    (DATA.p02[issueKey(null,idx)]||[]).forEach(p=>{
-      p02rows.push([issue.issue,p.project,p.obj,p.target].concat(YEARS.map(y=>p.budget[y]||0),[p.kpi,p.result,p.source,p.dept]));
-    });
-  });
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(p02rows), "ผ.02");
-
-  XLSX.writeFile(wb, "แผนพัฒนาท้องถิ่น_ดอนแก้ว_2571-2575.xlsx");
-  showToastMsg("ส่งออกไฟล์ Excel แล้ว");
+  const wb=XLSX.utils.book_new(),S=XLSX.utils.aoa_to_sheet,A=XLSX.utils.book_append_sheet;
+  const r1=[["ด้านที่","หัวข้อ","ข้อมูล","แก้ไขล่าสุดโดย","เมื่อ"]];
+  S1_FIELDS.flat().forEach(f=>{const m=DATA.meta[f.id]||{};
+    r1.push([f.id.replace("1_","1."),f.t,DATA.s1[f.id]||"",m.by||"",m.at?fmtTime(m.at):""]);});
+  A(wb,S(r1),"ส่วนที่1 ข้อมูลพื้นฐาน");
+  A(wb,S([["หัวข้อ","เนื้อหา"],["2.1 วิสัยทัศน์",DATA["2_1"]||""],["2.2 นโยบายผู้บริหาร",DATA["2_2"]||""],
+    ["2.3.1 ยุทธศาสตร์ชาติ",DATA["2_3_1"]||""],["2.3.2 แผนพัฒนาเศรษฐกิจฯ",DATA["2_3_2"]||""],
+    ["2.3.3 SDGs",DATA["2_3_3"]||""],["2.3.4 กลุ่มจังหวัด/ภาค",DATA["2_3_4"]||""],
+    ["2.3.5 แผนพัฒนาจังหวัด",DATA["2_3_5"]||""],["2.3.6 อปท.ระดับจังหวัด",DATA["2_3_6"]||""]]),"ส่วนที่2 วิสัยทัศน์");
+  const ri=[["#","ประเด็น","แนวทาง","KPIs"]]; DATA.issues.forEach((r,i)=>ri.push([i+1,r.issue,r.approach,r.kpi]));
+  A(wb,S(ri),"2.4 ประเด็นพัฒนา");
+  const rg=[["ประเด็น","Goals","2571","2572","2573","2574","2575"]];
+  DATA.goals.forEach(r=>rg.push([r.issue,r.goal,r.y71,r.y72,r.y73,r.y74,r.y75])); A(wb,S(rg),"2.5 เป้าหมาย");
+  const rf=[["#","ประเด็น","หลักการ","ผลวิเคราะห์","ผลกระทบ"]];
+  DATA.factors.forEach((r,i)=>rf.push([i+1,r.issue,r.principle,r.result,r.impact])); A(wb,S(rf),"2.6 วิเคราะห์ปัจจัย");
+  const rs=[["#","ประเด็น","Goals","ผลที่คาดว่าจะได้รับ","หน่วยงาน"]];
+  DATA.summary.forEach((r,i)=>rs.push([i+1,r.issue,r.goal,r.expect,r.dept])); A(wb,S(rs),"2.7 สรุปภาพรวม");
+  const r01=[["ประเด็น","จำนวนโครงการ","งบประมาณรวม"]]; let gc=0,gb=0;
+  DATA.issues.forEach((iss,i)=>{const ps=DATA.p02[issueKey(null,i)]||[];let s=0;
+    ps.forEach(p=>YEARS.forEach(y=>s+=parseFloat(p.budget[y])||0));gc+=ps.length;gb+=s;r01.push([iss.issue,ps.length,s]);});
+  r01.push(["รวมทั้งสิ้น",gc,gb]); A(wb,S(r01),"ผ.01");
+  const r02=[["ประเด็น","โครงการ","วัตถุประสงค์","เป้าหมาย"].concat(YEARS,["KPI","ผลที่คาด","ที่มา","หน่วยงาน"])];
+  DATA.issues.forEach((iss,i)=>(DATA.p02[issueKey(null,i)]||[]).forEach(p=>
+    r02.push([iss.issue,p.project,p.obj,p.target].concat(YEARS.map(y=>p.budget[y]||0),[p.kpi,p.result,p.source,p.dept]))));
+  A(wb,S(r02),"ผ.02");
+  const ra=[["วันเวลา","ผู้แก้ไข","ส่วน","หัวข้อ","การกระทำ"]];
+  AUDIT.slice(0,400).forEach(a=>ra.push([fmtTime(a.ts),a.name,a.section,a.label||a.field,ACTION_LABEL[a.action]||a.action]));
+  A(wb,S(ra),"ประวัติการแก้ไข");
+  XLSX.writeFile(wb,"แผนพัฒนาท้องถิ่น_ดอนแก้ว_2571-2575.xlsx");
+  toast("ส่งออกไฟล์ Excel แล้ว","leaf");
 }
-
-/* ============================================================
-   Build full report HTML (shared by Word & PDF)
-============================================================ */
-function tableHtml(headers, rows){
-  let h='<table border="1" cellspacing="0" cellpadding="6" style="border-collapse:collapse;width:100%;font-size:12px;margin-bottom:14px;">'+
-    '<tr style="background:#16324F;color:#fff;">'+headers.map(x=>'<th>'+x+'</th>').join("")+'</tr>';
-  if(rows.length===0){ h+='<tr><td colspan="'+headers.length+'" style="text-align:center;color:#888;">- ไม่มีข้อมูล -</td></tr>'; }
-  rows.forEach(r=>{ h+='<tr>'+r.map(c=>'<td>'+(c===undefined||c===null||c===""?"-":c)+'</td>').join("")+'</tr>'; });
-  return h+"</table>";
+function tableHtml(h,rows){
+  let s='<table border="1" cellspacing="0" cellpadding="7" style="border-collapse:collapse;width:100%;font-size:12px;margin-bottom:16px;">'+
+    '<tr style="background:#F1F5F9">'+h.map(x=>'<th style="text-align:left">'+x+"</th>").join("")+"</tr>";
+  if(!rows.length) s+='<tr><td colspan="'+h.length+'" style="text-align:center;color:#94A3B8">— ยังไม่มีข้อมูล —</td></tr>';
+  rows.forEach(r=>{s+="<tr>"+r.map(c=>"<td>"+(c==null||c===""?"-":c)+"</td>").join("")+"</tr>";});
+  return s+"</table>";
 }
-
 function buildReportHtml(){
-  collectAllInputs();
-  const esc=escHtml;
-  let s1html="";
-  S1_FIELDS.flat().forEach(f=>{
-    s1html+='<h4>'+f.id.replace('1_','1.')+' '+esc(f.t)+'</h4><p>'+esc(DATA.s1[f.id]||'-').replace(/\n/g,'<br>')+'</p>';
+  collectAllInputs(); const e=escHtml;
+  let s1=""; S1_FIELDS.flat().forEach(f=>{
+    s1+="<h4>"+f.id.replace("1_","1.")+" "+e(f.t)+"</h4><p>"+e(DATA.s1[f.id]||"-").replace(/\n/g,"<br>")+"</p>";});
+  const t1=tableHtml(["#","ประเด็น","แนวทาง","KPIs"],DATA.issues.map((r,i)=>[i+1,e(r.issue),e(r.approach),e(r.kpi)]));
+  const t2=tableHtml(["ประเด็น","Goals","2571","2572","2573","2574","2575"],
+    DATA.goals.map(r=>[e(r.issue),e(r.goal),e(r.y71),e(r.y72),e(r.y73),e(r.y74),e(r.y75)]));
+  const t3=tableHtml(["#","ประเด็น","หลักการ","ผลวิเคราะห์","ผลกระทบ"],
+    DATA.factors.map((r,i)=>[i+1,e(r.issue),e(r.principle),e(r.result),e(r.impact)]));
+  const t4=tableHtml(["#","ประเด็น","Goals","ผลที่คาดว่าจะได้รับ","หน่วยงาน"],
+    DATA.summary.map((r,i)=>[i+1,e(r.issue),e(r.goal),e(r.expect),e(r.dept)]));
+  let gc=0,gb=0;
+  const b01=DATA.issues.map((iss,i)=>{const ps=DATA.p02[issueKey(null,i)]||[];let s=0;
+    ps.forEach(p=>YEARS.forEach(y=>s+=parseFloat(p.budget[y])||0));gc+=ps.length;gb+=s;
+    return [e(iss.issue),ps.length,s.toLocaleString()];});
+  b01.push(["<strong>รวมทั้งสิ้น</strong>",gc,gb.toLocaleString()]);
+  let p02="";
+  DATA.issues.forEach((iss,i)=>{
+    const ps=DATA.p02[issueKey(null,i)]||[];
+    p02+="<h4>"+(i+1)+". ประเด็น: "+e(iss.issue||"-")+"</h4>"+
+      tableHtml(["#","โครงการ","วัตถุประสงค์","เป้าหมาย"].concat(YEARS,["KPI","ผลที่คาด","ที่มา","หน่วยงาน"]),
+        ps.map((p,j)=>[j+1,e(p.project),e(p.obj),e(p.target)].concat(YEARS.map(y=>p.budget[y]||"-"),[e(p.kpi),e(p.result),e(p.source),e(p.dept)])));
   });
-
-  const issuesTbl = tableHtml(["#","ประเด็นการพัฒนาท้องถิ่น","แนวทาง/กลยุทธ์","ตัวชี้วัด (KPIs)"],
-    DATA.issues.map((r,i)=>[i+1,esc(r.issue),esc(r.approach),esc(r.kpi)]));
-  const goalsTbl = tableHtml(["ประเด็นการพัฒนา","Goals","2571","2572","2573","2574","2575"],
-    DATA.goals.map(r=>[esc(r.issue),esc(r.goal),esc(r.y71),esc(r.y72),esc(r.y73),esc(r.y74),esc(r.y75)]));
-  const factorsTbl = tableHtml(["#","ประเด็น","หลักการวิเคราะห์","ผลการวิเคราะห์","ผลกระทบ"],
-    DATA.factors.map((r,i)=>[i+1,esc(r.issue),esc(r.principle),esc(r.result),esc(r.impact)]));
-  const summaryTbl = tableHtml(["#","ประเด็น","Goals","ผลที่คาดว่าจะได้รับ","หน่วยงาน"],
-    DATA.summary.map((r,i)=>[i+1,esc(r.issue),esc(r.goal),esc(r.expect),esc(r.dept)]));
-
-  let gCount=0,gBudget=0;
-  const p01body=DATA.issues.map((issue,idx)=>{
-    const projs=DATA.p02[issueKey(null,idx)]||[];
-    let sum=0; projs.forEach(p=>YEARS.forEach(y=>sum+=parseFloat(p.budget[y])||0));
-    gCount+=projs.length; gBudget+=sum;
-    return [esc(issue.issue), projs.length, sum.toLocaleString()];
-  });
-  p01body.push(["<strong>รวมทั้งสิ้น</strong>",gCount,gBudget.toLocaleString()]);
-  const p01Tbl = tableHtml(["ประเด็นการพัฒนา","จำนวนโครงการ","งบประมาณรวม (บาท)"], p01body);
-
-  let p02html="";
-  DATA.issues.forEach((issue,idx)=>{
-    const projs=DATA.p02[issueKey(null,idx)]||[];
-    p02html+='<h4>'+(idx+1)+'. ประเด็นการพัฒนาท้องถิ่น: '+esc(issue.issue||'-')+'</h4>';
-    p02html+=tableHtml(["#","โครงการ","วัตถุประสงค์","เป้าหมาย"].concat(YEARS,["ตัวชี้วัด (KPI)","ผลที่คาดว่าจะได้รับ","ที่มาของโครงการ","หน่วยงาน"]),
-      projs.map((p,i)=>[i+1,esc(p.project),esc(p.obj),esc(p.target)].concat(YEARS.map(y=>p.budget[y]||"-"),[esc(p.kpi),esc(p.result),esc(p.source),esc(p.dept)])));
-  });
-
-  return '<div style="font-family:\'Sarabun\',sans-serif;">'+
-    '<div style="text-align:center;margin-bottom:30px;">'+
-      '<h1 style="margin-bottom:4px;">แผนพัฒนาท้องถิ่น ฉบับที่ 3 (พ.ศ. 2571-2575)</h1>'+
-      '<h2 style="font-weight:400;margin-top:0;">เทศบาลเมืองดอนแก้ว</h2>'+
-      '<p>จัดทำตามระเบียบกระทรวงมหาดไทยว่าด้วยการจัดทำแผนพัฒนาขององค์กรปกครองส่วนท้องถิ่น พ.ศ. 2548 และที่แก้ไขเพิ่มเติม</p>'+
-    '</div>'+
-    '<h2>คำนำ</h2>'+
-    '<p>แผนพัฒนาท้องถิ่นฉบับนี้จัดทำขึ้นเพื่อเป็นกรอบแนวทางการพัฒนาเทศบาลเมืองดอนแก้ว ระยะ 5 ปี (พ.ศ. 2571-2575) ให้สอดคล้องกับยุทธศาสตร์ชาติ 20 ปี แผนพัฒนาเศรษฐกิจและสังคมแห่งชาติ เป้าหมายการพัฒนาที่ยั่งยืน (SDGs) และแผนพัฒนาจังหวัด/กลุ่มจังหวัด</p>'+
-    '<h2>ส่วนที่ 1 สภาพทั่วไปและข้อมูลพื้นฐาน</h2>'+s1html+
-    '<h2>ส่วนที่ 2 ประเด็นการพัฒนาท้องถิ่น</h2>'+
-    '<h3>2.1 วิสัยทัศน์</h3><p>'+esc(DATA["2_1"]||"-")+'</p>'+
-    '<h3>2.2 นโยบายผู้บริหารท้องถิ่น</h3><p>'+esc(DATA["2_2"]||"-")+'</p>'+
-    '<h3>2.3 ความสัมพันธ์ประเด็นการพัฒนาท้องถิ่น</h3>'+
-    '<p><strong>2.3.1 ยุทธศาสตร์ชาติ 20 ปี:</strong> '+esc(DATA["2_3_1"]||"-")+'</p>'+
-    '<p><strong>2.3.2 แผนพัฒนาเศรษฐกิจฯ ฉบับ 13/14:</strong> '+esc(DATA["2_3_2"]||"-")+'</p>'+
-    '<p><strong>2.3.3 SDGs:</strong> '+esc(DATA["2_3_3"]||"-")+'</p>'+
-    '<p><strong>2.3.4 กลุ่มจังหวัด/ภาค:</strong> '+esc(DATA["2_3_4"]||"-")+'</p>'+
-    '<p><strong>2.3.5 แผนพัฒนาจังหวัด:</strong> '+esc(DATA["2_3_5"]||"-")+'</p>'+
-    '<p><strong>2.3.6 ประเด็นพัฒนา อปท. ระดับจังหวัด:</strong> '+esc(DATA["2_3_6"]||"-")+'</p>'+
-    '<h3>2.4 ประเด็นการพัฒนาท้องถิ่น</h3>'+issuesTbl+
-    '<h3>2.5 จุดมุ่งหมายการพัฒนาท้องถิ่น</h3>'+goalsTbl+
-    '<h3>2.6 การวิเคราะห์ปัจจัยและสถานการณ์การเปลี่ยนแปลง</h3>'+factorsTbl+
-    '<h3>2.7 สรุปภาพรวมประเด็นการพัฒนาท้องถิ่น</h3>'+summaryTbl+
-    '<h2>ส่วนที่ 3 การนำแผนพัฒนาท้องถิ่นสู่การปฏิบัติ</h2>'+
-    '<h3>3.1 แบบ ผ.01 บัญชีสรุปโครงการพัฒนาท้องถิ่น</h3>'+p01Tbl+
-    '<h3>3.2 แบบ ผ.02 บัญชีรายละเอียดโครงการพัฒนาท้องถิ่น</h3>'+p02html+
-  '</div>';
+  return '<div><div style="text-align:center;margin-bottom:36px">'+
+    "<h1>แผนพัฒนาท้องถิ่น ฉบับที่ 3 (พ.ศ. 2571–2575)</h1>"+
+    '<h2 style="font-weight:400">เทศบาลเมืองดอนแก้ว</h2>'+
+    "<p>จัดทำตามระเบียบกระทรวงมหาดไทยว่าด้วยการจัดทำแผนพัฒนาขององค์กรปกครองส่วนท้องถิ่น พ.ศ. 2548 และที่แก้ไขเพิ่มเติม</p></div>"+
+    "<h2>คำนำ</h2><p>แผนพัฒนาท้องถิ่นฉบับนี้จัดทำขึ้นเพื่อเป็นกรอบแนวทางการพัฒนาเทศบาลเมืองดอนแก้ว ระยะ 5 ปี ให้สอดคล้องกับยุทธศาสตร์ชาติ 20 ปี แผนพัฒนาเศรษฐกิจและสังคมแห่งชาติ เป้าหมายการพัฒนาที่ยั่งยืน (SDGs) และแผนพัฒนาจังหวัด/กลุ่มจังหวัด</p>"+
+    "<h2>ส่วนที่ 1 สภาพทั่วไปและข้อมูลพื้นฐาน</h2>"+s1+
+    "<h2>ส่วนที่ 2 ประเด็นการพัฒนาท้องถิ่น</h2>"+
+    "<h3>2.1 วิสัยทัศน์</h3><p>"+e(DATA["2_1"]||"-")+"</p>"+
+    "<h3>2.2 นโยบายผู้บริหารท้องถิ่น</h3><p>"+e(DATA["2_2"]||"-")+"</p>"+
+    "<h3>2.3 ความสัมพันธ์กับแผนระดับต่าง ๆ</h3>"+
+    "<p><strong>2.3.1 ยุทธศาสตร์ชาติ 20 ปี:</strong> "+e(DATA["2_3_1"]||"-")+"</p>"+
+    "<p><strong>2.3.2 แผนพัฒนาเศรษฐกิจฯ:</strong> "+e(DATA["2_3_2"]||"-")+"</p>"+
+    "<p><strong>2.3.3 SDGs:</strong> "+e(DATA["2_3_3"]||"-")+"</p>"+
+    "<p><strong>2.3.4 กลุ่มจังหวัด/ภาค:</strong> "+e(DATA["2_3_4"]||"-")+"</p>"+
+    "<p><strong>2.3.5 แผนพัฒนาจังหวัด:</strong> "+e(DATA["2_3_5"]||"-")+"</p>"+
+    "<p><strong>2.3.6 อปท. ระดับจังหวัด:</strong> "+e(DATA["2_3_6"]||"-")+"</p>"+
+    "<h3>2.4 ประเด็นการพัฒนาท้องถิ่น</h3>"+t1+
+    "<h3>2.5 จุดมุ่งหมายการพัฒนา</h3>"+t2+
+    "<h3>2.6 การวิเคราะห์ปัจจัยและสถานการณ์</h3>"+t3+
+    "<h3>2.7 สรุปภาพรวมประเด็นการพัฒนา</h3>"+t4+
+    "<h2>ส่วนที่ 3 การนำแผนสู่การปฏิบัติ</h2>"+
+    "<h3>3.1 แบบ ผ.01 บัญชีสรุปโครงการ</h3>"+tableHtml(["ประเด็น","จำนวนโครงการ","งบประมาณรวม (บาท)"],b01)+
+    "<h3>3.2 แบบ ผ.02 บัญชีรายละเอียดโครงการ</h3>"+p02+"</div>";
 }
-
-/* ============================================================
-   EXPORT: Word / PDF  (escape <\/style> เพื่อไม่ให้ปิด tag ผิด)
-============================================================ */
 function exportWord(){
-  const content=buildReportHtml();
   const html='<!DOCTYPE html><html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">'+
     '<head><meta charset="utf-8"><title>แผนพัฒนาท้องถิ่น</title>'+
-    '<style>body{font-family:\'Sarabun\',sans-serif;font-size:14px;} h1,h2,h3,h4{color:#16324F;}<\/style>'+
-    '<\/head><body>'+content+'<\/body><\/html>';
-  const blob=new Blob(['\ufeff', html], {type:'application/msword'});
-  downloadBlob(blob, "แผนพัฒนาท้องถิ่น_ดอนแก้ว_2571-2575.doc");
-  showToastMsg("ส่งออกไฟล์ Word แล้ว");
+    "<style>body{font-family:'TH SarabunPSK','Sarabun',sans-serif;font-size:15px;color:#0F172A}h1,h2,h3,h4{color:#0F172A}<\/style>"+
+    "<\/head><body>"+buildReportHtml()+"<\/body><\/html>";
+  downloadBlob(new Blob(["\ufeff",html],{type:"application/msword"}),"แผนพัฒนาท้องถิ่น_ดอนแก้ว_2571-2575.doc");
+  toast("ส่งออกไฟล์ Word แล้ว","leaf");
 }
-
 function exportPdf(){
-  const content=buildReportHtml();
-  const w=window.open("", "_blank");
-  if(!w){ showToastMsg("เบราว์เซอร์บล็อกป๊อปอัป กรุณาอนุญาตแล้วลองใหม่"); return; }
+  const w=window.open("","_blank");
+  if(!w){ toast("เบราว์เซอร์บล็อกป๊อปอัป — อนุญาตแล้วลองใหม่นะครับ","coral"); return; }
   w.document.write('<!DOCTYPE html><html><head><meta charset="utf-8"><title>แผนพัฒนาท้องถิ่น ดอนแก้ว</title>'+
-    '<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">'+
-    '<style>'+
-      'body{font-family:\'Sarabun\',sans-serif;padding:30px;color:#20242B;}'+
-      'h1{font-size:22px;} h2{font-size:18px;color:#16324F;border-bottom:2px solid #B8912F;padding-bottom:4px;margin-top:26px;}'+
-      'h3{font-size:15px;color:#16324F;} h4{font-size:13.5px;margin-bottom:2px;}'+
-      'table{page-break-inside:auto;} tr{page-break-inside:avoid;}'+
-    '<\/style><\/head><body>'+content+'<\/body><\/html>');
+    '<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;600;700&display=swap" rel="stylesheet">'+
+    "<style>body{font-family:'Noto Sans Thai',sans-serif;padding:36px;color:#0F172A;line-height:1.7}"+
+    "h1{font-size:24px}h2{font-size:19px;border-bottom:2px solid #DBEAFE;padding-bottom:6px;margin-top:32px}"+
+    "h3{font-size:16px}h4{font-size:14px;margin-bottom:2px}"+
+    "table{page-break-inside:auto}tr{page-break-inside:avoid}td,th{border-color:#E2E8F0 !important}<\/style>"+
+    "<\/head><body>"+buildReportHtml()+"<\/body><\/html>");
   w.document.close();
-  setTimeout(()=>{ w.focus(); w.print(); }, 800);
-  showToastMsg("เปิดหน้าต่างพิมพ์แล้ว — เลือก 'บันทึกเป็น PDF' เพื่อดาวน์โหลด");
+  setTimeout(()=>{w.focus();w.print();},900);
+  toast("เปิดหน้าต่างพิมพ์แล้ว — เลือก 'บันทึกเป็น PDF'","leaf");
 }
 
 /* ============================================================
-   GEMINI: วิเคราะห์ภาพรวม
+   GEMINI OVERVIEW
 ============================================================ */
 function saveKey(){
   const k=document.getElementById("geminiKey").value.trim();
-  if(!k){ showToastMsg("กรุณาวางคีย์ก่อนบันทึก"); return; }
-  localStorage.setItem(GEMINI_KEY_STORAGE, k);
-  showToastMsg("บันทึกคีย์ในเครื่องนี้แล้ว");
+  if(!k){ toast("กรุณาวางคีย์ก่อนบันทึก","coral"); return; }
+  localStorage.setItem(GEMINI_KEY_STORAGE,k); toast("บันทึกคีย์ในเครื่องนี้แล้ว","leaf");
 }
-function loadKey(){
-  const k=localStorage.getItem(GEMINI_KEY_STORAGE);
-  if(k) document.getElementById("geminiKey").value=k;
-}
-
+function loadKey(){ const k=localStorage.getItem(GEMINI_KEY_STORAGE); if(k) document.getElementById("geminiKey").value=k; }
 async function runGemini(){
-  const statusEl=document.getElementById("aiStatus");
-  const resultEl=document.getElementById("aiResult");
-  const key=document.getElementById("geminiKey").value.trim();
-  if(!key){ statusEl.textContent="กรุณาใส่ Google API Key (Gemini) ก่อนใช้งาน"; return; }
+  const st=document.getElementById("aiStatus"),rs=document.getElementById("aiResult");
+  if(!document.getElementById("geminiKey").value.trim()){ st.textContent="กรุณาใส่ Google API Key ก่อนเริ่มวิเคราะห์"; return; }
   collectAllInputs();
-
   const task=document.getElementById("aiTask").value;
-  const dataSummary=buildAiContext(task);
-
-  const prompts={
-    completeness:"ตรวจสอบว่าข้อมูล 'สภาพทั่วไปและข้อมูลพื้นฐาน' ทั้ง 37 ด้าน ด้านใดยังกรอกไม่ครบหรือเนื้อหาสั้นเกินไป พร้อมข้อเสนอแนะสิ่งที่ควรเพิ่มเติมในแต่ละด้าน (ตอบเป็นรายการ)",
-    alignment:"ตรวจสอบความสอดคล้องระหว่างประเด็นการพัฒนาท้องถิ่นกับยุทธศาสตร์ชาติ 20 ปี, แผนพัฒนาเศรษฐกิจและสังคมแห่งชาติ, และเป้าหมาย SDGs ที่ระบุไว้ ชี้จุดที่ยังเชื่อมโยงไม่ชัดเจน และเสนอแนะแนวทางเชื่อมโยงเพิ่มเติม",
-    budget:"ตรวจสอบความสมเหตุสมผลของโครงการและงบประมาณในแบบ ผ.02 เช่น โครงการที่ไม่มีงบประมาณ งบประมาณที่อาจสูง/ต่ำผิดปกติ หรือวัตถุประสงค์ที่ไม่ชัดเจน พร้อมข้อเสนอแนะการปรับปรุง",
-    full:"วิเคราะห์ภาพรวมร่างแผนพัฒนาท้องถิ่นทั้งฉบับ ทั้งความครบถ้วน ความสอดคล้องเชิงยุทธศาสตร์ และความเหมาะสมของโครงการ/งบประมาณ พร้อมให้ข้อเสนอแนะเชิงนโยบาย 5-8 ข้อ"
-  };
-
-  const prompt = "คุณเป็นผู้เชี่ยวชาญด้านการวางแผนพัฒนาท้องถิ่นขององค์กรปกครองส่วนท้องถิ่นไทย ตามระเบียบกระทรวงมหาดไทยว่าด้วยการจัดทำแผนพัฒนาขององค์กรปกครองส่วนท้องถิ่น พ.ศ. 2548\n"+
-    "กรุณา"+prompts[task]+"\n"+
-    "โดยอ้างอิงจากข้อมูลร่างแผนพัฒนาท้องถิ่นเทศบาลเมืองดอนแก้วต่อไปนี้ (รูปแบบ JSON แบบย่อ):\n\n"+
-    dataSummary+"\n\nตอบเป็นภาษาไทย จัดรูปแบบเป็นหัวข้อและรายการที่อ่านง่าย";
-
-  statusEl.textContent="กำลังส่งข้อมูลไปวิเคราะห์กับ Gemini ...";
-  resultEl.style.display="none";
+  const P={completeness:"ตรวจสอบว่าข้อมูล 37 ด้าน ด้านใดยังกรอกไม่ครบหรือสั้นเกินไป พร้อมข้อเสนอแนะสิ่งที่ควรเพิ่มในแต่ละด้าน",
+    alignment:"ตรวจความสอดคล้องระหว่างประเด็นการพัฒนากับยุทธศาสตร์ชาติ 20 ปี แผนพัฒนาเศรษฐกิจและสังคมแห่งชาติ และ SDGs ชี้จุดที่เชื่อมโยงไม่ชัดและเสนอแนวทางเพิ่มเติม",
+    budget:"ตรวจความสมเหตุสมผลของโครงการและงบประมาณใน ผ.02 เช่น โครงการไม่มีงบ งบสูง/ต่ำผิดปกติ วัตถุประสงค์ไม่ชัด พร้อมข้อเสนอแนะ",
+    full:"วิเคราะห์ภาพรวมร่างแผนทั้งฉบับ ทั้งความครบถ้วน ความสอดคล้องเชิงยุทธศาสตร์ และความเหมาะสมของโครงการ/งบประมาณ พร้อมข้อเสนอแนะเชิงนโยบาย 5-8 ข้อ"};
+  const prompt="คุณเป็นผู้เชี่ยวชาญด้านการวางแผนพัฒนาท้องถิ่นของ อปท. ไทย ตามระเบียบกระทรวงมหาดไทย พ.ศ. 2548\nกรุณา"+P[task]+
+    "\nโดยอ้างอิงจากข้อมูลร่างแผนของเทศบาลเมืองดอนแก้วต่อไปนี้ (JSON ย่อ):\n\n"+buildAiContext(task)+
+    "\n\nตอบเป็นภาษาไทย จัดเป็นหัวข้อและรายการที่อ่านง่าย";
+  st.textContent="กำลังส่งข้อมูลไปวิเคราะห์..."; rs.style.display="none";
   try{
-    const text=await callGemini(prompt);
-    resultEl.textContent=text;
-    resultEl.style.display="block";
-    statusEl.textContent="วิเคราะห์เสร็จสิ้น";
-  }catch(e){
-    statusEl.textContent="เกิดข้อผิดพลาด: "+e.message+" (ตรวจสอบว่าคีย์ถูกต้องและเปิดใช้งาน Generative Language API แล้ว)";
-  }
+    rs.textContent=await callGemini(prompt); rs.style.display="block"; st.textContent="วิเคราะห์เสร็จแล้ว";
+    logAudit({section:"ระบบ",field:"ai_overview",label:"ใช้ AI วิเคราะห์ภาพรวม ("+task+")",action:"ai",before:"",after:""});
+  }catch(e){ st.textContent="ยังทำไม่สำเร็จ: "+e.message+" — ตรวจสอบว่าคีย์ถูกต้องและเปิดใช้ Generative Language API แล้ว"; }
 }
-
 function buildAiContext(task){
-  const obj={};
-  if(task==="completeness"||task==="full"){
-    obj.section1 = S1_FIELDS.flat().map(f=>({no:f.id.replace('1_','1.'), title:f.t, filled: !!(DATA.s1[f.id]||"").trim(), length:(DATA.s1[f.id]||"").length}));
-  }
+  const o={};
+  if(task==="completeness"||task==="full")
+    o.section1=S1_FIELDS.flat().map(f=>({no:f.id.replace("1_","1."),title:f.t,filled:!!(DATA.s1[f.id]||"").trim(),len:(DATA.s1[f.id]||"").length}));
   if(task==="alignment"||task==="full"){
-    obj.vision=DATA["2_1"]; obj.policy=DATA["2_2"];
-    obj.nationalStrategy=DATA["2_3_1"]; obj.ndp=DATA["2_3_2"]; obj.sdgs=DATA["2_3_3"];
-    obj.provinceGroup=DATA["2_3_4"]; obj.province=DATA["2_3_5"]; obj.provinceLevelIssues=DATA["2_3_6"];
-    obj.issues=DATA.issues;
+    o.vision=DATA["2_1"];o.policy=DATA["2_2"];o.national=DATA["2_3_1"];o.ndp=DATA["2_3_2"];
+    o.sdgs=DATA["2_3_3"];o.group=DATA["2_3_4"];o.province=DATA["2_3_5"];o.local=DATA["2_3_6"];o.issues=DATA.issues;
   }
   if(task==="budget"||task==="full"){
-    obj.projects=[];
-    DATA.issues.forEach((issue,idx)=>{
-      (DATA.p02[issueKey(null,idx)]||[]).forEach(p=>obj.projects.push({issue:issue.issue, project:p.project, obj:p.obj, target:p.target, budget:p.budget, dept:p.dept}));
-    });
+    o.projects=[];
+    DATA.issues.forEach((iss,i)=>(DATA.p02[issueKey(null,i)]||[]).forEach(p=>
+      o.projects.push({issue:iss.issue,project:p.project,obj:p.obj,budget:p.budget,dept:p.dept})));
   }
-  return JSON.stringify(obj).slice(0,12000);
+  return JSON.stringify(o).slice(0,12000);
 }
 
 /* ============================================================
    BOOTSTRAP
 ============================================================ */
-function attachS2Listeners(){
+function attachS2(){
   S2_KEYS.forEach(k=>{
-    const el=document.getElementById("f_"+k);
-    if(el) el.addEventListener("input",()=>{ DATA[k]=el.value; queueSave("s2"); });
+    const el=document.getElementById("f_"+k); if(!el) return;
+    el.addEventListener("focus",e=>{ e.target.dataset.before=e.target.value; });
+    el.addEventListener("input",()=>{ DATA[k]=el.value; queueSave("s2"); });
+    el.addEventListener("blur",e=>{
+      const b=e.target.dataset.before||"";
+      if(b!==e.target.value){
+        logAudit({section:"ส่วนที่ 2",field:k,label:el.dataset.label||k,action:"edit",before:b,after:e.target.value});
+        stampMeta(k);
+      }
+    });
   });
 }
-function populateS2Values(){
-  S2_KEYS.forEach(k=>{
-    const el=document.getElementById("f_"+k);
-    if(el && !editingGroup.s2) el.value=DATA[k]||"";
-  });
+function populateS2(){
+  S2_KEYS.forEach(k=>{ const el=document.getElementById("f_"+k); if(el&&!editingGroup.s2) el.value=DATA[k]||""; });
 }
-function renderEverything(fromSync){
+function renderEverything(){
   if(!editingGroup.s1) renderS1();
-  Object.keys(TABLE_DEFS).forEach(id=>{ if(!editingGroup.tables) renderTable(id); });
-  populateS2Values();
+  Object.keys(TDEF).forEach(id=>{ if(!editingGroup.tables) renderTable(id); });
+  populateS2();
   const s3b=document.getElementById("page-s3b");
-  if(!editingGroup.p02 && s3b && s3b.style.display!=="none") renderP02();
-  renderDashboard();
-  renderP01();
+  if(!editingGroup.p02&&s3b&&s3b.style.display!=="none") renderP02();
+  renderDashboard(); renderP01();
+  if(isViewer()) applyRoleLock();
 }
-
 async function boot(){
-  attachS2Listeners();
+  if(localStorage.getItem("donkaeo_hc")==="1") document.body.classList.add("hc");
+  attachS2();
   await initialLoad();
+  await loadAudit();
+  fillAuditFilter();
   renderEverything();
   loadKey();
   goTo("dashboard");
-  if(currentUser) document.getElementById("whoamiBtn").textContent="👤 "+currentUser;
-  else openNameModal();
   pollLoop();
+  if(isViewer()) toast("เข้าสู่ระบบในโหมดอ่านอย่างเดียว","");
 }
-boot();
+(async function init(){
+  await loadUsers();
+  fillLoginSelect();
+  let s=null;
+  try{ s=JSON.parse(localStorage.getItem(SESSION_KEY)||"null"); }catch(e){}
+  if(s&&USERS[s.uid]&&USERS[s.uid].active!==false){
+    SESSION={...s,role:USERS[s.uid].role,name:USERS[s.uid].name,dept:USERS[s.uid].dept};
+    document.getElementById("gate").classList.add("hidden");
+    document.getElementById("app").style.display="flex";
+    paintUser(); boot();
+  }
+  document.getElementById("loginPin").addEventListener("keydown",e=>{ if(e.key==="Enter") doLogin(); });
+  document.getElementById("regPin2").addEventListener("keydown",e=>{ if(e.key==="Enter") doRegister(); });
+})();
 </script>
 </body>
 </html>
