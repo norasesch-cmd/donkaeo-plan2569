@@ -1302,16 +1302,29 @@ function findField(id){ return S1_FIELDS.flat().find(f=>f.id===id); }
 /* ============================================================
    GEMINI
 ============================================================ */
-async function callGemini(prompt){
-  const key=(document.getElementById("geminiKey").value||"").trim();
-  if(!key) throw new Error("ยังไม่ได้ใส่ API Key — ไปที่หน้า 'ผู้ช่วย AI' ก่อนนะครับ");
-  const r=await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key="+encodeURIComponent(key),
-    {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({contents:[{parts:[{text:prompt}]}]})});
-  if(!r.ok){ const t=await r.text(); throw new Error("HTTP "+r.status+" "+t.slice(0,160)); }
-  const j=await r.json();
-  const txt=j?.candidates?.[0]?.content?.parts?.map(p=>p.text).join("\n");
-  if(!txt) throw new Error("ยังไม่ได้รับผลลัพธ์กลับมา ลองใหม่อีกครั้ง");
-  return txt.trim();
+async function callGemini(prompt) {
+  const key = (document.getElementById("geminiKey").value || "").trim();
+  if (!key) throw new Error("ยังไม่ได้ใส่ API Key");
+
+  // ใช้รุ่น 1.5-flash ซึ่งเสถียรที่สุดในตอนนี้
+  const model = "gemini-1.5-flash"; 
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(key)}`;
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      contents: [{ parts: [{ text: prompt }] }]
+    })
+  });
+
+  if (!response.ok) {
+    const err = await response.json();
+    throw new Error(`API Error: ${err.error?.message || "เชื่อมต่อไม่ได้"}`);
+  }
+
+  const data = await response.json();
+  return data.candidates[0].content.parts[0].text.trim();
 }
 function setFieldValue(id,text){
   const ta=document.getElementById("ta_"+id);
