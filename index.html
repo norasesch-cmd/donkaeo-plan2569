@@ -1306,8 +1306,8 @@ async function callGemini(prompt) {
   const key = (document.getElementById("geminiKey").value || "").trim();
   if (!key) throw new Error("ยังไม่ได้ใส่ API Key");
 
-  // ใช้รุ่น 1.5-flash ซึ่งเสถียรที่สุดในตอนนี้
-  const model = "gemini-1.5-flash"; 
+  // อัปเดตเป็นโมเดลล่าสุด (สิงหาคม 2026)
+  const model = "gemini-3.7-flash"; 
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(key)}`;
 
   const response = await fetch(url, {
