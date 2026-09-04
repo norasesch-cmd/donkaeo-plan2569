@@ -1495,7 +1495,7 @@ function renderP02(){
       '<h3>'+escHtml(issue.issue||"(ยังไม่ได้ตั้งชื่อประเด็น)")+'</h3>'+
       '<div class="tblwrap" style="margin-top:20px"><table class="tbl" id="p02_'+idx+'"><thead><tr>'+
       '<th style="width:48px">#</th><th>โครงการ</th><th>วัตถุประสงค์</th><th>เป้าหมาย (ผลผลิต)</th>'+
-      YEARS.map(y=>'<th style="width:130px">'+y+'</th>').join("")+ /* เปลี่ยนขนาดหัวตารางช่องเงินงบประมาณให้กว้างขึ้น */
+      YEARS.map(y=>'<th style="width:104px">'+y+'</th>').join("")+
       '<th>ตัวชี้วัด</th><th>ผลที่คาดว่าจะได้รับ</th><th>ที่มาโครงการ</th><th>หน่วยงาน</th><th style="width:80px"></th>'+
       '</tr></thead><tbody></tbody><tfoot></tfoot></table></div>'+
       '<div class="rowact"><button class="btn" onclick="addProject('+idx+')">+ เพิ่มโครงการ</button></div>';
@@ -1546,12 +1546,10 @@ function renderProjects(i){
   tb.innerHTML="";
   ps.forEach((p,pi)=>{
     const tr=document.createElement("tr");
-    // เพิ่ม style="min-width: 250px" เพื่อขยายช่องกรอกข้อความ
-    const inp=(k,n)=>'<td><input type="text" style="min-width: 250px" value="'+escAttr(p[k])+'" data-i="'+i+'" data-p="'+pi+'" data-n="'+n+'"'+
+    const inp=(k,n)=>'<td><input type="text" value="'+escAttr(p[k])+'" data-i="'+i+'" data-p="'+pi+'" data-n="'+n+'"'+
       ' onfocus="this.dataset.before=this.value" onblur="p02Blur(this)" oninput="updateProject('+i+','+pi+',\''+k+'\',this.value)"></td>';
     let bud="";
-    // เพิ่ม style="min-width: 120px" เพื่อขยายช่องกรอกตัวเลข
-    YEARS.forEach(y=>{ bud+='<td><input type="number" class="mono" style="min-width: 120px" value="'+escAttr(p.budget[y])+'" data-i="'+i+'" data-p="'+pi+'" data-n="งบ '+y+'"'+
+    YEARS.forEach(y=>{ bud+='<td><input type="number" class="mono" value="'+escAttr(p.budget[y])+'" data-i="'+i+'" data-p="'+pi+'" data-n="งบ '+y+'"'+
       ' onfocus="this.dataset.before=this.value" onblur="p02Blur(this)" oninput="updateProject('+i+','+pi+',null,this.value,\''+y+'\')"></td>'; });
     tr.innerHTML='<td class="nm">'+(pi+1)+"</td>"+F.map(f=>inp(f[0],f[1])).join("")+bud+
       G.map(f=>inp(f[0],f[1])).join("")+
