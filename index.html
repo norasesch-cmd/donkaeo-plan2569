@@ -1495,7 +1495,7 @@ function renderP02(){
       '<h3>'+escHtml(issue.issue||"(ยังไม่ได้ตั้งชื่อประเด็น)")+'</h3>'+
       '<div class="tblwrap" style="margin-top:20px"><table class="tbl" id="p02_'+idx+'"><thead><tr>'+
       '<th style="width:48px">#</th><th>โครงการ</th><th>วัตถุประสงค์</th><th>เป้าหมาย (ผลผลิต)</th>'+
-      YEARS.map(y=>'<th style="width:130px">'+y+'</th>').join("")+ /* เปลี่ยนขนาดหัวตารางช่องเงินงบประมาณให้กว้างขึ้น */
+      YEARS.map(y=>'<th style="width:200px">'+y+'</th>').join("")+ /* เปลี่ยนขนาดหัวตารางช่องเงินงบประมาณให้กว้างขึ้น */
       '<th>ตัวชี้วัด</th><th>ผลที่คาดว่าจะได้รับ</th><th>ที่มาโครงการ</th><th>หน่วยงาน</th><th style="width:80px"></th>'+
       '</tr></thead><tbody></tbody><tfoot></tfoot></table></div>'+
       '<div class="rowact"><button class="btn" onclick="addProject('+idx+')">+ เพิ่มโครงการ</button></div>';
