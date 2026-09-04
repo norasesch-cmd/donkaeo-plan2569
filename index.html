@@ -623,13 +623,17 @@ input:disabled,textarea:disabled,select:disabled{background:var(--sunken);color:
     </div>
 
     <!-- SECTION 3 -->
-    <div class="page" id="page-s3a" style="display:none">
-      <div class="card">
-        <span class="eyebrow">แบบ ผ.01</span>
-        <h3>บัญชีสรุปโครงการพัฒนาท้องถิ่น</h3>
-        <p class="lead">คำนวณอัตโนมัติจากข้อมูลที่กรอกในแบบ ผ.02</p>
-        <div class="tblwrap" style="margin-top:24px"><table class="tbl" id="tbl_p01">
-          <thead><tr><th>ประเด็นการพัฒนา</th><th style="width:160px">จำนวนโครงการ</th><th style="width:210px">งบประมาณรวม (บาท)</th></tr></thead>
+<div class="tblwrap" style="margin-top:24px"><table class="tbl" id="tbl_p01">
+          <thead><tr>
+            <th>ประเด็นการพัฒนา</th>
+            <th style="width:120px">จำนวนโครงการ</th>
+            <th style="width:110px">ปี 2571</th>
+            <th style="width:110px">ปี 2572</th>
+            <th style="width:110px">ปี 2573</th>
+            <th style="width:110px">ปี 2574</th>
+            <th style="width:110px">ปี 2575</th>
+            <th style="width:140px">รวม 5 ปี (บาท)</th>
+          </tr></thead>
           <tbody></tbody><tfoot></tfoot></table></div>
       </div>
     </div>
@@ -1562,21 +1566,55 @@ function renderProjects(i){
   if(isViewer()) applyRoleLock();
 }
 function renderP01(){
-  const tb=document.querySelector("#tbl_p01 tbody"),tf=document.querySelector("#tbl_p01 tfoot");
+  const tb=document.querySelector("#tbl_p01 tbody"), tf=document.querySelector("#tbl_p01 tfoot");
   if(!tb) return;
-  tb.innerHTML=""; let gc=0,gb=0;
+  tb.innerHTML=""; 
+  let gc=0, g_tot=0;
+  // สร้างตัวแปรเก็บยอดรวมทั้งหมดของแต่ละปี
+  let g_yr = { "2571":0, "2572":0, "2573":0, "2574":0, "2575":0 };
+
   DATA.issues.forEach((iss,i)=>{
-    const ps=DATA.p02[issueKey(null,i)]||[]; let s=0;
-    ps.forEach(p=>YEARS.forEach(y=>s+=parseFloat(p.budget[y])||0));
-    gc+=ps.length; gb+=s;
+    const ps=DATA.p02[issueKey(null,i)]||[]; 
+    let s_tot=0; // ยอดรวม 5 ปีของประเด็นนี้
+    let s_yr = { "2571":0, "2572":0, "2573":0, "2574":0, "2575":0 }; // ยอดรวมแต่ละปีของประเด็นนี้
+    
+    // คำนวณงบประมาณจากโครงการทั้งหมดในประเด็น
+    ps.forEach(p=>{
+      YEARS.forEach(y=>{
+        const b = parseFloat(p.budget[y])||0;
+        s_yr[y] += b;
+        s_tot += b;
+        g_yr[y] += b;
+      });
+    });
+    gc+=ps.length; 
+    g_tot+=s_tot;
+    
+    // สร้างแถวข้อมูลตาราง
     const tr=document.createElement("tr");
-    tr.innerHTML='<td style="padding:16px 14px">'+(i+1)+". "+escHtml(iss.issue||"(ยังไม่ตั้งชื่อ)")+
-      '</td><td class="mono" style="padding:16px 14px">'+ps.length+
-      '</td><td class="mono" style="padding:16px 14px">'+s.toLocaleString()+"</td>";
+    let rowHtml = '<td style="padding:16px 14px">'+(i+1)+". "+escHtml(iss.issue||"(ยังไม่ตั้งชื่อ)")+'</td>'+
+                  '<td class="mono" style="padding:16px 14px; text-align:center;">'+ps.length+'</td>';
+    
+    // วนลูปแสดงผลรวมรายปี
+    YEARS.forEach(y => {
+        rowHtml += '<td class="mono" style="padding:16px 14px">'+s_yr[y].toLocaleString()+'</td>';
+    });
+    
+    // แสดงผลรวม 5 ปีของประเด็นนี้
+    rowHtml += '<td class="mono" style="padding:16px 14px; font-weight:bold;">'+s_tot.toLocaleString()+'</td>';
+    
+    tr.innerHTML=rowHtml;
     tb.appendChild(tr);
   });
-  tf.innerHTML='<tr class="tot"><td style="padding:16px 14px">รวมทั้งสิ้น</td><td class="mono" style="padding:16px 14px">'+gc+
-    '</td><td class="mono" style="padding:16px 14px">'+gb.toLocaleString()+"</td></tr>";
+  
+  // สร้างแถวสรุปผลรวมด้านล่างสุด (tfoot)
+  let footHtml = '<tr class="tot"><td style="padding:16px 14px">รวมทั้งสิ้น</td><td class="mono" style="padding:16px 14px; text-align:center;">'+gc+'</td>';
+  YEARS.forEach(y => {
+      footHtml += '<td class="mono" style="padding:16px 14px">'+g_yr[y].toLocaleString()+'</td>';
+  });
+  footHtml += '<td class="mono" style="padding:16px 14px">'+g_tot.toLocaleString()+'</td></tr>';
+  
+  tf.innerHTML=footHtml;
 }
 
 /* ============================================================
