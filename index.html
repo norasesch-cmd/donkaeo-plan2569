@@ -10,6 +10,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
 <style>
 /* ============================================================
    SKYLEARN TOKENS
@@ -823,12 +824,15 @@ const firebaseConfig={
   messagingSenderId:"939638592444",
   appId:"1:939638592444:web:ff1259f256a5f907d611b9"
 };
-let db=null;
-try{
-  if(typeof firebase!=="undefined" && firebaseConfig.apiKey && !firebaseConfig.apiKey.startsWith("YOUR_")){
-    firebase.initializeApp(firebaseConfig); db=firebase.database();
-  }
-}catch(e){ console.warn("Firebase init failed:",e); }
+   let db = null, fbReady = Promise.resolve();
+   try{
+     if(typeof firebase !== "undefined" && firebaseConfig.apiKey && !firebaseConfig.apiKey.startsWith("YOUR_")){
+       firebase.initializeApp(firebaseConfig);
+       db = firebase.database();
+       fbReady = firebase.auth().signInAnonymously()
+         .catch(e => console.error("Anonymous sign-in failed:", e.code, e.message));
+     }
+   }catch(e){ console.warn("Firebase init failed:", e); }
 
 const GROUPS=["s1","s2","tables","p02","meta"];
 const GROUP_KEY={s1:"plan_s1",s2:"plan_s2",tables:"plan_tables",p02:"plan_p02",meta:"plan_meta"};
@@ -851,12 +855,37 @@ async function sha256(str){
 function uid(){ return "u"+Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
 
 async function loadUsers(){
+  let local = {};
+  try{ local = JSON.parse(localStorage.getItem(LOCAL_USERS_KEY) || "{}"); }catch(e){}
   if(db){
-    try{ const s=await db.ref("donkaeo_plan/users").once("value"); USERS=s.val()||{}; return; }
-    catch(e){ cloudAvailable=false; }
+    try{
+      const s = await db.ref("donkaeo_plan/users").once("value");
+      USERS = s.val() || {};
+      for(const id in local){
+        if(!USERS[id]){ USERS[id] = local[id]; await db.ref("donkaeo_plan/users/"+id).set(local[id]); }
+      }
+      return;
+    }catch(e){ console.error("Load users failed:", e.code, e.message); cloudAvailable = false; }
   }
-  try{ USERS=JSON.parse(localStorage.getItem(LOCAL_USERS_KEY)||"{}"); }catch(e){ USERS={}; }
+  USERS = local;
 }
+
+// และค้นหาฟังก์ชัน init ตอนท้ายไฟล์ แล้วเพิ่ม await fbReady; ไว้บรรทัดแรกสุดในปีกกา เช่น:
+(async function init(){
+  await fbReady;          // ← เพิ่มบรรทัดนี้ไว้บนสุด
+  await loadUsers();
+  fillLoginSelect();
+  let s = null;
+  try{ s = JSON.parse(localStorage.getItem(SESSION_KEY) || "null"); }catch(e){}
+  if(s && USERS[s.uid] && USERS[s.uid].active !== false){
+    SESSION = {...s, role: USERS[s.uid].role, name: USERS[s.uid].name, dept: USERS[s.uid].dept};
+    document.getElementById("gate").classList.add("hidden");
+    document.getElementById("app").style.display = "flex";
+    paintUser(); boot();
+  }
+  document.getElementById("loginPin").addEventListener("keydown", e => { if(e.key==="Enter") doLogin(); });
+  document.getElementById("regPin2").addEventListener("keydown", e => { if(e.key==="Enter") doRegister(); });
+})();
 async function persistUser(u){
   USERS[u.uid]=u;
   if(db){ try{ await db.ref("donkaeo_plan/users/"+u.uid).set(u); }catch(e){} }
